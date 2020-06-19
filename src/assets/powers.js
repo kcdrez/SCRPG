@@ -1,7 +1,6 @@
 export default [
   {
-    id: 'accident',
-    label: 'Accident',
+    name: 'Accident',
     powers: {
       categories: ['Athletic', 'Elemental/Energy', 'Intellectual', 'Materials', 'Psychic', 'Self Control'],
       list: []
@@ -54,8 +53,7 @@ export default [
     archetype: [12, 6]
   },
   {
-    id: 'training',
-    label: 'Training',
+    name: 'Training',
     powers: {
       categories: ['Athletic', 'Intellectual'],
       list: ['Gadgets', 'Signature Vehicle', 'Signature Weaponry']
@@ -88,8 +86,7 @@ export default [
     extras: 'Extra quality from archetype at d8' //todo: how to handle this
   },
   {
-    id: 'genetic',
-    label: 'Genetic',
+    name: 'Genetic',
     powers: {
       categories: ['Intellectual', 'Psychic'],
       list: ['Agility', 'Flight', 'Signature Weaponry', 'Strength', 'Vitality']
@@ -136,8 +133,7 @@ export default [
     archetype: [10, 8, 8]
   },
   {
-    id: 'experimentation',
-    label: 'Experimentation',
+    name: 'Experimentation',
     powers: {
       categories: ['Atheltic', 'Elemental/Energy', 'Intellectual', 'Mobility', 'Self Control'],
       list: ['Signature Weaponry']
@@ -184,8 +180,7 @@ export default [
     archetype: [8, 8, 8]
   },  
   {
-    id: 'mystical',
-    label: 'Mystical',
+    name: 'Mystical',
     powers: {
       categories: ['Elemental/Energy', 'Materials', 'Psychic', 'Self Control'],
       list: ['Awareness', 'Flight', 'Presence', 'Signature Weaponry', 'Teleportation']
@@ -218,8 +213,7 @@ export default [
     extras: 'Gain Information quality with d10'
   },  
   {
-    id: 'nature',
-    label: 'Nature',
+    name: 'Nature',
     powers: {
       categories: ['Athletic', 'Materials'],
       list: ['Animal Control', 'Cold', 'Electricity', 'Fire', 'Flight', 'Leaping', 'ShapeShifting', 'Swimming', 'Swinging', 'Wall-Crawling', 'Weather']
@@ -266,8 +260,7 @@ export default [
     archetype: [10, 8, 8]
   },
   {
-    id: 'relic',
-    label: 'Relic',
+    name: 'Relic',
     powers: {
       categories: ['Elemental/Energy', 'Materials', 'Mobility', 'Psychic', 'Self Control'],
       list: ['Awareness', 'Intuition', 'Signature Vehicle', 'Signature Weaponry']
@@ -320,8 +313,7 @@ export default [
     archetype: [10, 10, 6]
   },
   {
-    id: 'poweredSuit',
-    label: 'Powered Suit',
+    name: 'Powered Suit',
     powers: {
       categories: ['Athletic', 'Mobility'],
       list: ['Awareness', 'Cold', 'Elasticity', 'Electricity', 'Fire', 'Lightning Calculator', 'Nuclear', 'Part Detachment', 'Signature Vehicle', 'Signature Weaponry'],
@@ -369,8 +361,7 @@ export default [
     archetype: [10, 6, 6]
   }, 
   {
-    id: 'radiation',
-    label: 'Radiation',
+    name: 'Radiation',
     powers: {
       categories: ['Athletic', 'Self Control', 'Technological'],
       list: ['Nuclear', 'Signature Vehicle', 'Signature Weaponry']
@@ -417,8 +408,7 @@ export default [
     archetype: [10, 8, 6]
   }, 
   {
-    id: 'techUpgrades',
-    label: 'Tech Upgrades',
+    name: 'Tech Upgrades',
     powers: {
       categories: ['Athletic', 'Elemental/Energy', 'Intellectual', 'Mobility', 'Technological'],
       list: ['Signature Vehicle', 'Signature Weaponry']
@@ -471,8 +461,7 @@ export default [
     archetype: [10, 10, 8]
   },   
   {
-    id: 'supernatural',
-    label: 'Supernatural',
+    name: 'Supernatural',
     powers: {
       categories: ['Mobility', 'Psychic', 'Self Control'],
       list: ['Awareness', 'Cold', 'Electricity', 'Fire', 'Infernal', 'Plants', 'Radiant', 'Presence', 'Strength', 'Transmutation', 'Vitality', 'Weather']
@@ -511,8 +500,7 @@ export default [
     extras: 'Gain one power not in the list as d10'
   },   
   {
-    id: 'artificialBeing',
-    label: 'Artificial Being',
+    name: 'Artificial Being',
     powers: {
       categories: ['Athletic', 'Elemental/Energy', 'Intellectual', 'Mobility', 'Self Control'],
       list: ['Invensions', 'Robotics', 'Signature Vehicle', 'Signature Weaponry']
@@ -559,8 +547,7 @@ export default [
     archetype: [10, 8, 8]
   },  
   {
-    id: 'cursed',
-    label: 'Cursed',
+    name: 'Cursed',
     powers: {
       categories: ['Athletic', 'Elemental/Energy', 'Materials', 'Self Control'],
       list: ['Signature Weaponry']
@@ -607,8 +594,7 @@ export default [
     archetype: [12, 6]
   },
   {
-    id: 'alien',
-    label: 'Alien',
+    name: 'Alien',
     powers: {
       categories: ['Athletic', 'Elemental/Energy', 'Intellectual', 'Mobility', 'Psychic', 'Technological'],
       list: ['Signature Vehicle', 'Signature Weaponry']
@@ -641,8 +627,7 @@ export default [
     extras: 'Upgrade a d6 power to d8. If you have none, add a new power from the above list at d6'
   }, 
   {
-    id: 'genius',
-    label: 'Genius',
+    name: 'Genius',
     powers: {
       categories: ['Intellectual'],
       list: ['Inventions', 'Robotics', 'Signature Vehicle', 'Signature Weaponry']
@@ -675,8 +660,7 @@ export default [
     extras: 'Extra quality from Information or Mental categories at d10'
   },
   {
-    id: 'cosmos',
-    label: 'Cosmos',
+    name: 'Cosmos',
     powers: {
       categories: ['Mobility', 'Psychic', 'Self Control', 'Technological'],
       list: ['Cosmic', 'Intuition', 'Signature Vehicle', 'Signature Weaponry']
@@ -709,8 +693,7 @@ export default [
     extras: 'Downgrade one d8, d10, or d12 power and upgrade one d6, d8, or d10 power'
   },  
   {
-    id: 'extraDimentional',
-    label: 'Extra Dimentional',
+    name: 'Extra Dimentional',
     powers: {
       categories: ['Intellectual', 'Psychic'],
       list: ['Cosmic', 'Duplication', 'Infernal', 'Intangibility', 'Invisibility', 'Radiant', 'Signature Vehicle', 'Signature Weaponry', 'Transmutation', 'Teleportation']
@@ -757,8 +740,7 @@ export default [
     archetype: [12, 6]
   },   
   {
-    id: 'unknown',
-    label: 'Unknown',
+    name: 'Unknown',
     powers: {
       categories: ['Elemental/Energy', 'Intellectual', 'Materials', 'Self Control', 'Technological'],
       list: []
@@ -791,8 +773,7 @@ export default [
     extras: 'Gain a Social quality at d8'
   },  
   {
-    id: 'higherPower',
-    label: 'Higher Power',
+    name: 'Higher Power',
     powers: {
       categories: ['Athletic', 'Elemental/Energy', 'Materials', 'Psychic', 'Self Control'],
       list: []
@@ -845,8 +826,7 @@ export default [
     archetype: [10, 8, 8]
   },   
   {
-    id: 'theMultiverse',
-    label: 'The Multiverse',
+    name: 'The Multiverse',
     powers: {
       categories: ['Psychic', 'Self Control'],
       list: ['Awareness', 'Cosmic', 'Intuition', 'Speed', 'Teleportation']

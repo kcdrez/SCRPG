@@ -1,7 +1,6 @@
 export default [
   {
-    id: 'upperClass',
-    label: 'Upper Class',
+    name: 'Upper Class',
     qualities: {
       dice: [10, 8],
       categories: ['Mental'],
@@ -12,8 +11,7 @@ export default [
     principle: 'Responsibility'
   },
   {
-    id: 'blankSlate',
-    label: 'Blank Slate',
+    name: 'Blank Slate',
     qualities: {
       dice: [10, 8],
       categories: ['Mental', 'Physical'],
@@ -24,8 +22,7 @@ export default [
     principle: 'Identity'
   },
   {
-    id: 'struggling',
-    label: 'Struggling',
+    name: 'Struggling',
     qualities: {
       dice: [8, 6, 6],
       categories: ['Physical'],
@@ -36,8 +33,7 @@ export default [
     principle: 'Responsibility'
   },
   {
-    id: 'adventurer',
-    label: 'Adventurer',
+    name: 'Adventurer',
     qualities: {
       dice: [10, 8],
       categories: ['Physical'],
@@ -48,8 +44,7 @@ export default [
     principle: 'Expertise'
   },
   {
-    id: 'unremarkable',
-    label: 'Unremarkable',
+    name: 'Unremarkable',
     qualities: {
       dice: [10, 8],
       categories: ['Mental', 'Social'],
@@ -60,8 +55,7 @@ export default [
     principle: 'Identity'
   },
   {
-    id: 'lawEnforcement',
-    label: 'Law Enforcement',
+    name: 'Law Enforcement',
     qualities: {
       dice: [10, 8],
       categories: ['Mental', 'Social'],
@@ -72,8 +66,7 @@ export default [
     principle: 'Responsibility'
   },
   {
-    id: 'academic',
-    label: 'Academic',
+    name: 'Academic',
     qualities: {
       dice: [12, 8],
       categories: ['Information'],
@@ -84,20 +77,18 @@ export default [
     principle: 'Expertise'
   },
   {
-    id: 'tragic',
-    label: 'Tragic',
+    name: 'Tragic',
     qualities: {
       dice: [10, 8],
       categories: ['Mental'],
       list: ['Banter', 'Close Combat', 'Imposing']
     },    
-    description: 'Your history is eclipsed by a major negative event That shaped the rest of your life. You struggle to overcome the memory of the tragic event, be it the loss of a loved one or something that happened to you directly. Either way, the tragedy both fuels and haunts you.',
+    description: 'Your history is eclipsed by a major negative event that shaped the rest of your life. You struggle to overcome the memory of the tragic event, be it the loss of a loved one or something that happened to you directly. Either way, the tragedy both fuels and haunts you.',
     powerSource: [10, 10, 6],
     principle: 'Ideals'
   },  
   {
-    id: 'performer',
-    label: 'Performer',
+    name: 'Performer',
     qualities: {
       dice: [10, 8],
       categories: ['Social'],
@@ -108,8 +99,7 @@ export default [
     principle: 'Responsibility'
   },  
   {
-    id: 'military',
-    label: 'Military',
+    name: 'Military',
     qualities: {
       dice: [10, 8],
       categories: ['Physical'],
@@ -120,8 +110,7 @@ export default [
     principle: 'Ideals'
   },
   {
-    id: 'retired',
-    label: 'retired',
+    name: 'Retired',
     qualities: {
       dice: [10, 10],
       categories: ['Information', 'Social'],
@@ -132,8 +121,7 @@ export default [
     principle: 'Identity'
   },
   {
-    id: 'criminal',
-    label: 'Criminal',
+    name: 'Criminal',
     qualities: {
       dice: [10, 8],
       categories: ['Physical'],
@@ -144,8 +132,7 @@ export default [
     principle: 'Expertise'
   },  
   {
-    id: 'medical',
-    label: 'Medical',
+    name: 'Medical',
     qualities: {
       dice: [10, 8, 6],
       categories: ['Mental'],
@@ -156,8 +143,7 @@ export default [
     principle: 'Expertise'
   },
   {
-    id: 'anachronistic',
-    label: 'Anachronistic',
+    name: 'Anachronistic',
     qualities: {
       dice: [10, 8],
       categories: ['Physical'],
@@ -168,8 +154,7 @@ export default [
     principle: 'Esoteric'
   },
   {
-    id: 'exile',
-    label: 'Exile',
+    name: 'Exile',
     qualities: {
       dice: [10, 8],
       categories: ['Information'],
@@ -180,8 +165,7 @@ export default [
     principle: 'Ideals'
   },
   {
-    id: 'formerVillain',
-    label: 'Former Villain',
+    name: 'Former Villain',
     qualities: {
       dice: [10, 8],
       categories: ['Information', 'Social'],
@@ -192,8 +176,7 @@ export default [
     principle: 'Expertise'
   },  
   {
-    id: 'interstellar',
-    label: 'Interstellar',
+    name: 'Interstellar',
     qualities: {
       dice: [12, 8],
       categories: ['Information', 'Mental'],
@@ -204,8 +187,7 @@ export default [
     principle: 'Esoteric'
   },
   {
-    id: 'dynasty',
-    label: 'Dynasty',
+    name: 'Dynasty',
     qualities: {
       dice: [10, 10],
       categories: ['Social'],
@@ -216,8 +198,7 @@ export default [
     principle: 'Ideals'
   }, 
   {
-    id: 'otherWorldly',
-    label: 'Other Worldly',
+    name: 'Other Worldly',
     qualities: {
       dice: [10, 8],
       categories: ['Mental'],
@@ -228,8 +209,7 @@ export default [
     principle: 'Esoteric'
   }, 
   {
-    id: 'created',
-    label: 'Created',
+    name: 'Created',
     qualities: {
       dice: [12, 6],
       categories: ['Physical'],
