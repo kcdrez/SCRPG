@@ -4,6 +4,7 @@ import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 
 import HomePage from '../pages/home.vue';
+import AdminPage from '../pages/admin.vue';
 
 import store from '../vuex-state/store';
 
@@ -12,7 +13,12 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomePage
-  }
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminPage
+  }  
 ]
 
 const router = new VueRouter({

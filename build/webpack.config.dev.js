@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const jquery = require('jquery');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -49,30 +50,39 @@ module.exports = {
         test: /\.css$/,    
         use: ['style-loader','css-loader']  
       },  
+      // {
+      //     test: /\.(png|jpg|gif|svg)$/,
+      //     use: 'file-loader?name=[name].[ext]',
+      // },
       {    
         test: /\.png$/,    
-        use: "url-loader?limit=100000"  
+        use: {
+          loader: "file-loader",
+          options: {
+            name: '[path][name].[hash].[ext]'
+          }
+        }
       },  
-      {     
-        test: /\.jpg$/,     
-        use: "file-loader"  
-      }, 
-      {    
-        test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,    
-        use: 'url-loader?limit=10000&mimetype=application/font-woff'  
-      },  
-      {     
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,     
-        use: 'url-loader?limit=10000&mimetype=application/octet-stream'  
-      },  
-      {     
-        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,     
-        use: 'file-loader'  
-      },  
-      {    
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,    
-        use: 'url-loader?limit=10000&mimetype=image/svg+xml'  
-      }
+      // {     
+      //   test: /\.jpg$/,     
+      //   use: "file-loader"  
+      // }, 
+      // {    
+      //   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,    
+      //   use: 'url-loader?limit=10000&mimetype=application/font-woff'  
+      // },  
+      // {     
+      //   test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,     
+      //   use: 'url-loader?limit=10000&mimetype=application/octet-stream'  
+      // },  
+      // {     
+      //   test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,     
+      //   use: 'file-loader'  
+      // },  
+      // {    
+      //   test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,    
+      //   use: 'url-loader?limit=10000&mimetype=image/svg+xml'  
+      // }
     ]
   },  
   plugins: [
@@ -86,6 +96,11 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery',
       jquery: 'jquery'
-    })
+    }),
+    // new CopyPlugin({
+    //   patterns: [
+    //     { from: 'assets/green.png', to: 'dist/assets'}
+    //   ]
+    // })
   ]
 }

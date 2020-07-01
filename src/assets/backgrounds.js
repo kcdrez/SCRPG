@@ -1,8 +1,17 @@
+import {v4 as uuid} from 'uuid';
+
 export default [
   {
     name: 'Upper Class',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Mental'],
       list: ['Fitness', 'Persuasion']
     },
@@ -13,7 +22,14 @@ export default [
   {
     name: 'Blank Slate',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Mental', 'Physical'],
       list: []
     },
@@ -24,7 +40,18 @@ export default [
   {
     name: 'Struggling',
     qualities: {
-      dice: [8, 6, 6],
+      dice: [{
+        dieSize: 8,
+        id: uuid()
+      },
+      {
+        dieSize: 6,
+        id: uuid()
+      },
+      {
+        dieSize: 6,
+        id: uuid()
+      }],
       categories: ['Physical'],
       list: ['Banter', 'Criminal Underworld Info']
     },
@@ -35,7 +62,15 @@ export default [
   {
     name: 'Adventurer',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
+
       categories: ['Physical'],
       list: ['History', 'Leadership']
     },
@@ -46,7 +81,14 @@ export default [
   {
     name: 'Unremarkable',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Mental', 'Social'],
       list: ['Close Combat']
     },
@@ -57,7 +99,14 @@ export default [
   {
     name: 'Law Enforcement',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Mental', 'Social'],
       list: ['Close Combat', 'Criminal Underworld Info', 'Ranged Combat']
     },    
@@ -68,7 +117,14 @@ export default [
   {
     name: 'Academic',
     qualities: {
-      dice: [12, 8],
+      dice: [{
+        dieSize: 12,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Information'],
       list: ['Leadership', 'Self-Discipline']
     },    
@@ -79,7 +135,14 @@ export default [
   {
     name: 'Tragic',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Mental'],
       list: ['Banter', 'Close Combat', 'Imposing']
     },    
@@ -90,7 +153,14 @@ export default [
   {
     name: 'Performer',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Social'],
       list: ['Acrobatics', 'Creativity', 'Finesse']
     },     
@@ -101,7 +171,14 @@ export default [
   {
     name: 'Military',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Physical'],
       list: ['Leadership', 'Self-Discipline']
     },     
@@ -112,7 +189,14 @@ export default [
   {
     name: 'Retired',
     qualities: {
-      dice: [10, 10],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 10,
+        id: uuid()
+      }],
       categories: ['Information', 'Social'],
       list: []
     },     
@@ -123,7 +207,14 @@ export default [
   {
     name: 'Criminal',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Physical'],
       list: ['Criminal Underworld Info', 'Imposing']
     },     
@@ -134,7 +225,18 @@ export default [
   {
     name: 'Medical',
     qualities: {
-      dice: [10, 8, 6],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      },
+      {
+        dieSize: 6,
+        id: uuid()
+      }],
       categories: ['Mental'],
       list: ['Finesse', 'Science', 'Technology']
     },    
@@ -145,7 +247,14 @@ export default [
   {
     name: 'Anachronistic',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Physical'],
       list: ['History', 'Magical Lore', 'Technology']
     },       
@@ -156,7 +265,14 @@ export default [
   {
     name: 'Exile',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Information'],
       list: ['Conviction', 'Insight']
     },
@@ -167,7 +283,14 @@ export default [
   {
     name: 'Former Villain',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Information', 'Social'],
       list: ['Conviction']
     },    
@@ -178,7 +301,14 @@ export default [
   {
     name: 'Interstellar',
     qualities: {
-      dice: [12, 8],
+      dice: [{
+        dieSize: 12,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Information', 'Mental'],
       list: []
     },      
@@ -189,7 +319,14 @@ export default [
   {
     name: 'Dynasty',
     qualities: {
-      dice: [10, 10],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 10,
+        id: uuid()
+      }],
       categories: ['Social'],
       list: ['Close Combat', 'Fitness', 'History']
     },     
@@ -200,7 +337,14 @@ export default [
   {
     name: 'Other Worldly',
     qualities: {
-      dice: [10, 8],
+      dice: [{
+        dieSize: 10,
+        id: uuid()
+      },
+      {
+        dieSize: 8,
+        id: uuid()
+      }],
       categories: ['Mental'],
       list: ['Magical Lore', 'Otherworldly Mythos']
     },
@@ -211,7 +355,14 @@ export default [
   {
     name: 'Created',
     qualities: {
-      dice: [12, 6],
+      dice: [{
+        dieSize: 12,
+        id: uuid()
+      },
+      {
+        dieSize: 6,
+        id: uuid()
+      }],
       categories: ['Physical'],
       list: ['Alertness', 'Science', 'Technology']
     },    

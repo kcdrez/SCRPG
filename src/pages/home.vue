@@ -47,7 +47,7 @@
                 <div>{{character.background.principle}}</div>
               </div> 
               <div class="mb-3">
-                <h5>{{qualitiesData.diceText}}</h5>
+                <h5>{{character.qualityMessage}}</h5>
                 <table class="table table-sm table-striped table-dark table-bordered">
                   <thead class="text-center">
                     <tr>
@@ -57,15 +57,10 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="quality in qualitiesData.list">
+                    <tr v-for="quality in character.qualitySelections">
                       <td class="text-center">
-                        <select @change="" class="form-control form-control-sm">
-                          <option :value="-1"
-                            @click="addQuality(quality, -1)">-</option>
-                          <option v-for="die in qualitiesData.availableDice" 
-                            :value="die.id"
-                            :disabled="die.disabled"
-                            @click="addQuality(quality, die.id, die.dieSize)">{{die.dieSize}}</option>
+                        <select class="form-control form-control-sm" @input="character.adjustQuality(quality, $event.target.value)">
+                          <option v-for="die in character.options(quality)" :value="die.id">{{die.dieSize}}</option>
                         </select>
                       </td>
                       <td class="text-center">{{quality.name}}</td>
@@ -169,6 +164,8 @@
   import redAbilities from '../assets/redAbilities';
   import backgrounds from '../assets/backgrounds';
   import qualities from '../assets/qualities';
+  import Character from '../scripts/character';
+  import {roll, unvue} from '../scripts/utilities';
 
   export default {
     name: 'Home',
@@ -180,11 +177,7 @@
         redAbilities,
         backgrounds,
         qualities,
-        character: {
-          background: null,
-          powerSource: null,
-          qualities: []
-        },
+        character: new Character(),
         details: {
           background: null,
           powerSource: null
@@ -215,37 +208,20 @@
           return false;
         }
       },
+      selectPowerSource() {},
       validateBackground() {
         const selected = this.selectBackground(this.character.background);
         if (selected) {
-          if (this.character.qualities.length !== this.character.background.qualities.dice.length) {
+          if (this.character.validBackground) {
+            return true;
+          } else {
             this.error = 'You must assign all of your quality dice.';
             return false;
-          } else {
-            return true;
           }
         } else {
           return false;
         }
       },
-      selectPowerSource() {
-
-      },
-      addQuality(quality, id, dieSize) {
-        console.log(JSON.parse(JSON.stringify(quality)), id, dieSize);
-        if (id < 0) {
-          const index = this.character.qualities.findIndex(x => x.name === quality.name);
-          if (index >= 0) this.character.qualities.splice(index, 1);
-        } else {
-          const match = this.qualitiesData.availableDice.find(x => x.id === id);
-          if (match) {
-            this.character.qualities.push(Object.assign({id, dieSize}, quality));
-          } else {
-            console.error(quality, id);
-            alert('No quality match');
-          }
-        }
-      },     
       randomize(property) {
         if (property in this.random) {
           let selected = [];
@@ -273,58 +249,8 @@
           alert(`${property} is not in the random object`);
         }
       },
-      roll(dieSize) {
-        return Math.floor(Math.random() * dieSize);
-      }
     },
     computed: {
-      qualitiesData() {
-        const {dice, list, categories} = this.character.background.qualities;
-        const mapped = dice.map(x => `d${x}`);
-        const diceText = `Assign a ${mapped.join(' and a ')} to ${mapped.length} of these qualities:`;
-        let fullList = [];
-        categories.forEach(c => {
-          fullList = fullList.concat(this.qualities[c.toLowerCase()]);
-        })
-        list.forEach(l => {
-          let match = this.qualities.information.find(x => x.name.toLowerCase() === l.toLowerCase());
-          if (!match) {
-            match = this.qualities.mental.find(x => x.name.toLowerCase() === l.toLowerCase());
-          }
-          if (!match) {
-            match = this.qualities.physical.find(x => x.name.toLowerCase() === l.toLowerCase());
-          }
-          if (!match) {
-            match = this.qualities.social.find(x => x.name.toLowerCase() === l.toLowerCase());
-          }
-          if (match) {
-            fullList.push(match);
-          } else {
-            console.log(l);
-            alert('couldnt find a match');
-          }
-        })
-        fullList = fullList.reduce((acc, x) => {
-          const match = acc.find(y => x.name === y.name);
-          if (!match) acc.push(x);
-          return acc;
-        }, []);
-
-        const availableDice = dice.reduce((acc, dieSize, index) => {
-          let disabled = Boolean(this.character.qualities.find(x => x.id === index));
-          acc.push({
-            id: index,
-            dieSize,
-            disabled
-          })
-          return acc;
-        }, []);
-        return {
-          diceText,
-          list: fullList,
-          availableDice
-        }
-      }
     }
   };
 </script>
