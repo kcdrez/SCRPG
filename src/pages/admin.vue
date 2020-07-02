@@ -1,66 +1,20 @@
 <template>
-  <div class="container">
+  <div class="container admin-page">
     <div class="row">
-      <h1 class="col text-center">
-        GM Management
-      </h1>
+      <h1 class="col text-center">GM Management</h1>
     </div>
-    <div class="row mb-3">
-      <div class="col-4">
-        <h3>Create Scene Tracker</h3>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Green</div>
-          </div>
-          <input class="form-control" v-model.number="green" type="number">
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Yellow</div>
-          </div>
-          <input class="form-control" v-model.number="yellow" type="number">
-        </div>
-        <div class="input-group input-group-sm">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Red</div>
-          </div>
-          <input class="form-control" v-model.number="red" type="number">
-        </div>
-      </div>
-      <div class="col m-auto text-center">
-        <button class="btn btn-primary" @click="createScene">Create Scene Tracker</button>
-        <button class="btn btn-warning" @click="clearScene">Clear Scene Tracker</button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-4">
-        <h3>Create Minion</h3>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Name</div>
-          </div>
-          <input class="form-control" v-model.trim="$store.state.minionData.name" type="text">
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Size</div>
-          </div>
-          <input class="form-control" v-model.number="$store.state.minionData.size" type="number" step="2" min="4" max="12">
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Count</div>
-          </div>
-          <input class="form-control" v-model.number="$store.state.minionData.count" type="number" min="0">
-        </div>
-      </div>
-      <div class="col text-center m-auto">
-        <button class="btn btn-primary" @click="createMinion">Create Minion</button>
-      </div>
-    </div>
-    <div class="row">
+    <div class="row scene-tracker-header">
       <div class="col">
-        <h3>Scene Tracker</h3>
+        <h3><a href="#sceneTrackerData" data-toggle="collapse">Scene Tracker</a></h3>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-sm btn-success border-dark" 
+            data-toggle="modal" data-target="#sceneTrackerModal">Create</button>
+          <button class="btn btn-sm btn-warning border-dark" @click="clearScene">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div id="sceneTrackerData" class="collapse row scene-tracker">
+      <div class="col">
         <div v-for="item in scene.green" class="d-inline" @click="progressScene(item)">
           <img src="/src/assets/images/green_checked.png" v-if="item.checked">
           <img src="/src/assets/images/green.png" v-else>
@@ -75,54 +29,74 @@
         </div>
       </div>
     </div>
-    <div class="row mb-3">
-      <div class="col-12">
-        <h3>Minions</h3>
+    <div class="row minion-list-header">
+      <div class="col">
+        <h3><a href="#minionData" data-toggle="collapse">Minions</a></h3>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-sm btn-success border-dark" 
+            data-toggle="modal" data-target="#createMinionModal">Create</button>
+        </div>
       </div>
-      <div class="col-12 mb-3" v-for="(minion, minionIndex) in $store.state.minions">
+    </div>
+    <div id="minionData" class="collapse row minion-list">
+      <div class="col-6 mb-3" v-for="(minion, minionIndex) in $store.state.minions">
         <div class="card">
           <div class="card-header">
-            <h3 class="d-inline">{{minion.name}}</h3>
-            <button class="btn btn-danger btn-sm float-right" @click="$store.commit('DELETE_MINION', minionIndex)">Remove</button>
+            <h3 class="d-inline"><a :href="`#minion-${minion.name}`" data-toggle="collapse">{{minion.name}}</a></h3>
+            <div class="btn-group btn-group-sm float-right w-25">
+              <button class="btn btn-success border-dark" @click="addMinion(minion.name)">Add</button>
+              <button class="btn btn-danger border-dark" 
+                @click="$store.commit('DELETE_MINION', minionIndex)">Remove</button>
+            </div>
           </div>
-          <div class="card-body">
+          <div :id="`minion-${minion.name}`" class="card-body collapse show">
             <template v-for="(data, size) in minion.types">
               <template v-if="data.length > 0">
-                <h4><b>Size:</b> d{{size}}</h4>
-                <table class="table table-sm table-striped table-bordered">
+                <h4>
+                  <a :href="`#minion-${minion.name}-${size}`" data-toggle="collapse"><b>Size:</b></a>
+                  <img :src="`/src/assets/images/d${size}.png`">
+                  ({{minion.countBySize(size)}})
+                </h4>
+                <table :id="`minion-${minion.name}-${size}`" class="collapse table table-sm table-striped table-bordered">
                   <thead class="text-center">
                     <tr>
-                      <th>Count</th>
-                      <th>Boosts</th>
-                      <th>Hinders</th>
-                      <th>Actions</th>
+                      <th width="15%">Count</th>
+                      <th width="25%">Boosts</th>
+                      <th width="25%">Hinders</th>
+                      <th width="35%">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(el, index) in data">
+                    <tr v-for="(el, minionIndex) in data">
                       <td class="text-center align-middle">{{el.count}}</td>
                       <td class="text-center">
                         <template v-if="el.boosts.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(boost, boostIndex) in el.boosts">
-                          <div class="remove-affix" @click="$store.dispatch('removeAffix', {minion: el, index: boostIndex, type: 'boosts'})">&times;</div>
+                        <div class="border border-dark position-relative" v-for="(boost, affixIndex) in el.boosts">
+                          <div class="remove-affix" @click="$store.dispatch('removeAffix', {minion, size, minionIndex, affixIndex, type: 'boosts'})">&times;</div>
                           <div><b>Name: </b>{{boost.name}}</div>
                           <div><b>Amount: </b>{{boost.amount}}</div>
                         </div>
                       </td>
                       <td class="text-center">
                         <template v-if="el.hinders.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(hinder, hinderIndex) in el.hinders">
-                          <div class="remove-affix" @click="$store.dispatch('removeAffix', {minion: el, index: hinderIndex, type: 'hinders'})">&times;</div>
+                        <div class="border border-dark position-relative" v-for="(hinder, affixIndex) in el.hinders">
+                          <div class="remove-affix" @click="$store.dispatch('removeAffix', {minion, size, minionIndex, affixIndex, type: 'hinders'})">&times;</div>
                           <div><b>Name: </b>{{hinder.name}}</div>
                           <div><b>Amount: </b>{{hinder.amount}}</div>
                         </div>
                       </td>
                       <td class="align-middle">
-                        <div>
-                          <button class="btn btn-success btn-sm" @click="$store.dispatch('boostMinion', {minion, size, index})">Boost</button>
-                          <button class="btn btn-warning btn-sm" @click="$store.dispatch('hinderMinion', {minion, size, index})">Hinder</button>
-                          <button class="btn btn-danger btn-sm" @click="$store.dispatch('demoteMinion', {minion, size, index})">Demote</button>
-                          <button class="btn btn-danger btn-sm" @click="$store.dispatch('removeMinion', {minion, size, index})">Remove</button>
+                        <div class="btn-group btn-group-sm w-100 mb-2" role="group">
+                          <button class="btn btn-success border-dark" 
+                            @click="$store.dispatch('boostMinion', {minion, size, index: minionIndex})">Boost</button>
+                          <button class="btn btn-warning border-dark" 
+                            @click="$store.dispatch('hinderMinion', {minion, size, index: minionIndex})">Hinder</button>
+                        </div>
+                        <div class="btn-group btn-group-sm w-100">
+                          <button class="btn btn-info border-dark" 
+                            @click="$store.dispatch('demoteMinion', {minion, size, index: minionIndex})">Demote</button>
+                          <button class="btn btn-danger border-dark" 
+                            @click="$store.dispatch('removeMinion', {minion, size, index: minionIndex})">Remove</button>
                         </div>
                       </td>
                     </tr>
@@ -148,11 +122,13 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Name</div>
               </div>
-              <input class="form-control" v-model.trim="$store.state.minionData.affix.name" type="text" @keydown.enter="$store.dispatch('addMinionAffix')">
+              <input class="form-control" type="text"
+                v-model.trim="$store.state.minionData.affix.name"
+                @keydown.enter="$store.dispatch('addMinionAffix')">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Name</div>
+                <div class="input-group-text">Amount</div>
               </div>
               <input class="form-control" 
                 v-model.number="$store.state.minionData.affix.amount" 
@@ -163,11 +139,85 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" @click="$store.dispatch('addMinionAffix')" data-dismiss="modal">Add</button>
+            <button type="button" class="btn btn-primary" 
+              @click="$store.dispatch('addMinionAffix')" data-dismiss="modal">Add</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
+    </div>
+    <div id="sceneTrackerModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Scene Tracker</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Green</div>
+              </div>
+              <input class="form-control" v-model.number="green" type="number">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Yellow</div>
+              </div>
+              <input class="form-control" v-model.number="yellow" type="number">
+            </div>
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Red</div>
+              </div>
+              <input class="form-control" v-model.number="red" type="number">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="createScene">Create</button>
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>      
+    </div>
+    <div id="createMinionModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Create a Minion</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Name</div>
+              </div>
+              <input class="form-control" v-model.trim="$store.state.minionData.name" type="text">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Size</div>
+              </div>
+              <input class="form-control" 
+                v-model.number="$store.state.minionData.size" type="number" step="2" min="4" max="12">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Count</div>
+              </div>
+              <input class="form-control" v-model.number="$store.state.minionData.count" type="number" min="1">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="createMinion">Create</button>
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>      
     </div>
   </div>
 </template>
@@ -217,7 +267,11 @@
       },
       createMinion() {
         const {name, size, count} = this.$store.state.minionData;
-        this.$store.commit('ADD_MINION', new Minion(name, size, count));
+        this.$store.commit('UPSERT_MINION', new Minion(name, size, count));
+      },
+      addMinion(name) {
+        this.$store.state.minionData.name = name;
+        $('#createMinionModal').modal('show');
       }
     },
     created() {
@@ -232,6 +286,45 @@
 </script>
 
 <style lang="scss">
+  .admin-page {
+    max-width: 90%;
+
+    .row {
+      margin-bottom: .5rem;
+    }
+  }
+
+  .scene-tracker-header, .minion-list-header {
+    margin-bottom: 1rem;
+
+    .col {
+      display: flex;
+      margin-bottom: 0.5rem;
+      
+      h3 {
+        margin: 0;
+      }
+      .btn-group {
+        vertical-align: middle;
+        margin: 0 1rem;
+        width: 15%;
+      }
+    }
+  }
+  .scene-tracker {
+    img {
+      cursor: pointer;
+
+      &:hover {
+        transform: translate(0px, -3px);
+      }
+    }
+  }
+  .minion-list {
+    img {
+      width: 30px;
+    }
+  }
   .remove-affix {
     position: absolute;
     top: -5px;

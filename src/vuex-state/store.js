@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Cookies from 'js-cookie';
 import Minion from '../scripts/minions';
+import {unvue} from '../scripts/utilities';
 
 Vue.use(Vuex);
 
@@ -43,8 +44,17 @@ const store = new Vuex.Store({
       state.minionData.affix.minionIndex = index;
       $('#affixMinionModal').modal('show');
     },
-    ADD_MINION(state, minion) {
-      state.minions.push(minion);
+    UPSERT_MINION(state, minion) {
+      const match = state.minions.find(x => x.name === minion.name);
+      if (match) {
+        Object.entries(minion.types).forEach(([size, list]) => {
+          list.forEach(item => {
+            match.addMinion(size, item.boosts, item.hinders, item.count);
+          })
+        })
+      } else {
+        state.minions.push(minion);
+      }
       Cookies.set('minion', state.minions);
     },
     DELETE_MINION(state, index) {
@@ -87,11 +97,28 @@ const store = new Vuex.Store({
       Cookies.set('minion', ctx.rootState.minions);
     },
     removeMinion(ctx, {minion, size, index}) {
-      minion.removeMinion(size, index)
+      minion.removeMinion(size, index);
       Cookies.set('minion', ctx.rootState.minions);
     },    
-    removeAffix(ctx, {minion, index, type}) {
-      minion[type].splice(index, 1);
+    removeAffix(ctx, {minion, size, minionIndex, affixIndex, type}) {
+      let minionData = minion.types[size];
+      minionData[minionIndex][type].splice(affixIndex, 1);
+
+      minion.types[size] = unvue(minionData).reduce((acc, minionEl) => {
+        const match = acc.find(x => {
+          return JSON.stringify(x.boosts) === JSON.stringify(minionEl.boosts) &&
+            JSON.stringify(x.hinders) === JSON.stringify(minionEl.hinders);
+        });
+        if (match) {
+          match.count += minionEl.count;
+        } else {
+          acc.push(minionEl);
+        }
+        return acc;
+      }, []);
+      // console.log(meow, minionData);
+      // minionData = meow;
+      // minion.types[size] = meow;
       Cookies.set('minion', ctx.rootState.minions);
     }
   },

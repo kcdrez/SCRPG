@@ -24,15 +24,16 @@ class Minion {
       this.addMinion(size - 2, boosts, hinders);
     }
   }
-  addMinion(size, boosts, hinders) {
+  addMinion(size, boosts, hinders, count) {
+    count = count || 1;
     const match = this.types[size].find(x => {
       return JSON.stringify(boosts) === JSON.stringify(x.boosts) &&
         JSON.stringify(hinders) === JSON.stringify(x.hinders);
     });
     if (match) {
-      match.count++;
+      match.count += count;
     } else {
-      this.types[size].push({ boosts, hinders, count: 1});
+      this.types[size].push({ boosts, hinders, count});
     }
   }
   removeMinion(size, index) {
@@ -51,6 +52,11 @@ class Minion {
     const {boosts, hinders} = this.types[size][index];
     this.addMinion(size, boosts, hinders.concat({amount, name}));
     this.removeMinion(size, index);
+  }
+  countBySize(size) {
+    return this.types[size].reduce((total, item) => {
+      return total + item.count;
+    }, 0);
   }
 }
 
