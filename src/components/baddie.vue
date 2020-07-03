@@ -230,14 +230,7 @@
   };
 </script>
 
-<style lang="scss">
-  .admin-page {
-    max-width: 90%;
-
-    .row {
-      margin-bottom: .5rem;
-    }
-  }
+<style lang="scss" scoped>
   .baddie-list {
     img {
       width: 30px;
