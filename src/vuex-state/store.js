@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Cookies from 'js-cookie';
-import Minion from '../scripts/minions';
+import Baddie from '../scripts/baddie';
 import {unvue} from '../scripts/utilities';
 
 Vue.use(Vuex);
@@ -14,10 +14,14 @@ const store = new Vuex.Store({
   },
   mutations: {
     INIT(state, payload) {
-      const minions = Cookies.getJSON('minion');
+      const minions = Cookies.getJSON('minions');
+      const lieutenants = Cookies.getJSON('lieutenants');
       if (minions) {
-        state.minions = minions.map(x => new Minion(x.name, null, null, x.types))
+        state.minions = minions.map(x => new Baddie(x.name, null, null, x.types))
       }
+      if (lieutenants) {
+        state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types))
+      }      
       state.initialized = true;
     },
     UPSERT_BADDIE(state, {baddie, baddieType}) {
@@ -25,7 +29,7 @@ const store = new Vuex.Store({
       if (match) {
         Object.entries(baddie.types).forEach(([size, list]) => {
           list.forEach(item => {
-            match.addMinion(size, item.boosts, item.hinders, item.count);
+            match.addBaddie(size, item.boosts, item.hinders, item.count);
           })
         })
       } else {
@@ -48,40 +52,32 @@ const store = new Vuex.Store({
       Cookies.set(baddieType, ctx.rootState[baddieType]);
     },
     addBaddieAffix(ctx, {affixData, baddieType}) {
-      const {amount, name, type, target, minionSize, minionIndex} = affixData;
+      const {amount, name, type, target, size, index} = affixData;
       if (name === '') return;
       if (type === 'Boost') {
-        target.boost(minionSize, minionIndex, amount, name);
+        target.boost(size, index, amount, name);
       } else {
-        target.hinder(minionSize, minionIndex, amount, name);
+        target.hinder(size, index, amount, name);
       }
-      Cookies.set(baddieType, ctx.rootState[baddieType]);
+      ctx.dispatch('saveBaddies', baddieType);
     },
-    demoteBaddie(ctx, {minion, size, index, baddieType}) {
-      minion.demote(size, index);
-      Cookies.set(baddieType, ctx.rootState[baddieType]);
-    },
-    removeBaddie(ctx, {minion, size, index, baddieType}) {
-      minion.removeMinion(size, index);
-      Cookies.set(baddieType, ctx.rootState[baddieType]);
-    },
-    removeAffix(ctx, {baddieType, minion, size, minionIndex, affixIndex, type}) {
-      let minionData = minion.types[size];
-      minionData[minionIndex][type].splice(affixIndex, 1);
+    removeAffix(ctx, {baddieType, baddie, size, baddieIndex, affixIndex, type}) {
+      let baddieData = baddie.types[size];
+      baddieData[baddieIndex][type].splice(affixIndex, 1);
 
-      minionData = unvue(minionData).reduce((acc, minionEl) => {
+      baddieData = unvue(baddieData).reduce((acc, el) => {
         const match = acc.find(x => {
-          return JSON.stringify(x.boosts) === JSON.stringify(minionEl.boosts) &&
-            JSON.stringify(x.hinders) === JSON.stringify(minionEl.hinders);
+          return JSON.stringify(x.boosts) === JSON.stringify(el.boosts) &&
+            JSON.stringify(x.hinders) === JSON.stringify(el.hinders);
         });
         if (match) {
-          match.count += minionEl.count;
+          match.count += el.count;
         } else {
-          acc.push(minionEl);
+          acc.push(el);
         }
         return acc;
       }, []);
-      Cookies.set(type, ctx.rootState[type]);
+      ctx.dispatch('saveBaddies', baddieType);
     }
   },
   getters: {

@@ -1,4 +1,4 @@
-class Minion {
+class Baddie {
   constructor(name, size, count, types) {
     this.name = name;
     this.types = {
@@ -10,7 +10,7 @@ class Minion {
     };
     if (size) {
       for (let i = 0; i < count; i++) {
-        this.addMinion(size, [], []);
+        this.addBaddie(size, [], []);
       }
     } else if (types) {
       this.types = types;
@@ -19,12 +19,12 @@ class Minion {
 
   demote(size, index) {
     const {boosts, hinders} = this.types[size][index];
-    this.removeMinion(size, index);
+    this.remove(size, index);
     if (size > 4) {
-      this.addMinion(size - 2, boosts, hinders);
+      this.addBaddie(size - 2, boosts, hinders);
     }
   }
-  addMinion(size, boosts, hinders, count) {
+  addBaddie(size, boosts, hinders, count) {
     count = count || 1;
     const match = this.types[size].find(x => {
       return JSON.stringify(boosts) === JSON.stringify(x.boosts) &&
@@ -36,7 +36,7 @@ class Minion {
       this.types[size].push({ boosts, hinders, count});
     }
   }
-  removeMinion(size, index) {
+  remove(size, index) {
     if (this.types[size][index].count === 1) {
       this.types[size].splice(index, 1);
     } else {
@@ -45,13 +45,13 @@ class Minion {
   }
   boost(size, index, amount, name) {
     const {boosts, hinders} = this.types[size][index];
-    this.addMinion(size, boosts.concat({amount, name}), hinders);
-    this.removeMinion(size, index);
+    this.addBaddie(size, boosts.concat({amount, name}), hinders);
+    this.remove(size, index);
   }
   hinder(size, index, amount, name) {
     const {boosts, hinders} = this.types[size][index];
-    this.addMinion(size, boosts, hinders.concat({amount, name}));
-    this.removeMinion(size, index);
+    this.addBaddie(size, boosts, hinders.concat({amount, name}));
+    this.remove(size, index);
   }
   countBySize(size) {
     return this.types[size].reduce((total, item) => {
@@ -60,4 +60,4 @@ class Minion {
   }
 }
 
-export default Minion;
+export default Baddie;

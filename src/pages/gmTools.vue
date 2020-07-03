@@ -78,7 +78,7 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import Minion from '../scripts/minions';
+  import Baddie from '../scripts/baddie';
   import baddies from '../components/baddie.vue';
 
   export default {
@@ -120,14 +120,6 @@
         this.scene.yellow = [];
         this.scene.red = [];
         Cookies.set('sceneTracker', this.scene);
-      },
-      createMinion() {
-        const {name, size, count} = this.$store.state.minionData;
-        this.$store.commit('UPSERT_MINION', new Minion(name, size, count));
-      },
-      addMinion(name) {
-        this.$store.state.minionData.name = name;
-        $('#createMinionModal').modal('show');
       }
     },
     computed: {
@@ -155,32 +147,32 @@
     .row {
       margin-bottom: .5rem;
     }
-  }
+    .scene-tracker-header, .baddie-list-header {
+      margin-bottom: 1rem;
 
-  .scene-tracker-header, .minion-list-header {
-    margin-bottom: 1rem;
-
-    .col {
-      display: flex;
-      margin-bottom: 0.5rem;
-      
-      h3 {
-        margin: 0;
+      .col {
+        display: flex;
+        margin-bottom: 0.5rem;
+        
+        h3 {
+          margin: 0;
+        }
+        .btn-group {
+          vertical-align: middle;
+          margin: 0 1rem;
+          width: 15%;
+        }
       }
-      .btn-group {
-        vertical-align: middle;
-        margin: 0 1rem;
-        width: 15%;
+    }
+    .scene-tracker {
+      img {
+        cursor: pointer;
+
+        &:hover {
+          transform: translate(0px, -3px);
+        }
       }
     }
   }
-  .scene-tracker {
-    img {
-      cursor: pointer;
 
-      &:hover {
-        transform: translate(0px, -3px);
-      }
-    }
-  }
 </style>
