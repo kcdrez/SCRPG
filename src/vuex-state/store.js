@@ -9,22 +9,8 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     initialized: false,
-    minions: [],
-    minionData: {
-      name: 'Robot',
-      size: 8,
-      count: 5,
-      affix: {
-        amount: 0,
-        name: '',
-        max: 0,
-        min: 0,
-        type: '',
-        minionSize: 0,
-        minionIndex: -1,
-        target: null
-      }
-    }
+    lieutenants: [],
+    minions: []
   },
   mutations: {
     INIT(state, payload) {
@@ -34,32 +20,22 @@ const store = new Vuex.Store({
       }
       state.initialized = true;
     },
-    ADD_AFFIX(state, {max, min, amount, type, minion, size, index}) {
-      state.minionData.affix.max = max;
-      state.minionData.affix.min = min;
-      state.minionData.affix.amount = amount;
-      state.minionData.affix.type = type;
-      state.minionData.affix.target = minion;
-      state.minionData.affix.minionSize = size;
-      state.minionData.affix.minionIndex = index;
-      $('#affixMinionModal').modal('show');
-    },
-    UPSERT_MINION(state, minion) {
-      const match = state.minions.find(x => x.name === minion.name);
+    UPSERT_BADDIE(state, {baddie, baddieType}) {
+      const match = state[baddieType].find(x => x.name === baddie.name);
       if (match) {
-        Object.entries(minion.types).forEach(([size, list]) => {
+        Object.entries(baddie.types).forEach(([size, list]) => {
           list.forEach(item => {
             match.addMinion(size, item.boosts, item.hinders, item.count);
           })
         })
       } else {
-        state.minions.push(minion);
+        state[baddieType].push(baddie);
       }
-      Cookies.set('minion', state.minions);
+      Cookies.set(baddieType, state[baddieType]);
     },
-    DELETE_MINION(state, index) {
-      state.minions.splice(index, 1);
-      Cookies.set('minion', state.minions);
+    DELETE_BADDIE(state, {type, index}) {
+      state[type].splice(index, 1);
+      Cookies.set(type, state[type]);
     }
   },
   actions: {
@@ -68,43 +44,32 @@ const store = new Vuex.Store({
         ctx.commit('INIT');
       }
     },
-    boostMinion(ctx, data) {
-      ctx.commit('ADD_AFFIX', Object.assign({
-        max: 4, 
-        min: 1,
-        amount: 1,
-        type: 'Boost',}, data));
+    saveBaddies(ctx, baddieType) {
+      Cookies.set(baddieType, ctx.rootState[baddieType]);
     },
-    hinderMinion(ctx, data) {
-      ctx.commit('ADD_AFFIX', Object.assign({
-        max: -1, 
-        min: -4,
-        amount: -1,
-        type: 'Hinder',}, data));
-    },
-    addMinionAffix(ctx) {
-      const {amount, name, type, target, minionSize, minionIndex} = ctx.rootState.minionData.affix;
+    addBaddieAffix(ctx, {affixData, baddieType}) {
+      const {amount, name, type, target, minionSize, minionIndex} = affixData;
       if (name === '') return;
       if (type === 'Boost') {
         target.boost(minionSize, minionIndex, amount, name);
       } else {
         target.hinder(minionSize, minionIndex, amount, name);
       }
-      Cookies.set('minion', ctx.rootState.minions);
+      Cookies.set(baddieType, ctx.rootState[baddieType]);
     },
-    demoteMinion(ctx, {minion, size, index}) {
+    demoteBaddie(ctx, {minion, size, index, baddieType}) {
       minion.demote(size, index);
-      Cookies.set('minion', ctx.rootState.minions);
+      Cookies.set(baddieType, ctx.rootState[baddieType]);
     },
-    removeMinion(ctx, {minion, size, index}) {
+    removeBaddie(ctx, {minion, size, index, baddieType}) {
       minion.removeMinion(size, index);
-      Cookies.set('minion', ctx.rootState.minions);
-    },    
-    removeAffix(ctx, {minion, size, minionIndex, affixIndex, type}) {
+      Cookies.set(baddieType, ctx.rootState[baddieType]);
+    },
+    removeAffix(ctx, {baddieType, minion, size, minionIndex, affixIndex, type}) {
       let minionData = minion.types[size];
       minionData[minionIndex][type].splice(affixIndex, 1);
 
-      minion.types[size] = unvue(minionData).reduce((acc, minionEl) => {
+      minionData = unvue(minionData).reduce((acc, minionEl) => {
         const match = acc.find(x => {
           return JSON.stringify(x.boosts) === JSON.stringify(minionEl.boosts) &&
             JSON.stringify(x.hinders) === JSON.stringify(minionEl.hinders);
@@ -116,10 +81,7 @@ const store = new Vuex.Store({
         }
         return acc;
       }, []);
-      // console.log(meow, minionData);
-      // minionData = meow;
-      // minion.types[size] = meow;
-      Cookies.set('minion', ctx.rootState.minions);
+      Cookies.set(type, ctx.rootState[type]);
     }
   },
   getters: {

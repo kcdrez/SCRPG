@@ -3,8 +3,8 @@ import VueRouter from 'vue-router';
 
 Vue.use(VueRouter);
 
-import HomePage from '../pages/home.vue';
-import AdminPage from '../pages/admin.vue';
+import CharacterCreationPage from '../pages/characterCreation.vue';
+import GMToolsPage from '../pages/gmTools.vue';
 
 import store from '../vuex-state/store';
 
@@ -12,13 +12,18 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomePage
+    component: GMToolsPage
   },
   {
-    path: '/admin',
-    name: 'admin',
-    component: AdminPage
-  }  
+    path: '/gmtools',
+    name: 'gmTools',
+    component: GMToolsPage
+  },
+    {
+    path: '/characterCreation',
+    name: 'characterCreation',
+    component: CharacterCreationPage
+  }
 ]
 
 const router = new VueRouter({

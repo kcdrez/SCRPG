@@ -2,7 +2,7 @@
   "name": "scrpg",
   "version": "1.0.0",
   "description": "",
-  "main": "webpack.config.dev.js",
+  "main": "main.js",
   "dependencies": {
     "bootstrap": "^4.5.0",
     "jquery": "^3.5.1",
@@ -35,6 +35,6 @@
     "start": "webpack-dev-server --config build/webpack.config.dev.js",
     "build": "webpack --config build/webpack.config.dev.js"
   },
-  "author": "",
+  "author": "KC Drez",
   "license": "ISC"
 }

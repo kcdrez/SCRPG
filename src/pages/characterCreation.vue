@@ -1,5 +1,6 @@
 <template>
   <div>
+    <navbar />
     <div class="method-select">
       <button class="btn" 
         title="I don't have an idea for my hero and/or I feel overwhelmed and want to limit my options to prevent analysis paralysis" 
@@ -168,7 +169,7 @@
   import {roll, unvue} from '../scripts/utilities';
 
   export default {
-    name: 'Home',
+    name: 'CharacterCreation',
     data() {
       return {
         archetypes,

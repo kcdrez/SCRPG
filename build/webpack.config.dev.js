@@ -28,32 +28,18 @@ module.exports = {
         test: /\.vue$/,
         use: 'vue-loader'
       },
-      // {
-      //   test: /\.css$/,
-      //   use: [
-      //     'css-loader', 'vue-style-loader'
-      //   ]
-      // },
       {
         test: /\.scss$/,
         use: [ 'vue-style-loader', 'css-loader', 
           {
-            loader: 'sass-loader',
-            options: { 
-              // sassOptions: { indentedSyntax: true },
-              // prependData: 'src/styles/variables.scss'
-            }
+            loader: 'sass-loader'
           }
         ]
       },
       {    
         test: /\.css$/,    
         use: ['style-loader','css-loader']  
-      },  
-      // {
-      //     test: /\.(png|jpg|gif|svg)$/,
-      //     use: 'file-loader?name=[name].[ext]',
-      // },
+      },
       {    
         test: /\.png$/,    
         use: {
@@ -62,27 +48,7 @@ module.exports = {
             name: '[path][name].[hash].[ext]'
           }
         }
-      },  
-      // {     
-      //   test: /\.jpg$/,     
-      //   use: "file-loader"  
-      // }, 
-      // {    
-      //   test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,    
-      //   use: 'url-loader?limit=10000&mimetype=application/font-woff'  
-      // },  
-      // {     
-      //   test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,     
-      //   use: 'url-loader?limit=10000&mimetype=application/octet-stream'  
-      // },  
-      // {     
-      //   test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,     
-      //   use: 'file-loader'  
-      // },  
-      // {    
-      //   test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,    
-      //   use: 'url-loader?limit=10000&mimetype=image/svg+xml'  
-      // }
+      }
     ]
   },  
   plugins: [

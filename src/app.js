@@ -5,14 +5,13 @@ import formWizard from 'vue-form-wizard';
 import 'vue-form-wizard/dist/vue-form-wizard.min.css';
 import VueDialog from 'vuejs-dialog';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
-// import './styles/main.scss';
-
+import './styles/main.scss';
 
 import store from './vuex-state/store';
 import router from './router/router';
-// import navbar from './components/navbar.vue';
+import navbar from './components/navbar.vue';
 
-// Vue.component('navbar', navbar);
+Vue.component('navbar', navbar);
 
 Vue.use(formWizard);
 Vue.use(VueDialog);
