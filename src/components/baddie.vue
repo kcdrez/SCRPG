@@ -28,7 +28,7 @@
               <template v-if="data.length > 0">
                 <h4>
                   <a :href="`#${label}-${baddie.name}-${size}`" data-toggle="collapse"><b>Size:</b></a>
-                  <img :src="`/src/assets/images/d${size}.png`" :title="`This minion uses a d${size}`">
+                  <img :src="`images/d${size}.png`" :title="`This minion uses a d${size}`">
                   <div class="d-inline" :title="`There are ${baddie.countBySize(size)} minions that use this die size`">
                     ({{baddie.countBySize(size)}})
                   </div>

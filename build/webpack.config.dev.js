@@ -4,7 +4,7 @@ const webpack = require('webpack');
 const jquery = require('jquery');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -63,10 +63,10 @@ module.exports = {
       $: 'jquery',
       jquery: 'jquery'
     }),
-    // new CopyPlugin({
-    //   patterns: [
-    //     { from: 'assets/green.png', to: 'dist/assets'}
-    //   ]
-    // })
+    new CopyPlugin({
+      patterns: [
+        { from: 'src/assets/images', to: 'images'}
+      ]
+    })
   ]
 }

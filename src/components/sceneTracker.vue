@@ -16,16 +16,16 @@
       </div>
       <div class="col" v-else>
         <div v-for="item in scene.green" class="d-inline" @click="progressScene(item)">
-          <img src="/src/assets/images/green_checked.png" v-if="item.checked">
-          <img src="/src/assets/images/green.png" v-else>
+          <img src="images/green_checked.png" v-if="item.checked">
+          <img src="images/green.png" v-else>
         </div>
         <div v-for="item in scene.yellow" class="d-inline" @click="progressScene(item)">
-          <img src="/src/assets/images/yellow_checked.png" v-if="item.checked">
-          <img src="/src/assets/images/yellow.png" v-else>
+          <img src="images/yellow_checked.png" v-if="item.checked">
+          <img src="images/yellow.png" v-else>
         </div>
         <div v-for="item in scene.red" class="d-inline" @click="progressScene(item)">
-          <img src="/src/assets/images/red_checked.png" v-if="item.checked">
-          <img src="/src/assets/images/red.png" v-else>
+          <img src="images/red_checked.png" v-if="item.checked">
+          <img src="images/red.png" v-else>
         </div>
       </div>
     </div>
