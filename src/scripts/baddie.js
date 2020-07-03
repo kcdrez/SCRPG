@@ -43,12 +43,12 @@ class Baddie {
       this.types[size][index].count--;
     }
   }
-  boost(size, index, amount, name) {
+  boost(name, amount, size, index) {
     const {boosts, hinders} = this.types[size][index];
     this.addBaddie(size, boosts.concat({amount, name}), hinders);
     this.remove(size, index);
   }
-  hinder(size, index, amount, name) {
+  hinder(name, amount, size, index) {
     const {boosts, hinders} = this.types[size][index];
     this.addBaddie(size, boosts, hinders.concat({amount, name}));
     this.remove(size, index);
@@ -60,4 +60,19 @@ class Baddie {
   }
 }
 
-export default Baddie;
+class Villain {
+  constructor(name, boosts, hinders) {
+    this.name = name;
+    this.boosts = boosts || [];
+    this.hinders = hinders || [];
+  }
+
+  boost(name, amount) {
+    this.boosts.push({name, amount});
+  }
+  hinder(name, amount) {
+    this.hinders.push({name, amount});
+  }
+}
+
+export {Baddie, Villain};

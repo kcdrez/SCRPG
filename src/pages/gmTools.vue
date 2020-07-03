@@ -8,19 +8,19 @@
       <sceneTracker />
       <baddies :list="$store.state.minions" label="Minions"></baddies>
       <baddies :list="$store.state.lieutenants" label="Lieutenants"></baddies>
+      <villains />
     </div>
   </div>
 </template>
 
 <script>
-  import Cookies from 'js-cookie';
-  import Baddie from '../scripts/baddie';
   import baddies from '../components/baddie.vue';
   import sceneTracker from '../components/sceneTracker.vue';
+  import villains from '../components/villain.vue';
 
   export default {
     name: 'GMTools',
-    components: {baddies, sceneTracker}
+    components: {baddies, sceneTracker, villains}
   };
 </script>
 

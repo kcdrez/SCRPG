@@ -13,7 +13,7 @@
       <div class="col" v-if="list.length === 0">
         There are no {{label}}.
       </div>
-      <div class="col-6 mb-3" v-else v-for="(baddie, baddieIndex) in list">
+      <div class="col-6 mb-3" v-for="(baddie, baddieIndex) in list">
         <div class="card">
           <div class="card-header">
             <h3 class="d-inline"><a :href="`#${label}-${baddie.name}`" data-toggle="collapse">{{baddie.name}}</a></h3>
@@ -70,7 +70,7 @@
                             @click="affectBaddie(size, baddieIndex, false, baddie)">Hinder</button>
                         </div>
                         <div class="btn-group btn-group-sm w-100">
-                          <button class="bnfo bortn btn-ider-dark" 
+                          <button class="btn btn-info border-dark" 
                             @click="demoteBaddie(baddie, size, index)">Demote</button>
                           <button class="btn btn-danger border-dark" 
                             @click="removeBaddie(baddie, size, index)">Remove</button>
@@ -165,7 +165,7 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import Baddie from '../scripts/baddie';
+  import {Baddie} from '../scripts/baddie';
 
   export default {
     name: 'BaddieList',
