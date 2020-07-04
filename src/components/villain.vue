@@ -95,7 +95,8 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Name</div>
               </div>
-              <input class="form-control" v-model.trim="name" type="text">
+              <input class="form-control" v-model.trim="name" type="text"
+                @keydown.enter="createVillain">
             </div>
           </div>
           <div class="modal-footer">
@@ -121,7 +122,7 @@
               </div>
               <input class="form-control" type="text"
                 v-model.trim="affix.name"
-                @keydown.enter="affix.target.addAffix(affix)">
+                @keydown.enter="target.addAffix(affix)">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -132,12 +133,12 @@
                 type="number" 
                 :max="affix.max"
                 :min="affix.min"
-                @keydown.enter="affix.target.addAffix(affix)">
+                @keydown.enter="target.addAffix(affix)">
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" 
-              @click="affix.target.addAffix(affix)" data-dismiss="modal">Add</button>
+              @click="target.addAffix(affix)" data-dismiss="modal">Add</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -154,12 +155,12 @@
     data() {
       return {
         name: '',
+        target: null,
         affix: {
           type: '',
           amount: 0,
           max: 0,
           min: 0,
-          target: null
         }
       }
     },
@@ -179,8 +180,8 @@
         this.affix.min = boosting ? 1: -4;
         this.affix.amount = boosting ? 1: -1;
         this.affix.type = boosting ? 'Bonus': 'Penalty';
-        this.affix.target = villain;
-        this.$store.dispatch('saveBaddies', 'villains');
+        this.target = villain;
+        villain.refresh();
         $(`#affixModal-villain`).modal('show');
       }
     }

@@ -103,20 +103,23 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Name</div>
               </div>
-              <input class="form-control" v-model.trim="baddieData.name" type="text">
+              <input class="form-control" v-model.trim="baddieData.name" type="text"
+                @keydown.enter="createBaddie">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Size</div>
               </div>
               <input class="form-control" 
-                v-model.number="baddieData.size" type="number" step="2" min="4" max="12">
+                v-model.number="baddieData.size" type="number" step="2" min="4" max="12"
+                @keydown.enter="createBaddie">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Count</div>
               </div>
-              <input class="form-control" v-model.number="baddieData.count" type="number" min="1">
+              <input class="form-control" v-model.number="baddieData.count" type="number" min="1"
+                @keydown.enter="createBaddie">
             </div>
           </div>
           <div class="modal-footer">
