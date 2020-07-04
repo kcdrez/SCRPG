@@ -55,42 +55,6 @@ const store = new Vuex.Store({
     },
     saveBaddies(ctx, baddieType) {
       Cookies.set(baddieType, ctx.rootState[baddieType]);
-    },
-    addBaddieAffix(ctx, {affixData, baddieType}) {
-      const {amount, name, type, target, size, index} = affixData;
-      if (name === '') return;
-      else if (type === 'Bonus') {
-        target.boost(name, amount, size, index);
-      } else {
-        target.hinder(name, amount, size, index);
-      }
-      // ctx.dispatch('refreshBaddies', {size, baddieType, baddie: target});
-    },
-    // refreshBaddies(ctx, {baddieType, size, baddie}) {
-    //   if (baddieType !== 'villains') {
-    //     baddie.types[size] = unvue(baddie.types[size]).reduce((acc, el) => {
-    //       const match = acc.find(x => {
-    //         return JSON.stringify(x.bonuses) === JSON.stringify(el.bonuses) &&
-    //           JSON.stringify(x.penalties) === JSON.stringify(el.penalties);
-    //       });
-    //       if (match) {
-    //         match.count += el.count;
-    //       } else {
-    //         acc.push(el);
-    //       }
-    //       return acc;
-    //     }, []);
-    //   }
-    //   ctx.dispatch('saveBaddies', baddieType);
-    // },
-    removeAffix(ctx, {baddieType, baddie, size, baddieIndex, affixIndex, type}) {
-      if (baddieType === 'villains') { //todo: make this a function in the class
-        baddie[type].splice(affixIndex, 1);
-      } else {
-        baddie.types[size][baddieIndex][type].splice(affixIndex, 1);
-      }
-      baddie.refresh(size);
-      // ctx.dispatch('refreshBaddies', {size, baddieType, baddie});
     }
   },
   getters: {

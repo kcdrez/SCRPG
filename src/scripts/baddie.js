@@ -79,6 +79,26 @@ class Baddie {
     }, []);
     store.dispatch('saveBaddies', this.baddieType);
   }
+  addAffix({name, type, amount, size, index}) {
+    if (name === '') return;
+    else if (type === 'Bonus') {
+      this.boost(name, amount, size, index);
+    } else {
+      this.hinder(name, amount, size, index);
+    }
+  }
+  removeAffix(size, affixType, affixIndex, baddieIndex) {
+    const affixData = this.types[size][baddieIndex][affixType];
+    if (affixData.count > 1) {
+      const copy = unvue(affixData);
+      affixData.count--;
+      copy[type].splice(affixIndex, 1);
+      this.addBaddie(size, copy.bonuses, copy.penalties, 1);
+    } else {
+      this.types[size][baddieIndex][affixType].splice(affixIndex, 1);
+    }
+    this.refresh(size);
+  }
 }
 
 class Villain {

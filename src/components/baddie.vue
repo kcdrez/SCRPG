@@ -51,7 +51,7 @@
                         <div class="border border-dark position-relative" v-for="(bonus, affixIndex) in el.bonuses">
                           <div class="remove-affix" 
                             title="Remove this Bonus"
-                            @click="$store.dispatch('removeAffix', {baddieType: label.toLowerCase(), baddie, size, baddieIndex: index, affixIndex, type: 'bonuses'})">&times;</div>
+                            @click="baddie.removeAffix(size, 'bonuses', affixIndex, index)">&times;</div>
                           <div><b>Name: </b>{{bonus.name}}</div>
                           <div><b>Amount: </b>+{{bonus.amount}}</div>
                         </div>
@@ -61,7 +61,7 @@
                         <div class="border border-dark position-relative" v-for="(penalty, affixIndex) in el.penalties">
                           <div class="remove-affix" 
                             title="Remove this Penalty"
-                            @click="$store.dispatch('removeAffix', {baddieType: label.toLowerCase(), baddie, size, baddieIndex: index, affixIndex, type: 'penalties'})">&times;</div>
+                            @click="baddie.removeAffix(size, 'penalties', affixIndex, index)">&times;</div>
                           <div><b>Name: </b>{{penalty.name}}</div>
                           <div><b>Amount: </b>{{penalty.amount}}</div>
                         </div>
@@ -69,9 +69,9 @@
                       <td class="align-middle">
                         <div class="btn-group btn-group-sm w-100 mb-2" role="group">
                           <button class="btn btn-success border-dark" 
-                            @click="affectBaddie(size, baddieIndex, true, baddie)">Boost</button>
+                            @click="affectBaddie(size, index, true, baddie)">Boost</button>
                           <button class="btn btn-warning border-dark" 
-                            @click="affectBaddie(size, baddieIndex, false, baddie)">Hinder</button>
+                            @click="affectBaddie(size, index, false, baddie)">Hinder</button>
                         </div>
                         <div class="btn-group btn-group-sm w-100">
                           <button class="btn btn-info border-dark" 
@@ -142,7 +142,7 @@
               </div>
               <input class="form-control" type="text"
                 v-model.trim="baddieData.affix.name"
-                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: label.toLowerCase(), affixData: baddieData.affix})">
+                @keydown.enter="baddieData.affix.target.addAffix(baddieData.affix)">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -153,12 +153,12 @@
                 type="number" 
                 :max="baddieData.affix.max"
                 :min="baddieData.affix.min"
-                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: label.toLowerCase(), affixData: baddieData.affix})">
+                @keydown.enter="baddieData.affix.target.addAffix(baddieData.affix)">
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" 
-              @click="$store.dispatch('addBaddieAffix', {baddieType: label.toLowerCase(), affixData: baddieData.affix})" data-dismiss="modal">Add</button>
+              @click="baddieData.affix.target.addAffix(baddieData.affix)" data-dismiss="modal">Add</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
