@@ -61,7 +61,7 @@
                     <tr v-for="quality in character.qualitySelections">
                       <td class="text-center">
                         <select class="form-control form-control-sm" @input="character.adjustQuality(quality, $event.target.value)">
-                          <option v-for="die in character.options(quality)" :value="die.id">{{die.dieSize}}</option>
+                          <option v-for="die in character.options(quality)" :value="die.id" :disabled="die.disabled">{{die.dieSize}}</option>
                         </select>
                       </td>
                       <td class="text-center">{{quality.name}}</td>
@@ -74,7 +74,7 @@
           </div>
         </div>
       </tab-content>
-      <tab-content title="Power Source" :before-change="selectPowerSource">
+      <tab-content title="Power Source" :before-change="validatePowerSource">
           <h1 class="text-center">Choose a Power Source</h1>
           <h4 v-if="error" class="text-danger text-center">{{error}}</h4>
           <div class="container">
@@ -109,18 +109,24 @@
                   <h5>Abilities</h5>
                   <div v-if="'green' in details.powerSource.abilities">
                     Select {{details.powerSource.abilities.green.count}} from the following Green Abilities:
-                    <table class="table table-sm table-striped table-dark table-bordered">
+                    <table class="table table-sm table-striped table-dark table-bordered green-abilities">
                       <thead class="text-center">
                         <tr>
+                          <th width="10%">Action(s)</th>
                           <th width="15%">Action(s)</th>
                           <th width="15%">Name</th>
                           <th width="15%">Type</th>
-                          <th width="55%">Description</th>
+                          <th width="45%">Description</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="ability in details.powerSource.abilities.green.list">
-                          <td class="text-center">{{ability.actions.join(', ')}}</td>
+                          <td class="text-center align-middle">
+                            <input type="checkbox" 
+                              @input="character.selectAbility(ability, 'green')"
+                              :disabled="character.disabledAbility(ability, 'green', details.powerSource.abilities.green.count)">
+                          </td>            
+                          <td class="text-center">{{ability.actions.length > 0 ? ability.actions.join(', '): '-'}}</td>
                           <td class="text-center">{{ability.name}}</td>
                           <td class="text-center">{{ability.type}}</td>
                           <td>{{ability.description}}</td>
@@ -130,18 +136,24 @@
                   </div>
                   <div v-if="'yellow' in details.powerSource.abilities">
                     Select {{details.powerSource.abilities.yellow.count}} from the following Yellow Abilities:
-                    <table class="table table-sm table-striped table-dark table-bordered">
+                    <table class="table table-sm table-striped table-dark table-bordered yellow-abilities">
                       <thead class="text-center">
                         <tr>
+                          <th width="10%">Action(s)</th>
                           <th width="15%">Action(s)</th>
                           <th width="15%">Name</th>
                           <th width="15%">Type</th>
-                          <th width="55%">Description</th>
+                          <th width="45%">Description</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="ability in details.powerSource.abilities.yellow.list">
-                          <td class="text-center">{{ability.actions.join(', ')}}</td>
+                          <td class="text-center align-middle">
+                            <input type="checkbox" 
+                              @input="character.selectAbility(ability, 'yellow')"
+                              :disabled="character.disabledAbility(ability, 'yellow', details.powerSource.abilities.yellow.count)">
+                          </td>
+                          <td class="text-center">{{ability.actions.length > 0 ? ability.actions.join(', '): '-'}}</td>
                           <td class="text-center">{{ability.name}}</td>
                           <td class="text-center">{{ability.type}}</td>
                           <td>{{ability.description}}</td>
@@ -153,6 +165,9 @@
               </div>
             </div>
           </div>
+      </tab-content>
+      <tab-content>
+        next step
       </tab-content>
     </form-wizard>
   </div>
@@ -209,7 +224,28 @@
           return false;
         }
       },
-      selectPowerSource() {},
+      selectPowerSource(source) {
+        if (source) {
+          this.character.powerSource = source;
+          return true;
+        } else {
+          this.error = 'You must select a Power Source before continuing.';
+          return false;
+        }
+      },
+      validatePowerSource() {
+        const selected = this.selectPowerSource(this.details.powerSource);
+        if (selected) {
+          if (this.character.validPowerSource) {
+            return true;
+          } else {
+            this.error = 'You must select all of your abilities.';
+            return false;
+          }
+        } else {
+          return false;
+        }
+      },
       validateBackground() {
         const selected = this.selectBackground(this.character.background);
         if (selected) {
@@ -287,4 +323,31 @@
       }
     }
   }
+  .green-abilities {
+    thead {
+      background-color: #345f34;
+    }
+    tbody {
+      tr {
+        background-color: #2e902e;
+      }
+      tr:nth-of-type(2n+1) {
+        background-color: #34aa34;
+      }
+    }
+  }
+  .yellow-abilities {
+    thead {
+      background-color: #8f9737;
+    }
+    tbody {
+      tr {
+        background-color: #bfcc2a;
+        color: black;
+      }
+      tr:nth-of-type(2n+1) {
+        background-color: #e4f523;
+      }
+    }
+  }  
 </style>

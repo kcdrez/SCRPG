@@ -7,7 +7,12 @@ class Character {
     this._data = {
       background: null,
       powerSource: null,
-      qualities: []
+      qualities: [],
+      abilities: {
+        green: [],
+        yellow: [],
+        red: []
+      }
     };
   }
 
@@ -25,7 +30,7 @@ class Character {
     this._data.background = val;
   }
   get validBackground() {
-    return this._data.qualities.length !== this._data.background.qualities.dice.length;
+    return this.qualities.length === this.background.qualities.dice.length;
   }
 
   get powerSource() {
@@ -33,6 +38,15 @@ class Character {
   }
   set powerSource(val) {
     this._data.powerSource = val;
+  }
+  get validPowerSource() {
+    return Object.entries(this.powerSource.abilities).reduce((acc, [key, {count}]) => {
+      if (count === this.abilities[key].length && acc) {
+        return true;
+      } else {
+        return false;
+      }
+    }, true);
   }
 
   get qualities() {
@@ -86,6 +100,9 @@ class Character {
       used: []
     });
   }
+  get abilities() {
+    return this._data.abilities;
+  }
   adjustQuality(quality, dieID) {
     if (dieID === '-') {
       const index = this.qualities.findIndex(x => x.name === quality.name);
@@ -107,8 +124,25 @@ class Character {
       const qualityMatch = this.qualities.find(q => q.name === quality.name);
       if (!diceMatch) acc.push(x);
       else if (qualityMatch) acc.push(x);
+      else acc.push(Object.assign({disabled: true}, x)); //todo: figure out how to remove this
       return acc;
     }, [{id: '-', dieSize: '-'}]);
+  }
+  selectAbility(ability, color) {
+    const index = this._data.abilities[color].findIndex(x => ability.name === x.name);
+    if (index > -1) {
+      this._data.abilities[color].splice(index, 1);
+    } else {
+      this._data.abilities[color].push(ability);
+    }
+  }
+  disabledAbility(ability, color, count) {
+    const match = this._data.abilities[color].find(x => ability.name === x.name);
+    if (match) {
+      return false;
+    } else {
+      return this._data.abilities[color].length === count;
+    }
   }
 }
 
