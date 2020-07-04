@@ -38,8 +38,8 @@
                   <thead class="text-center">
                     <tr>
                       <th width="15%">Count</th>
-                      <th width="25%">Boosts</th>
-                      <th width="25%">Hinders</th>
+                      <th width="25%">Bonuses</th>
+                      <th width="25%">Penalties</th>
                       <th width="35%">Actions</th>
                     </tr>
                   </thead>
@@ -47,19 +47,23 @@
                     <tr v-for="(el, index) in data">
                       <td class="text-center align-middle">{{el.count}}</td>
                       <td class="text-center">
-                        <template v-if="el.boosts.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(boost, affixIndex) in el.boosts">
-                          <div class="remove-affix" @click="$store.dispatch('removeAffix', {baddieType: label.toLowerCase(), baddie, size, baddieIndex: index, affixIndex, type: 'boosts'})">&times;</div>
-                          <div><b>Name: </b>{{boost.name}}</div>
-                          <div><b>Amount: </b>{{boost.amount}}</div>
+                        <template v-if="el.bonuses.length === 0">-</template>
+                        <div class="border border-dark position-relative" v-for="(bonus, affixIndex) in el.bonuses">
+                          <div class="remove-affix" 
+                            title="Remove this Bonus"
+                            @click="$store.dispatch('removeAffix', {baddieType: label.toLowerCase(), baddie, size, baddieIndex: index, affixIndex, type: 'bonuses'})">&times;</div>
+                          <div><b>Name: </b>{{bonus.name}}</div>
+                          <div><b>Amount: </b>+{{bonus.amount}}</div>
                         </div>
                       </td>
                       <td class="text-center">
-                        <template v-if="el.hinders.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(hinder, affixIndex) in el.hinders">
-                          <div class="remove-affix" @click="$store.dispatch('removeAffix', {baddieType: label.toLowerCase(), baddie, size, baddieIndex: index, affixIndex, type: 'hinders'})">&times;</div>
-                          <div><b>Name: </b>{{hinder.name}}</div>
-                          <div><b>Amount: </b>{{hinder.amount}}</div>
+                        <template v-if="el.penalties.length === 0">-</template>
+                        <div class="border border-dark position-relative" v-for="(penalty, affixIndex) in el.penalties">
+                          <div class="remove-affix" 
+                            title="Remove this Penalty"
+                            @click="$store.dispatch('removeAffix', {baddieType: label.toLowerCase(), baddie, size, baddieIndex: index, affixIndex, type: 'penalties'})">&times;</div>
+                          <div><b>Name: </b>{{penalty.name}}</div>
+                          <div><b>Amount: </b>{{penalty.amount}}</div>
                         </div>
                       </td>
                       <td class="align-middle">
@@ -138,7 +142,7 @@
               </div>
               <input class="form-control" type="text"
                 v-model.trim="baddieData.affix.name"
-                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: label, affixData: baddieData.affix})">
+                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: label.toLowerCase(), affixData: baddieData.affix})">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -149,12 +153,12 @@
                 type="number" 
                 :max="baddieData.affix.max"
                 :min="baddieData.affix.min"
-                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: label, affixData: baddieData.affix})">
+                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: label.toLowerCase(), affixData: baddieData.affix})">
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" 
-              @click="$store.dispatch('addBaddieAffix', {baddieType: label, affixData: baddieData.affix})" data-dismiss="modal">Add</button>
+              @click="$store.dispatch('addBaddieAffix', {baddieType: label.toLowerCase(), affixData: baddieData.affix})" data-dismiss="modal">Add</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -201,7 +205,10 @@
     methods: {
       createBaddie() {
         const {name, size, count} = this.baddieData;
-        this.$store.commit('UPSERT_BADDIE', {baddie: new Baddie(name, size, count), baddieType: this.label.toLowerCase()});
+        if (name !== '') {
+          this.$store.commit('UPSERT_BADDIE', 
+            {baddie: new Baddie(name, size, count, null, this.label.toLowerCase()), baddieType: this.label.toLowerCase()});
+        }
       },
       addBaddie(name) {
         this.baddieData.name = name;
@@ -211,11 +218,11 @@
         this.baddieData.affix.max = boosting ? 4: -1;
         this.baddieData.affix.min = boosting ? 1: -4;
         this.baddieData.affix.amount = boosting ? 1: -1;
-        this.baddieData.affix.type = boosting ? 'Boost': 'Hinder';
+        this.baddieData.affix.type = boosting ? 'Bonus': 'Penalty';
         this.baddieData.affix.size = size;
         this.baddieData.affix.index = index;
         this.baddieData.affix.target = baddie;
-        this.$store.dispatch('saveBaddies', this.label);
+        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
         $(`#affixModal-${this.label}`).modal('show');
       },
       demoteBaddie(baddie, size, index) {
@@ -224,7 +231,7 @@
       },
       removeBaddie(baddie, size, index) {
         baddie.remove(size, index);
-        ctx.dispatch('saveBaddies', this.label.toLowerCase());
+        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
       }
     }
   };

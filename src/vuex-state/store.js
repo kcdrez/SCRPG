@@ -19,13 +19,13 @@ const store = new Vuex.Store({
       const lieutenants = Cookies.getJSON('lieutenants');
       const villains = Cookies.getJSON('villains');
       if (minions) {
-        state.minions = minions.map(x => new Baddie(x.name, null, null, x.types))
+        state.minions = minions.map(x => new Baddie(x.name, null, null, x.types, 'minions'))
       }
       if (lieutenants) {
-        state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types))
+        state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types, 'lieutenants'))
       }
       if (villains) {
-        state.villains = villains.map(x => new Villain(x.name, x.boosts, x.hinders))
+        state.villains = villains.map(x => new Villain(x.name, x.bonuses, x.penalties))
       }           
       state.initialized = true;
     },
@@ -34,7 +34,7 @@ const store = new Vuex.Store({
       if (match && baddieType !== 'villains') {
         Object.entries(baddie.types).forEach(([size, list]) => {
           list.forEach(item => {
-            match.addBaddie(size, item.boosts, item.hinders, item.count);
+            match.addBaddie(size, item.bonuses, item.penalties, item.count);
           })
         })
       } else {
@@ -59,34 +59,38 @@ const store = new Vuex.Store({
     addBaddieAffix(ctx, {affixData, baddieType}) {
       const {amount, name, type, target, size, index} = affixData;
       if (name === '') return;
-      if (type === 'Boost') {
+      else if (type === 'Bonus') {
         target.boost(name, amount, size, index);
       } else {
         target.hinder(name, amount, size, index);
       }
-      ctx.dispatch('saveBaddies', baddieType);
+      // ctx.dispatch('refreshBaddies', {size, baddieType, baddie: target});
     },
+    // refreshBaddies(ctx, {baddieType, size, baddie}) {
+    //   if (baddieType !== 'villains') {
+    //     baddie.types[size] = unvue(baddie.types[size]).reduce((acc, el) => {
+    //       const match = acc.find(x => {
+    //         return JSON.stringify(x.bonuses) === JSON.stringify(el.bonuses) &&
+    //           JSON.stringify(x.penalties) === JSON.stringify(el.penalties);
+    //       });
+    //       if (match) {
+    //         match.count += el.count;
+    //       } else {
+    //         acc.push(el);
+    //       }
+    //       return acc;
+    //     }, []);
+    //   }
+    //   ctx.dispatch('saveBaddies', baddieType);
+    // },
     removeAffix(ctx, {baddieType, baddie, size, baddieIndex, affixIndex, type}) {
-      if (baddieType === 'villains') {
+      if (baddieType === 'villains') { //todo: make this a function in the class
         baddie[type].splice(affixIndex, 1);
       } else {
-        let baddieData = baddie.types[size];
-        baddieData[baddieIndex][type].splice(affixIndex, 1);
-
-        baddieData = unvue(baddieData).reduce((acc, el) => {
-          const match = acc.find(x => {
-            return JSON.stringify(x.boosts) === JSON.stringify(el.boosts) &&
-              JSON.stringify(x.hinders) === JSON.stringify(el.hinders);
-          });
-          if (match) {
-            match.count += el.count;
-          } else {
-            acc.push(el);
-          }
-          return acc;
-        }, []);
+        baddie.types[size][baddieIndex][type].splice(affixIndex, 1);
       }
-      ctx.dispatch('saveBaddies', baddieType);
+      baddie.refresh(size);
+      // ctx.dispatch('refreshBaddies', {size, baddieType, baddie});
     }
   },
   getters: {

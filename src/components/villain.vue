@@ -23,12 +23,14 @@
             </div>
           </div>
           <div :id="`villain-${villain.name}`" class="card-body collapse show">
-            <div class="btn-group btn-group-sm">
-              <button class="btn btn-success border-dark" @click="affectVillain(villain, true)">Add Boost</button>
-              <button class="btn btn-warning border-dark" @click="affectVillain(villain, false)">Add Hinder</button>
+            <div class="text-center">
+              <div class="btn-group btn-group-sm w-50">
+                <button class="btn btn-success border-dark" @click="affectVillain(villain, true)">Boost</button>
+                <button class="btn btn-warning border-dark" @click="affectVillain(villain, false)">Hinder</button>
+              </div>
             </div>
-            <template v-if="villain.boosts.length > 0">
-              <h3>Boosts</h3>
+            <template v-if="villain.bonuses.length > 0">
+              <h3>Bonuses</h3>
               <table class="table table-sm table-striped table-bordered">
                 <thead class="text-center">
                   <tr>
@@ -38,21 +40,21 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(boost, affixIndex) in villain.boosts">
-                    <td class="text-center">{{boost.name}}</td>
-                    <td class="text-center">{{boost.amount}}</td>
+                  <tr v-for="(bonus, affixIndex) in villain.bonuses">
+                    <td class="text-center">{{bonus.name}}</td>
+                    <td class="text-center">+{{bonus.amount}}</td>
                     <td class="align-middle">
                       <div class="btn-group btn-group-sm w-100">
                         <button class="btn btn-danger border-dark" 
-                          @click="$store.dispatch('removeAffix', {baddieType: 'villains', baddie: villain, affixIndex, type: 'boosts'})">Remove</button>
+                          @click="$store.dispatch('removeAffix', {baddieType: 'villains', baddie: villain, affixIndex, type: 'bonuses'})">Remove</button>
                       </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </template>
-            <template v-if="villain.hinders.length > 0">
-              <h3>Hinders</h3>
+            <template v-if="villain.penalties.length > 0">
+              <h3>Penalties</h3>
               <table class="table table-sm table-striped table-bordered">
                 <thead class="text-center">
                   <tr>
@@ -62,13 +64,13 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(hinder, affixIndex) in villain.hinders">
-                    <td class="text-center">{{hinder.name}}</td>
-                    <td class="text-center">{{hinder.amount}}</td>
+                  <tr v-for="(penalty, affixIndex) in villain.penalties">
+                    <td class="text-center">{{penalty.name}}</td>
+                    <td class="text-center">{{penalty.amount}}</td>
                     <td class="align-middle">
                       <div class="btn-group btn-group-sm w-100">
                         <button class="btn btn-danger border-dark" 
-                          @click="$store.dispatch('removeAffix', {baddieType: 'villains', baddie: villain, affixIndex, type: 'hinders'})">Remove</button>
+                          @click="$store.dispatch('removeAffix', {baddieType: 'villains', baddie: villain, affixIndex, type: 'penalties'})">Remove</button>
                       </div>
                     </td>
                   </tr>
@@ -168,13 +170,15 @@
     },
     methods: {
       createVillain() {
-        this.$store.commit('UPSERT_BADDIE', {baddie: new Villain(this.name), baddieType: 'villains'});
+        if (this.name !== '') {
+          this.$store.commit('UPSERT_BADDIE', {baddie: new Villain(this.name), baddieType: 'villains'});
+        }
       },
       affectVillain(villain, boosting) {
         this.affix.max = boosting ? 4: -1;
         this.affix.min = boosting ? 1: -4;
         this.affix.amount = boosting ? 1: -1;
-        this.affix.type = boosting ? 'Boost': 'Hinder';
+        this.affix.type = boosting ? 'Bonus': 'Penalty';
         this.affix.target = villain;
         this.$store.dispatch('saveBaddies', 'villains');
         $(`#affixModal-villain`).modal('show');
