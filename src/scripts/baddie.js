@@ -110,9 +110,26 @@ class Villain {
 
   boost(name, amount) {
     this.bonuses.push({name, amount});
+    this.refresh();
   }
   hinder(name, amount) {
     this.penalties.push({name, amount});
+    this.refresh();
+  }
+  addAffix({name, type, amount}) {
+    if (name === '') return;
+    else if (type === 'Bonus') {
+      this.boost(name, amount);
+    } else {
+      this.hinder(name, amount);
+    }
+  }
+  removeAffix(type, index) {
+    this[type].splice(index, 1);
+    this.refresh();
+  }
+  refresh() {
+    store.dispatch('saveBaddies', 'villains');
   }
 }
 

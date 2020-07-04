@@ -46,7 +46,7 @@
                     <td class="align-middle">
                       <div class="btn-group btn-group-sm w-100">
                         <button class="btn btn-danger border-dark" 
-                          @click="$store.dispatch('removeAffix', {baddieType: 'villains', baddie: villain, affixIndex, type: 'bonuses'})">Remove</button>
+                          @click="villain.removeAffix('bonuses', affixIndex)">Remove</button>
                       </div>
                     </td>
                   </tr>
@@ -70,7 +70,7 @@
                     <td class="align-middle">
                       <div class="btn-group btn-group-sm w-100">
                         <button class="btn btn-danger border-dark" 
-                          @click="$store.dispatch('removeAffix', {baddieType: 'villains', baddie: villain, affixIndex, type: 'penalties'})">Remove</button>
+                          @click="villain.removeAffix('penalties', affixIndex)">Remove</button>
                       </div>
                     </td>
                   </tr>
@@ -121,7 +121,7 @@
               </div>
               <input class="form-control" type="text"
                 v-model.trim="affix.name"
-                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: 'villains', affixData: affix})">
+                @keydown.enter="affix.target.addAffix(affix)">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -132,12 +132,12 @@
                 type="number" 
                 :max="affix.max"
                 :min="affix.min"
-                @keydown.enter="$store.dispatch('addBaddieAffix', {baddieType: 'villains', affixData: affix})">
+                @keydown.enter="affix.target.addAffix(affix)">
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" 
-              @click="$store.dispatch('addBaddieAffix', {baddieType: 'villains', affixData: affix})" data-dismiss="modal">Add</button>
+              @click="affix.target.addAffix(affix)" data-dismiss="modal">Add</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
