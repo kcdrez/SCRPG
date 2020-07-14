@@ -1,4 +1,6 @@
-export default [
+import {v4 as uuid} from 'uuid';
+
+const powerSources = [
   {
     name: 'Accident',
     powers: {
@@ -50,7 +52,14 @@ export default [
       }
     },
     description: 'An external source caused you to manifest powers or perhaps the cure for an accident caused it.',
-    archetype: [12, 6]
+    archetype: [{
+      dieSize: 12,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }]
   },
   {
     name: 'Training',
@@ -82,7 +91,18 @@ export default [
       }
     },
     description: 'The source of your powers is the result of your hard work, dedication, and long hours.',
-    archetype: [10, 8, 8],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }],
     extras: 'Extra quality from archetype at d8' //todo: how to handle this
   },
   {
@@ -130,7 +150,18 @@ export default [
       }
     },
     description: 'Mutations in your DNA have caused you to develop unusual abilities.',
-    archetype: [10, 8, 8]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }]
   },
   {
     name: 'Experimentation',
@@ -177,7 +208,18 @@ export default [
       }
     },
     description: 'Your powers were created in a lab and had some unexpected side effects.',
-    archetype: [8, 8, 8]
+    archetype: [{
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }]
   },  
   {
     name: 'Mystical',
@@ -209,7 +251,18 @@ export default [
       }
     },
     description: 'Your magical training or alteration by magic gives you your powers.',
-    archetype: [10, 8, 8],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }],
     extras: 'Gain Information quality with d10'
   },  
   {
@@ -257,7 +310,18 @@ export default [
       }
     },
     description: 'The power of nature flows through you.',
-    archetype: [10, 8, 8]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }]
   },
   {
     name: 'Relic',
@@ -310,14 +374,25 @@ export default [
       }
     },
     description: 'An object (or collection of objects) of mystical significance either grants you powers or altered you to give you powers.',
-    archetype: [10, 10, 6]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }]
   },
   {
     name: 'Powered Suit',
     powers: {
       categories: ['Athletic', 'Mobility'],
       list: ['Awareness', 'Cold', 'Elasticity', 'Electricity', 'Fire', 'Lightning Calculator', 'Nuclear', 'Part Detachment', 'Signature Vehicle', 'Signature Weaponry'],
-      required: ['Power Suit']
+      required: ['Power Suit'] //todo: handle this
     },
     abilities: {
       green: {
@@ -341,7 +416,7 @@ export default [
           actions: ['Boost'],
           name: 'Energy Converter',
           type: 'Reaction',
-          description: 'When you take damage from [element/energy], gain a bonus equal to that amount of damage.'
+          description: 'When you take damage from [energy/element], gain a bonus equal to that amount of damage.'
         },
         {
           actions: ['Attack'],
@@ -358,7 +433,18 @@ export default [
       }
     },
     description: 'An engineered suit provides you with your powers, and may even be important to keeping you alive.',
-    archetype: [10, 6, 6]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }]
   }, 
   {
     name: 'Radiation',
@@ -405,7 +491,18 @@ export default [
       }
     },
     description: 'Exposure to radiation has charged your system and given you new abilities.',
-    archetype: [10, 8, 6]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }]
   }, 
   {
     name: 'Tech Upgrades',
@@ -447,7 +544,7 @@ export default [
           actions: ['Recover'],
           name: 'Techno-Absorb',
           type: 'Inherent',
-          description: 'If you would take damage from [element/energy you have a related power for], instead reduce that damage to 0 and Recover that amount of Health instead.'
+          description: 'If you would take damage from [energy/element you have a related power for], instead reduce that damage to 0 and Recover that amount of Health instead.'
         },
         {
           actions: ['Boost'],
@@ -458,7 +555,18 @@ export default [
       }
     },
     description: 'You have technological upgrades and implants that give you your power',
-    archetype: [10, 10, 8]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }]
   },   
   {
     name: 'Supernatural',
@@ -496,7 +604,18 @@ export default [
       }
     },
     description: 'In some way, you have pierced the veil of life and reality and brought back power.',
-    archetype: [10, 10, 6],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }],
     extras: 'Gain one power not in the list as d10'
   },   
   {
@@ -527,7 +646,7 @@ export default [
           actions: ['Recover'],
           name: 'Created Immunity',
           type: 'Inherent',
-          description: 'When you would take damage from [element/energy], you may Recover that amount of Health instead.'
+          description: 'When you would take damage from [energy/element], you may Recover that amount of Health instead.'
         },
         {
           actions: ['Attack'],
@@ -544,7 +663,18 @@ export default [
       }
     },
     description: 'You were created, not born, and your abilities simply stem from your makeup.',
-    archetype: [10, 8, 8]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }]
   },  
   {
     name: 'Cursed',
@@ -574,7 +704,7 @@ export default [
           actions: ['Recover'],
           name: 'Attunement',
           type: 'Inherent',
-          description: 'When you would take damage from [element/energy], you may Recover that amount of Health instead.'
+          description: 'When you would take damage from [energy/element], you may Recover that amount of Health instead.'
         },
         {
           actions: ['Boost', 'Hinder'],
@@ -591,7 +721,14 @@ export default [
       }
     },
     description: 'A supernatural curse has been inflicted upon you and/or your family line, granting both boons and banes.',
-    archetype: [12, 6]
+    archetype: [{
+      dieSize: 12,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }]
   },
   {
     name: 'Alien',
@@ -623,7 +760,18 @@ export default [
       }
     },
     description: 'You are not from Earth, though your powers might not be all that unusual where you come from. Or you’ve been granted abilities by an extraterrestrial source.',
-    archetype: [8, 8, 8],
+    archetype: [{
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }],
     extras: 'Upgrade a d6 power to d8. If you have none, add a new power from the above list at d6'
   }, 
   {
@@ -656,7 +804,18 @@ export default [
       }
     },
     description: 'The source of your powers is your brilliant mind. You have put your staggering intellect to the task of fighting crime.',
-    archetype: [10, 6, 6],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }],
     extras: 'Extra quality from Information or Mental categories at d10'
   },
   {
@@ -672,7 +831,7 @@ export default [
           actions: ['Recover'],
           name: 'Cosmic Ray Absorption',
           type: 'Inherent',
-          description: 'If you would take damage from [element/energy you have a related power for], instead reduce that damage to 0 and Recover that amount of Health instead.'
+          description: 'If you would take damage from [energy/element you have a related power for], instead reduce that damage to 0 and Recover that amount of Health instead.'
         },
         {
           actions: ['Attack', 'Boost'],
@@ -689,11 +848,22 @@ export default [
       }
     },
     description: 'Exposure to forces from beyond the stars have changed you.',
-    archetype: [10, 8, 8],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }],
     extras: 'Downgrade one d8, d10, or d12 power and upgrade one d6, d8, or d10 power'
   },  
   {
-    name: 'Extra Dimentional',
+    name: 'Extra Dimensional',
     powers: {
       categories: ['Intellectual', 'Psychic'],
       list: ['Cosmic', 'Duplication', 'Infernal', 'Intangibility', 'Invisibility', 'Radiant', 'Signature Vehicle', 'Signature Weaponry', 'Transmutation', 'Teleportation']
@@ -737,7 +907,14 @@ export default [
       }
     },
     description: 'Exposure to side dimensions like the Realm of Discord has left its mark on you.',
-    archetype: [12, 6]
+    archetype: [{
+      dieSize: 12,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }]
   },   
   {
     name: 'Unknown',
@@ -769,7 +946,18 @@ export default [
       }
     },
     description: 'You don’t know the source of your powers: they either just manifested one day, or hint at a bigger mystery.',
-    archetype: [10, 8, 6],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }],
     extras: 'Gain a Social quality at d8'
   },  
   {
@@ -800,7 +988,7 @@ export default [
           actions: [],
           name: 'Command Power',
           type: 'Reaction',
-          description: 'When you take damage from [elemental/energy], you may deal that much damage to another target.'
+          description: 'When you take damage from [energy/element], you may deal that much damage to another target.'
         },
         {
           actions: ['Attack', 'Hinder'],
@@ -819,11 +1007,22 @@ export default [
           name: 'Resolve',
           type: 'Action',
           description: 'Boost yourself using [power], then remove a penalty on yourself or Recover using your Min die.'
-        }        ]
+        }]
       }
     },
     description: 'You have been chosen by a higher force to carry out their work and have been given powers to make it happen; or you are a being from another realm, incarnated into a physical body, and your powers are a reflection of your true form.',
-    archetype: [10, 8, 8]
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    }]
   },   
   {
     name: 'The Multiverse',
@@ -861,7 +1060,288 @@ export default [
       }
     },
     description: 'Your origin comes from traveling or being flung through the infinitely branching realms of time and space. Without the Multiverse itself, you would not have the powers you do now.',
-    archetype: [10, 8, 6],
+    archetype: [{
+      dieSize: 10,
+      id: uuid()
+    },
+    {
+      dieSize: 8,
+      id: uuid()
+    },
+    {
+      dieSize: 6,
+      id: uuid()
+    }],
     extras: 'Gain a power from any category at d6'
-  } 
+  }
 ]
+
+const powers = [
+  {
+    name: 'Agility',
+    category: 'Athletic',
+    description: 'Your reflexes are honed.'
+  },
+  {
+    name: 'Speed',
+    category: 'Athletic',
+    description: 'You\'re quick on your feet.'
+  },
+  {
+    name: 'Strength',
+    category: 'Athletic',
+    description: 'You\'re strong and have no problem lifting'
+  },
+  {
+    name: 'Vitality',
+    category: 'Athletic',
+    description: 'You\'re in a good shape and good health. At higher levels of vitality, you may even have a regenerative ability.'
+  },
+  {
+    name: 'Cold',
+    category: 'Elemental/Energy',
+    description: 'Brr. You can lower the temperature dramaticaly and shape ice to your whim.'
+  },
+  {
+    name: 'Cosmic',
+    category: 'Elemental/Energy',
+    description: 'The primal energies of the universe iteself are yours to command.'
+  },
+  {
+    name: 'Electricity',
+    category: 'Elemental/Energy',
+    description: 'You command lightning (or just a nearby powerline).'
+  },
+  {
+    name: 'Fire',
+    category: 'Elemental/Energy',
+    description: 'You make everything burn.'
+  },
+  {
+    name: 'Infernal',
+    category: 'Elemental/Energy',
+    description: 'You can command demonic energies of the underworld.'
+  },
+  {
+    name: 'Nuclear',
+    category: 'Elemental/Energy',
+    description: 'The splitting of the atom allows you to channel raw power and radiation.'
+  },
+  {
+    name: 'Radiant',
+    category: 'Elemental/Energy',
+    description: 'The light of the Heavently Host is at your fingertips, ready to purge the world of evil.'
+  },
+  {
+    name: 'Sonic',
+    category: 'Elemental/Energy',
+    description: 'Focused waves of souncd can be wielded to great effect, both for destructive vibration and for sound mimicry.'
+  },
+  {
+    name: 'Weather',
+    category: 'Elemental/Energy',
+    description: 'You control the weather, including terrible storms and winds. If you want a more direct application of the weather\'s power, you can also take electricity or cold to supplement it.'
+  },
+  {
+    name: 'Signature Vehicle',
+    category: 'Hallmark',
+    description: 'You have a custom vehicle that is nearly always on hand for you — it could be an awesome motorcycle, a tricked out van or even something like a magical surfboard. (Be sure to rename this power on your hero sheet to whatever your vehicle is.)'
+  },
+  {
+    name: 'Signature Weaponry',
+    category: 'Hallmark',
+    description: 'You have a weapon that is almost like a part of you, from Fanatic’s blade Absolution to Wraith’s arsenal of knives. (Be sure to rename this power on your hero sheet to whatever your weapon is.)'
+  },
+  {
+    name: 'Awareness',
+    category: 'Intellectual',
+    description: 'You have enhanced senses that give you a broader range of awareness, covering everything from innate danger sense to superior sight and hearing.'
+  },
+  {
+    name: 'Deduction',
+    category: 'Intellectual',
+    description: 'Your mind can make leaps of logic by analyzing details.'
+  },
+  {
+    name: 'Intuition',
+    category: 'Intellectual',
+    description: 'You have strong gut feelings about what’s going to happen and these feelings frequently lead to correct conclusions.'
+  },
+  {
+    name: 'Lightning Calculator',
+    category: 'Intellectual',
+    description: 'You can perform intense feats of mathematics in your head in the blink of an eye.'
+  },
+  {
+    name: 'Presence',
+    category: 'Intellectual',
+    description: 'You project your personality strongly over those you meet.'
+  },
+  {
+    name: 'Metal',
+    category: 'Materials',
+    description: 'You can command and control metals, fashioning them to all kinds of shapes.'
+  },
+  {
+    name: 'Plants',
+    category: 'Materials',
+    description: 'The plants of this world (and maybe beyond) respond to your thoughts, growing as you see fit.'
+  },
+  {
+    name: 'Stone',
+    category: 'Materials',
+    description: 'You can shape stone and use it to build as well as destroy.'
+  },
+  {
+    name: 'Toxic',
+    category: 'Materials',
+    description: 'You can manipulate toxic substances, including radioactive wastes and various poison gases.'
+  },
+  {
+    name: 'Transmutation',
+    category: 'Materials',
+    description: 'You can transform non-living materials from one type to another. (To control them, also take other entries from this category in addition to transmutation.)'
+  },
+  {
+    name: 'Flight',
+    category: 'Mobility',
+    description: 'Look, up in the sky! It\'s you!'
+  },
+  {
+    name: 'Leaping',
+    category: 'Mobility',
+    description: 'Whether it\'s from immense strength or the proportionate ability of a bullfrog, you can leap through the air with ease.'
+  },
+  {
+    name: 'Momentum',
+    category: 'Mobility',
+    description: 'You build up momentum as you move and can channel it effectively.'
+  },
+  {
+    name: 'Swimming',
+    category: 'Mobility',
+    description: 'You are at home in the water and can propel yourself seamlessly through it. (At d8 or above, you also have no problems breathing underwater.)'
+  },
+  {
+    name: 'Swinging',
+    category: 'Mobility',
+    description: 'Via ropes or other devices, you can swing yourself across town, as long as you have something to grab onto.'
+  },
+  {
+    name: 'Teleportation',
+    category: 'Mobility',
+    description: 'Poof! You can disappear one place and reappear another. The greater the die value, the bigger distance you can go and the more control you have over the process.'
+  },
+  {
+    name: 'Wall-Crawling',
+    category: 'Mobility',
+    description: 'You can stick to walls and travel across them quickly.'
+  },
+  {
+    name: 'Animal Control',
+    category: 'Psychic',
+    description: 'Your mental abilities let you talk to and command non-sentient animals.'
+  },
+  {
+    name: 'Illusions',
+    category: 'Psychic',
+    description: 'You can weave convincing mental images to others.'
+  },
+  {
+    name: 'Postcognition',
+    category: 'Psychic',
+    description: 'You can experience visions of what has happened in the past to a person, place, or object.'
+  },
+  {
+    name: 'Precognition',
+    category: 'Psychic',
+    description: 'You have a limited ability to see into the future-or at least, a potential future.'
+  },
+  {
+    name: 'Remote Viewing',
+    category: 'Psychic',
+    description: 'You can project your senses to view another place at the same time.'
+  },
+  {
+    name: 'Suggestion',
+    category: 'Psychic',
+    description: 'You can influence minds to act based on your will.'
+  },
+  {
+    name: 'Telekinesis',
+    category: 'Psychic',
+    description: 'You can move things with your mind. The higher the die, the heavier the things and the more precision you have.'
+  },
+  {
+    name: 'Telepathy',
+    category: 'Psychic',
+    description: 'You can send thoughts as well as read minds.'
+  },
+  {
+    name: 'Absorption',
+    category: 'Self Control',
+    description: 'You can absorb energy sent to you, and channel it into other forms.'
+  },
+  {
+    name: 'Density Control',
+    category: 'Self Control',
+    description: 'You can make yourself more or less dense to make yourself more resistant to harm or have a lighter step.'
+  },
+  {
+    name: 'Duplication',
+    category: 'Self Control',
+    description: 'You can make copies of yourself. Generally these copies won\'t be functional enought to act as full heroes, unless your abilities let you back this up.'
+  },
+  {
+    name: 'Elasticity',
+    category: 'Self Control',
+    description: 'You can stretch your entire body.'
+  },
+  {
+    name: 'Intangibility',
+    category: 'Self Control',
+    description: 'You can pass through solid objects.'
+  },
+  {
+    name: 'Invisibility',
+    category: 'Self Control',
+    description: 'You can make yourself unseen when needed.'
+  },
+  {
+    name: 'Part Detachment',
+    category: 'Self Control',
+    description: 'You can give someone a hand. Or any other limb, really.'
+  },
+  {
+    name: 'Shapeshifting',
+    category: 'Self Control',
+    description: 'You can change your form into something roughly the same size. Some shapeshifters have a limited number of forms they can take, while others are more mutable.'
+  },
+  {
+    name: 'Size-Changing',
+    category: 'Self Control',
+    description: 'You can increase or decrease your size, from a tall building to ant-sized.'
+  },
+  {
+    name: 'Gadgets',
+    category: 'Technological',
+    description: 'You have access to a wide variety of useful technological tools for any given situation-generally built by somebody else.'
+  },
+  {
+    name: 'Inventions',
+    category: 'Technological',
+    description: 'You can invent your own technological tools, and have some of your own inventions on you at all times.'
+  },
+  {
+    name: 'Power Suit',
+    category: 'Technological',
+    description: 'You have a technological suit with a variety of built-in functions.'
+  },
+  {
+    name: 'Robotics',
+    category: 'Technological',
+    description: 'You are able to create your own robot servitors.'
+  }
+]
+
+export {powerSources, powers};

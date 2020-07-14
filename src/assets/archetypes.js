@@ -1,6 +1,8 @@
+import {v4 as uuid} from 'uuid';
+
 export default [
   {
-    label: 'Speedster',
+    name: 'Speedster',
     prerequisite: 'Speed',
     powers: {
       categories: ['Mobility'],
@@ -66,7 +68,7 @@ export default [
     principle: 'Expertise'
   },
   {
-    label: 'Shadow',
+    name: 'Shadow',
     prerequisite: 'Stealth',
     powers: {
       categories: ['Athletic'],
@@ -119,7 +121,7 @@ export default [
     principle: 'Expertise'
   },
   {
-    label: 'Physical Powerhouse',
+    name: 'Physical Powerhouse',
     prerequisite: 'Strength',
     powers: {
       categories: ['Athletic'],
@@ -169,7 +171,7 @@ export default [
     extras: 'Gain a green ability as a yellow using a different power or quality.'
   },
   {
-    label: 'Marksman',
+    name: 'Marksman',
     prerequisite: 'Signature Weaponry',
     powers: {
       categories: ['Athletic', 'Intellectual', 'Technological'],
@@ -247,7 +249,7 @@ export default [
     principle: 'Responsibility'
   },
   {
-    label: 'Blaster',
+    name: 'Blaster',
     prerequisite: 'Elemental/Energy',
     powers: {
       categories: ['Elemental/Energy', 'Mobility', 'Technological'],
@@ -313,7 +315,7 @@ export default [
     principle: 'Esoteric'
   },
   {
-    label: 'Close Quarters Combatant',
+    name: 'Close Quarters Combatant',
     prerequisite: 'Close Combat',
     powers: {
       categories: ['Athletic', 'Mobility', 'Technological'],
@@ -370,7 +372,7 @@ export default [
     extras: 'Gain any ability as a yellow ability with a different power or quality'
   },  
   {
-    label: 'Armored',
+    name: 'Armored',
     powers: {
       categories: ['Athletic', 'Intellectual', 'Materials', 'Mobility', 'Technological'],
       list: ['Signature Weaponry', 'Signature Vehicle']
@@ -426,7 +428,7 @@ export default [
     extras: 'When determining Health, you may use Materials or Technological power instead of Athletic power or Mental quality'
   },
   {
-    label: 'Flyer',
+    name: 'Flyer',
     prerequisite: ['Signature Vehicle', 'Flight'],
     powers: {
       categories: ['Athletic', 'Mobility', 'Technological'],
@@ -483,7 +485,7 @@ export default [
     extras: 'Gain one ability as a yellow ability'
   },
   {
-    label: 'Elemental Manipulator',
+    name: 'Elemental Manipulator',
     prerequisite: ['Elemental/Energy'],
     powers: {
       categories: ['Elemental/Energy'],
@@ -556,7 +558,7 @@ export default [
     principle: 'Esoteric'
   },  
   {
-    label: 'Robot/Cyborg',
+    name: 'Robot/Cyborg',
     powers: {
       categories: ['Athletic', 'Intellectual', 'Mobility', 'Self Control', 'Technological'],
       list: ['Signature Weaponry', 'Signature Vehicle']
@@ -606,7 +608,7 @@ export default [
     extras: ['Technological power at d10', 'Gain ability at yellow', 'Use Technological power instead of Athletic power or Mental quality when determining Health']
   },
   {
-    label: 'Sorcerer',
+    name: 'Sorcerer',
     powers: {
       categories: ['Elemental/Energy', 'Materials', 'Mobility', 'Psychic', 'Self Control'],
       list: []
@@ -671,7 +673,7 @@ export default [
     principle: 'Esoteric'
   },  
   {
-    label: 'Psychic',
+    name: 'Psychic',
     prerequisite: 'Psyhic',
     powers: {
       categories: ['Psychic', 'Intellectual', 'Materials', 'Self Control'],
@@ -773,7 +775,7 @@ export default [
     principle: 'Esoteric'
   },
   {
-    label: 'Transporter',
+    name: 'Transporter',
     prerequisite: ['Signature Vehicle', 'Mobility'],
     powers: {
       categories: ['Athletic', 'Mobility', 'Psychic', 'Technological'],
@@ -823,7 +825,7 @@ export default [
     extras: 'Gain one yellow'
   },
   {
-    label: 'Minion Maker',
+    name: 'Minion Maker',
     powers: {
       categories: ['Elemental/Energy', 'Materials'],
       list: ['Duplication', 'Inventions', 'Part Detachment', 'Robotics']
@@ -986,7 +988,7 @@ export default [
     }
   },  
   {
-    label: 'Wild Card',
+    name: 'Wild Card',
     powers: {
       categories: ['Athletic', 'Intellectual', 'Mobility', 'Self Control'],
       list: ['Signature Weaponry', 'Signature Vehicle']
@@ -1062,7 +1064,7 @@ export default [
     principle: 'Ideals'
   },
   {
-    label: 'Form Changer',
+    name: 'Form Changer',
     prerequisite: 'Self Control',
     powers: {
       categories: ['Athletic', 'Mobility', 'Self Control', 'Technological'],
@@ -1218,7 +1220,7 @@ export default [
     }
   },
   {
-    label: 'Gadgeteer',
+    name: 'Gadgeteer',
     prerequisite: 'Intellectual',
     powers: {
       categories: ['Intellectual', 'Mobility', 'Psychic', 'Technological'],
@@ -1283,7 +1285,7 @@ export default [
     principle: 'Identity'
   },  
   {
-    label: 'Reality Shaper',
+    name: 'Reality Shaper',
     powers: {
       categories: ['Intellectual', 'Psychic', 'Technological'],
       list: ['Density Control', 'Intangibility', 'Invisibility', 'Speed', 'Teleportation', 'Transmutation']
@@ -1353,12 +1355,12 @@ export default [
     principle: 'Expertise'
   },
   {
-    label: 'Divided', //todo
+    name: 'Divided', //todo
     description: 'You have two very different forms, such as an unpowered civilian form and a powered heroic form.',
     principle: 'Responsibility'
   },
   {
-    label: 'Modular', //todo
+    name: 'Modular', //todo
     description: 'You have multiple forms (configurations, fighting styles, etc.) that each give their own advantages and disadvantages.',
     principle: 'Expertise'
   },  

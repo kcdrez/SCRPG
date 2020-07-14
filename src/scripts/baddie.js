@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import store from '../vuex-state/store';
 import {unvue} from './utilities';
 
@@ -14,7 +15,7 @@ class Baddie {
     };
     if (size) {
       for (let i = 0; i < count; i++) {
-        this.addBaddie(size, [], []);
+        this.addBaddie(size, [], [], []);
       }
     } else if (types) {
       this.types = types;
@@ -28,16 +29,17 @@ class Baddie {
       this.addBaddie(size - 2, bonuses, penalties);
     }
   }
-  addBaddie(size, bonuses, penalties, count) {
+  addBaddie(size, bonuses, penalties, defends, count) {
     count = count || 1;
     const match = this.types[size].find(x => {
       return JSON.stringify(bonuses) === JSON.stringify(x.bonuses) &&
-        JSON.stringify(penalties) === JSON.stringify(x.penalties);
+        JSON.stringify(penalties) === JSON.stringify(x.penalties) &&
+        JSON.stringify(defends) === JSON.stringify(x.defends);
     });
     if (match) {
       match.count += count;
     } else {
-      this.types[size].push({ bonuses, penalties, count});
+      this.types[size].push({ bonuses, penalties, defends, count});
     }
   }
   remove(size, index) {
@@ -47,15 +49,21 @@ class Baddie {
       this.types[size][index].count--;
     }
   }
-  boost(name, amount, size, index) {
-    const {bonuses, penalties} = this.types[size][index];
-    this.addBaddie(size, bonuses.concat({amount, name}), penalties);
+  boost(name, amount, size, index, {persistent, exclusive}) {
+    const {bonuses, penalties, defends} = this.types[size][index];
+    this.addBaddie(size, bonuses.concat({amount, name, persistent, exclusive}), penalties, defends);
     this.remove(size, index);
     this.refresh(size);
   }
-  hinder(name, amount, size, index) {
-    const {bonuses, penalties} = this.types[size][index];
-    this.addBaddie(size, bonuses, penalties.concat({amount, name}));
+  hinder(name, amount, size, index, {persistent, exclusive}) {
+    const {bonuses, penalties, defends} = this.types[size][index];
+    this.addBaddie(size, bonuses, penalties.concat({amount, name, persistent, exclusive}), defends);
+    this.remove(size, index);
+    this.refresh(size);
+  }
+  defend(name, amount, size, index) {
+    const {bonuses, penalties, defends} = this.types[size][index];
+    this.addBaddie(size, bonuses, penalties, defends.concat({amount, name}));
     this.remove(size, index);
     this.refresh(size);
   }
@@ -68,7 +76,8 @@ class Baddie {
     this.types[size] = unvue(this.types[size]).reduce((acc, el) => {
       const match = acc.find(x => {
         return JSON.stringify(x.bonuses) === JSON.stringify(el.bonuses) &&
-          JSON.stringify(x.penalties) === JSON.stringify(el.penalties);
+          JSON.stringify(x.penalties) === JSON.stringify(el.penalties) &&
+          JSON.stringify(x.defends) === JSON.stringify(el.defends);
       });
       if (match) {
         match.count += el.count;
@@ -79,54 +88,83 @@ class Baddie {
     }, []);
     store.dispatch('saveBaddies', this.baddieType);
   }
-  addAffix({name, type, amount, size, index}) {
+  addAffix({name, type, amount, size, index, persistent, exclusive}) {
     if (name === '') return;
     else if (type === 'Bonus') {
-      this.boost(name, amount, size, index);
-    } else {
-      this.hinder(name, amount, size, index);
+      this.boost(name, amount, size, index, {persistent, exclusive});
+    } else if (type === 'Penalty') {
+      this.hinder(name, amount, size, index, {persistent, exclusive});
+    } else if (type === 'Defend') {
+      this.defend(name, amount, size, index);
     }
   }
   removeAffix(size, affixType, affixIndex, baddieIndex) {
     const affixData = this.types[size][baddieIndex][affixType];
-    if (affixData.count > 1) {
-      const copy = unvue(affixData);
-      affixData.count--;
-      copy[type].splice(affixIndex, 1);
-      this.addBaddie(size, copy.bonuses, copy.penalties, 1);
-    } else {
-      this.types[size][baddieIndex][affixType].splice(affixIndex, 1);
+    const remove = () => {
+      if (affixData.count > 1) {
+        const copy = unvue(affixData);
+        affixData.count--;
+        copy[type].splice(affixIndex, 1);
+        this.addBaddie(size, copy.bonuses, copy.penalties, copy.defends, 1);
+      } else {
+        this.types[size][baddieIndex][affixType].splice(affixIndex, 1);
+      }
+      this.refresh(size);
     }
-    this.refresh(size);
+    if (affixData[affixIndex].exclusive || affixData[affixIndex].persistent) {
+      Vue.dialog.confirm(`This ${affixType} is persistent and/or exclusive. Are you sure you want to remove it?`)
+      .then(() => {
+        remove();
+      });
+    } else { 
+      remove();
+    }
   }
 }
 
 class Villain {
-  constructor(name, bonuses, penalties) {
+  constructor(name, bonuses, penalties, defends) {
     this.name = name;
     this.bonuses = bonuses || [];
     this.penalties = penalties || [];
+    this.defends = defends || [];
   }
 
-  boost(name, amount) {
-    this.bonuses.push({name, amount});
+  boost(name, amount, persistent, exclusive) {
+    this.bonuses.push({name, amount, persistent, exclusive});
     this.refresh();
   }
-  hinder(name, amount) {
-    this.penalties.push({name, amount});
+  hinder(name, amount, persistent, exclusive) {
+    this.penalties.push({name, amount, persistent, exclusive});
     this.refresh();
   }
-  addAffix({name, type, amount}) {
+  defend(name, amount) {
+    this.defends.push({name, amount});
+    this.refresh();
+  }
+  addAffix({name, type, amount, persistent, exclusive}) {
     if (name === '') return;
     else if (type === 'Bonus') {
-      this.boost(name, amount);
-    } else {
-      this.hinder(name, amount);
+      this.boost(name, amount, persistent, exclusive);
+    } else if (type === 'Penalty') {
+      this.hinder(name, amount, persistent, exclusive);
+    } else if (type === 'Defend') {
+      this.defend(name, amount);
     }
   }
   removeAffix(type, index) {
-    this[type].splice(index, 1);
-    this.refresh();
+    const remove = () => {
+      this[type].splice(index, 1);
+      this.refresh();
+    }
+    if (this[type][index].exclusive || this[type][index].persistent) {
+      Vue.dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
+      .then(() => {
+        remove();
+      });
+    } else { 
+      remove();
+    }
   }
   refresh() {
     store.dispatch('saveBaddies', 'villains');

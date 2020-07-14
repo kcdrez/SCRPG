@@ -25,7 +25,7 @@ const store = new Vuex.Store({
         state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types, 'lieutenants'))
       }
       if (villains) {
-        state.villains = villains.map(x => new Villain(x.name, x.bonuses, x.penalties))
+        state.villains = villains.map(x => new Villain(x.name, x.bonuses, x.penalties, x.defends))
       }           
       state.initialized = true;
     },
