@@ -3,10 +3,10 @@ import store from '../vuex-state/store';
 import {unvue} from './utilities';
 
 class Baddie {
-  constructor(name, size, count, types, baddieType) {
+  constructor(name, size, count, types, baddieType, acted) {
     this.name = name;
     this.baddieType = baddieType;
-    this.acted = false;
+    this.acted = acted === undefined ? false : acted;
     this.types = {
       12: [],
       10: [],
@@ -24,10 +24,10 @@ class Baddie {
   }
 
   demote(size, index) {
-    const {bonuses, penalties} = this.types[size][index];
+    const {bonuses, penalties, defends} = this.types[size][index];
     this.remove(size, index);
     if (size > 4) {
-      this.addBaddie(size - 2, bonuses, penalties);
+      this.addBaddie(size - 2, bonuses, penalties, defends);
     }
   }
   addBaddie(size, bonuses, penalties, defends, count) {
@@ -121,6 +121,10 @@ class Baddie {
       remove();
     }
   }
+  takenAction() {
+    this.acted = !this.acted;
+    store.dispatch('saveBaddies', this.baddieType);
+  }
 }
 
 class Villain {
@@ -130,6 +134,7 @@ class Villain {
     this.bonuses = bonuses || [];
     this.penalties = penalties || [];
     this.defends = defends || [];
+    this.baddieType = 'villain';
   }
 
   boost(name, amount, persistent, exclusive) {
@@ -170,6 +175,10 @@ class Villain {
   }
   refresh() {
     store.dispatch('saveBaddies', 'villains');
+  }
+  takenAction() {
+    this.acted = !this.acted;
+    this.refresh();
   }
 }
 

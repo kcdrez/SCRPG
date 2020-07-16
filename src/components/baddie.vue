@@ -13,7 +13,7 @@
       <div class="col" v-if="list.length === 0">
         There are no {{label}}.
       </div>
-      <div class="col-6 mb-3" v-for="(baddie, baddieIndex) in list" :key="baddieIndex">
+      <div class="col-6 mb-3" v-for="(baddie, baddieIndex) in list" :key="baddie.name + baddieIndex">
         <div class="card">
           <div class="card-header">
             <h3 class="d-inline">
@@ -26,16 +26,16 @@
             </div>
           </div>
           <div :id="`${label}-${baddie.name.replace(/\s/g, '')}`" class="card-body collapse show">
-            <template v-for="(data, size) in baddie.types">
+            <div v-for="(data, size) in baddie.types" :key="baddie.name + 'size' + size">
               <template v-if="data.length > 0">
-                <h4 :key="baddie.name + size">
+                <h4>
                   <a :href="`#${label}-${baddie.name.replace(/\s/g, '')}-${size}`" data-toggle="collapse"><b>Size:</b></a>
                   <img :src="`images/d${size}.png`" :title="`This minion uses a d${size}`">
                   <div class="d-inline" :title="`There are ${baddie.countBySize(size)} minions that use this die size`">
                     ({{baddie.countBySize(size)}})
                   </div>
                 </h4>
-                <table :id="`${label}-${baddie.name.replace(/\s/g, '')}-${size}`" :key="baddie.name + size"
+                <table :id="`${label}-${baddie.name.replace(/\s/g, '')}-${size}`"
                   class="collapse table table-sm table-striped table-bordered">
                   <thead class="text-center">
                     <tr>
@@ -47,11 +47,11 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(el, index) in data" :key="index">
+                    <tr v-for="(el, index) in data" :key="size + '-' + index">
                       <td class="text-center align-middle">{{el.count}}</td>
                       <td class="text-center">
                         <template v-if="el.bonuses.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(bonus, affixIndex) in el.bonuses" :key="affixIndex">
+                        <div class="border border-dark position-relative" v-for="(bonus, affixIndex) in el.bonuses" :key="'bonus' + affixIndex">
                           <div class="remove-affix" 
                             title="Remove this Bonus"
                             @click="baddie.removeAffix(size, 'bonuses', affixIndex, index)">&times;</div>
@@ -63,7 +63,7 @@
                       </td>
                       <td class="text-center">
                         <template v-if="el.penalties.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(penalty, affixIndex) in el.penalties" :key="affixIndex">
+                        <div class="border border-dark position-relative" v-for="(penalty, affixIndex) in el.penalties" :key="'penalty' + affixIndex">
                           <div class="remove-affix" 
                             title="Remove this Penalty"
                             @click="baddie.removeAffix(size, 'penalties', affixIndex, index)">&times;</div>
@@ -75,7 +75,7 @@
                       </td>
                       <td class="text-center">
                         <template v-if="el.defends.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(defend, affixIndex) in el.defends" :key="affixIndex">
+                        <div class="border border-dark position-relative" v-for="(defend, affixIndex) in el.defends" :key="'defend' + affixIndex">
                           <div class="remove-affix" 
                             title="Remove this Penalty"
                             @click="baddie.removeAffix(size, 'defends', affixIndex, index)">&times;</div>
@@ -103,7 +103,7 @@
                   </tbody>
                 </table>
               </template>
-            </template>
+            </div>
           </div>
         </div>
       </div>
@@ -218,7 +218,7 @@
         baddieData: {
           name: '',
           size: 8,
-          count: 5,
+          count: 1,
           affix: {
             amount: 0,
             name: '',

@@ -11,40 +11,61 @@
           <h4>Scene Tracker</h4>
           <div class="btn-group btn-group-sm w-50">
             <button class="btn btn-sm btn-success border-dark" 
-              data-toggle="modal" data-target="#sceneTrackerModal">Create</button>
-            <button class="btn btn-sm btn-warning border-dark" @click="clearScene">Clear</button>
+              data-toggle="modal" data-target="#sceneTrackerModal" title="Create a new Scene Tracker">Create</button>
+            <button class="btn btn-sm btn-warning border-dark" @click="clearScene" title="Clear the Scene Tracker">Clear</button>
+            <button class="btn btn-sm btn-danger border-dark" @click="resetScene" 
+              title="Reset the Environment, removing the Scene Tracker and all minions, lieutenants, and villains">Reset</button>
           </div>
           <div class="" v-if="noScenes">
             There is no Scene Tracker.
           </div>
           <div class="" v-else>
-            <div v-for="(item, index) in scene.green" class="d-inline" @click="progressScene(item)" :key="index">
+            <div v-for="(item, index) in scene.green" class="d-inline" @click="progressScene(item)" :key="'green' + index">
               <img src="images/green_checked.png" v-if="item.checked">
               <img src="images/green.png" v-else>
             </div>
-            <div v-for="(item, index) in scene.yellow" class="d-inline" @click="progressScene(item)"  :key="index">
+            <div v-for="(item, index) in scene.yellow" class="d-inline" @click="progressScene(item)"  :key="'yellow' + index">
               <img src="images/yellow_checked.png" v-if="item.checked">
               <img src="images/yellow.png" v-else>
             </div>
-            <div v-for="(item, index) in scene.red" class="d-inline" @click="progressScene(item)"  :key="index">
+            <div v-for="(item, index) in scene.red" class="d-inline" @click="progressScene(item)"  :key="'red' + index">
               <img src="images/red_checked.png" v-if="item.checked">
               <img src="images/red.png" v-else>
             </div>
           </div>
         </div>
         <div class="col-5">
-          <h4>Round Tracker</h4>
-          <div class="btn-group btn-group-sm w-75">
-            <button class="btn btn-success border-dark" @click="addPlayer">Add Player</button>
-            <button class="btn btn-warning border-dark" @click="resetRound">Reset</button>
+          <h4 class="text-center">Round Tracker</h4>
+          <div class="text-center mb-3">
+            <div class="btn-group btn-group-sm w-75 mx-auto">
+              <button class="btn btn-success border-dark" @click="addPlayer">Add Player</button>
+              <button class="btn btn-warning border-dark" @click="resetRound">Reset</button>
+            </div>
           </div>
-          <ul class="h3">
-            <li v-for="item in roundData" 
-              @click="item.acted = !item.acted" :key="item.name">
-              <i class="fa fa-check text-success" v-if="item.acted"></i>
-              <span class="mx-2">{{item.name}}</span>
-            </li>
-          </ul>
+          <table class="table table-sm table-bordered table-dark table-stripped">
+            <thead class="text-center">
+              <tr>
+                <th>Actor Name</th>
+                <th>Actor Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody class="text-center">
+              <tr v-for="item in roundData" :key="'roundTracker' + item.name">
+                <td>
+                  <i class="fa fa-check text-success" v-if="item.acted"></i>
+                  {{item.name}}
+                </td>
+                <td class="text-capitalize">{{item.type || item.baddieType}}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-primary" @click="actorActed(item)">Acted</button>
+                    <button class="btn btn-warning" v-if="item.type === 'player'" @click="removePlayer(item.name)" title="Remove this Player">Remove</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>        
       </div>
     </div>
@@ -83,13 +104,13 @@
           </div>
         </div>
       </div>      
-    </div>    
+    </div>
   </div>
 </template>
 
 <script>
   import Cookies from 'js-cookie';
-  import Baddie from '../scripts/baddie.js';
+  import {Baddie, Villain} from '../scripts/baddie.js';
   import {unvue} from '../scripts/utilities.js';
   import {mapState} from 'vuex';
   import {diff} from 'deep-diff';
@@ -98,9 +119,9 @@
     name: 'SceneTracker',
     data() {
       return {
-        green: 1,
-        yellow: 0,
-        red: 0,
+        green: 2,
+        yellow: 4,
+        red: 2,
         scene: {
           green: [],
           yellow: [],
@@ -134,14 +155,40 @@
         this.scene.red = [];
         Cookies.set('sceneTracker', this.scene);
       },
+      resetScene() {
+        this.$dialog.confirm({
+          title: 'Are You Sure?',
+          body: 'Are you sure you want to reset the scene? All minions, lieutenants, villans, and scene tracker will be removed.'
+        })
+        .then(r => {
+          this.clearScene();
+          this.$store.commit('RESET_SCENE');
+        })
+      },
       addPlayer() {
         this.$dialog.prompt({
           title: 'Add a Player',
           body: 'Add a player to add to the scene'
         })
         .then(r => {
-          this.players.push({name: r.data, acted: false});
+          this.players.push({name: r.data, acted: false, type: 'player'});
+          Cookies.set('players', this.players);
         });
+      },
+      removePlayer(player) {
+        const index = this.players.findIndex(x => x.name === player.name);
+        if (index > -1) {
+          this.players.splice(index, 1);
+          Cookies.set('players', this.players);
+        }
+      },
+      actorActed(actor) {
+        if (actor instanceof Baddie || actor instanceof Villain) {
+          actor.takenAction();
+        } else {
+          actor.acted = !actor.acted;
+          Cookies.set('players', this.players);
+        }
       },
       resetRound() {
         this.roundData.forEach(item => item.acted = false);
@@ -168,6 +215,11 @@
         this.scene.green = sceneData.green;
         this.scene.yellow = sceneData.yellow;
         this.scene.red = sceneData.red;
+      }
+
+      const playerData = Cookies.getJSON('players');
+      if (playerData) {
+        this.players = playerData;
       }
     }
   };

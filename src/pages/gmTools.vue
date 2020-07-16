@@ -20,7 +20,7 @@
 
   export default {
     name: 'GMTools',
-    components: {baddies, sceneTracker, villains}
+    components: { baddies, sceneTracker, villains }
   };
 </script>
 

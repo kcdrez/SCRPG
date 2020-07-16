@@ -19,14 +19,14 @@ const store = new Vuex.Store({
       const lieutenants = Cookies.getJSON('lieutenants');
       const villains = Cookies.getJSON('villains');
       if (minions) {
-        state.minions = minions.map(x => new Baddie(x.name, null, null, x.types, 'minions'))
+        state.minions = minions.map(x => new Baddie(x.name, null, null, x.types, 'minions', x.acted))
       }
       if (lieutenants) {
-        state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types, 'lieutenants'))
+        state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types, 'lieutenants', x.acted))
       }
       if (villains) {
-        state.villains = villains.map(x => new Villain(x.name, x.bonuses, x.penalties, x.defends))
-      }           
+        state.villains = villains.map(x => new Villain(x.name, x.bonuses, x.penalties, x.defends, x.acted))
+      }
       state.initialized = true;
     },
     UPSERT_BADDIE(state, {baddie, baddieType}) {
@@ -45,6 +45,11 @@ const store = new Vuex.Store({
     DELETE_BADDIE(state, {type, index}) {
       state[type].splice(index, 1);
       Cookies.set(type, state[type]);
+    },
+    RESET_SCENE(state) {
+      state.minions = [];
+      state.lieutenants = [];
+      state.villains = [];
     }
   },
   actions: {
@@ -55,6 +60,12 @@ const store = new Vuex.Store({
     },
     saveBaddies(ctx, baddieType) {
       Cookies.set(baddieType, ctx.rootState[baddieType]);
+    },
+    resetScene(ctx) {
+      ctx.commit('RESET_SCENE');
+      ctx.displatch('saveBaddies', 'minions');
+      ctx.displatch('saveBaddies', 'lieutenants');
+      ctx.displatch('saveBaddies', 'villains');
     }
   },
   getters: {
