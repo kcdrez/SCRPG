@@ -6,6 +6,7 @@ class Baddie {
   constructor(name, size, count, types, baddieType) {
     this.name = name;
     this.baddieType = baddieType;
+    this.acted = false;
     this.types = {
       12: [],
       10: [],
@@ -123,8 +124,9 @@ class Baddie {
 }
 
 class Villain {
-  constructor(name, bonuses, penalties, defends) {
+  constructor(name, bonuses, penalties, defends, acted) {
     this.name = name;
+    this.acted = acted === undefined ? false : acted;
     this.bonuses = bonuses || [];
     this.penalties = penalties || [];
     this.defends = defends || [];

@@ -5,6 +5,9 @@ import formWizard from 'vue-form-wizard';
 import 'vue-form-wizard/dist/vue-form-wizard.min.css';
 import VueDialog from 'vuejs-dialog';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
+// import '@fortawesome/fontawesome-free/css/all.css';
+// import '@fortawesome/fontawesome-free/js/all.js';
+
 import './styles/main.scss';
 
 import store from './vuex-state/store';

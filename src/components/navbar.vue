@@ -6,9 +6,9 @@
     </button>
     <div class="collapse navbar-collapse" id="navbar-toggler">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <router-link :to="{name: 'characterCreation'}" class="nav-link">Character Creation</router-link>
-        </li>
+        </li> -->
         <li class="nav-item">
           <router-link :to="{name: 'gmTools'}" class="nav-link">GM Tools</router-link>
         </li>        

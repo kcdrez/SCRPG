@@ -2,31 +2,50 @@
   <div class="scene-tracker">
     <div class="row scene-tracker-header">
       <div class="col">
-        <h3><a href="#sceneTrackerData" data-toggle="collapse">Scene Tracker</a></h3>
-        <div class="btn-group btn-group-sm">
-          <button class="btn btn-sm btn-success border-dark" 
-            data-toggle="modal" data-target="#sceneTrackerModal">Create</button>
-          <button class="btn btn-sm btn-warning border-dark" @click="clearScene">Clear</button>
-        </div>
+        <h3><a href="#sceneTrackerData" data-toggle="collapse">Environment</a></h3>
       </div>
     </div>
-    <div id="sceneTrackerData" class="collapse show row">
-      <div class="col" v-if="noScenes">
-        There is no Scene Tracker.
-      </div>
-      <div class="col" v-else>
-        <div v-for="item in scene.green" class="d-inline" @click="progressScene(item)">
-          <img src="images/green_checked.png" v-if="item.checked">
-          <img src="images/green.png" v-else>
+    <div id="sceneTrackerData" class="collapse show">
+      <div class="row">
+        <div class="col-7">
+          <h4>Scene Tracker</h4>
+          <div class="btn-group btn-group-sm w-50">
+            <button class="btn btn-sm btn-success border-dark" 
+              data-toggle="modal" data-target="#sceneTrackerModal">Create</button>
+            <button class="btn btn-sm btn-warning border-dark" @click="clearScene">Clear</button>
+          </div>
+          <div class="" v-if="noScenes">
+            There is no Scene Tracker.
+          </div>
+          <div class="" v-else>
+            <div v-for="(item, index) in scene.green" class="d-inline" @click="progressScene(item)" :key="index">
+              <img src="images/green_checked.png" v-if="item.checked">
+              <img src="images/green.png" v-else>
+            </div>
+            <div v-for="(item, index) in scene.yellow" class="d-inline" @click="progressScene(item)"  :key="index">
+              <img src="images/yellow_checked.png" v-if="item.checked">
+              <img src="images/yellow.png" v-else>
+            </div>
+            <div v-for="(item, index) in scene.red" class="d-inline" @click="progressScene(item)"  :key="index">
+              <img src="images/red_checked.png" v-if="item.checked">
+              <img src="images/red.png" v-else>
+            </div>
+          </div>
         </div>
-        <div v-for="item in scene.yellow" class="d-inline" @click="progressScene(item)">
-          <img src="images/yellow_checked.png" v-if="item.checked">
-          <img src="images/yellow.png" v-else>
-        </div>
-        <div v-for="item in scene.red" class="d-inline" @click="progressScene(item)">
-          <img src="images/red_checked.png" v-if="item.checked">
-          <img src="images/red.png" v-else>
-        </div>
+        <div class="col-5">
+          <h4>Round Tracker</h4>
+          <div class="btn-group btn-group-sm w-75">
+            <button class="btn btn-success border-dark" @click="addPlayer">Add Player</button>
+            <button class="btn btn-warning border-dark" @click="resetRound">Reset</button>
+          </div>
+          <ul class="h3">
+            <li v-for="item in roundData" 
+              @click="item.acted = !item.acted" :key="item.name">
+              <i class="fa fa-check text-success" v-if="item.acted"></i>
+              <span class="mx-2">{{item.name}}</span>
+            </li>
+          </ul>
+        </div>        
       </div>
     </div>
     <div id="sceneTrackerModal" class="modal" tabindex="-1" role="dialog">
@@ -70,7 +89,10 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import Baddie from '../scripts/baddie';
+  import Baddie from '../scripts/baddie.js';
+  import {unvue} from '../scripts/utilities.js';
+  import {mapState} from 'vuex';
+  import {diff} from 'deep-diff';
 
   export default {
     name: 'SceneTracker',
@@ -83,7 +105,8 @@
           green: [],
           yellow: [],
           red: []
-        }
+        },
+        players: [],
       }
     },
     methods: {
@@ -110,6 +133,18 @@
         this.scene.yellow = [];
         this.scene.red = [];
         Cookies.set('sceneTracker', this.scene);
+      },
+      addPlayer() {
+        this.$dialog.prompt({
+          title: 'Add a Player',
+          body: 'Add a player to add to the scene'
+        })
+        .then(r => {
+          this.players.push({name: r.data, acted: false});
+        });
+      },
+      resetRound() {
+        this.roundData.forEach(item => item.acted = false);
       }
     },
     computed: {
@@ -117,7 +152,15 @@
         return this.scene.green.length === 0 &&
           this.scene.yellow.length === 0 &&
           this.scene.red.length === 0;
-      }
+      },
+      roundData() {
+        return this.players.concat(this.villains, this.lieutenants, this.minions);
+      },
+      ...mapState([
+        'minions',
+        'lieutenants',
+        'villains'
+      ])
     },
     created() {
       const sceneData = Cookies.getJSON('sceneTracker');
@@ -126,7 +169,7 @@
         this.scene.yellow = sceneData.yellow;
         this.scene.red = sceneData.red;
       }
-    }    
+    }
   };
 </script>
 
@@ -137,6 +180,24 @@
 
       &:hover {
         transform: translate(0px, -3px);
+      }
+    }
+
+    ul {
+      padding: 0;
+
+      li {
+        cursor: pointer;
+        list-style-type: none;
+        padding: .25rem;
+
+        &:hover {
+          background-color: lightgray;
+          border-radius: 5px;
+        }
+        
+        &.acted {
+        }
       }
     }
   }

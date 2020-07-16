@@ -19,11 +19,11 @@ const routes = [
     name: 'gmTools',
     component: GMToolsPage
   },
-    {
-    path: '/characterCreation',
-    name: 'characterCreation',
-    component: CharacterCreationPage
-  }
+  // {
+  //   path: '/characterCreation',
+  //   name: 'characterCreation',
+  //   component: CharacterCreationPage
+  // }
 ]
 
 const router = new VueRouter({

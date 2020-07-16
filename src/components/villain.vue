@@ -13,18 +13,18 @@
       <div class="col" v-if="list.length === 0">
         There are no Villains.
       </div>
-      <div class="col-6 mb-3" v-for="(villain, villainIndex) in list">
+      <div class="col-6 mb-3" v-for="(villain, villainIndex) in list" :key="villainIndex">
         <div class="card">
           <div class="card-header">
             <h3 class="d-inline">
-              <a :href="`#villain-${villain.name.replace(' ', '')}`" data-toggle="collapse">{{villain.name}}</a>
+              <a :href="`#villain-${villain.name.replace(/\s/g, '')}`" data-toggle="collapse">{{villain.name}}</a>
             </h3>
             <div class="btn-group btn-group-sm float-right w-25">
               <button class="btn btn-danger border-dark" 
                 @click="$store.commit('DELETE_BADDIE', {baddieIndex: villainIndex, type: 'villains'})">Remove</button>
             </div>
           </div>
-          <div :id="`villain-${villain.name.replace(' ', '')}`" class="card-body collapse show">
+          <div :id="`villain-${villain.name.replace(/\s/g, '')}`" class="card-body collapse show">
             <div class="text-center">
               <div class="btn-group btn-group-sm w-50">
                 <button class="btn btn-success border-dark" @click="affectVillain(villain, 'boost')">Boost</button>
@@ -43,7 +43,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(bonus, affixIndex) in villain.bonuses">
+                  <tr v-for="(bonus, affixIndex) in villain.bonuses" :key="affixIndex">
                     <td class="text-center">{{bonus.name}}</td>
                     <td class="text-center">
                       +{{bonus.amount}}
@@ -71,7 +71,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(penalty, affixIndex) in villain.penalties">
+                  <tr v-for="(penalty, affixIndex) in villain.penalties" :key="affixIndex">
                     <td class="text-center">{{penalty.name}}</td>
                     <td class="text-center">
                       {{penalty.amount}}
@@ -99,7 +99,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(defend, affixIndex) in villain.defends">
+                  <tr v-for="(defend, affixIndex) in villain.defends" :key="affixIndex">
                     <td class="text-center">{{defend.name}}</td>
                     <td class="text-center">
                       {{defend.amount}}
