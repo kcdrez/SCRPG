@@ -14,9 +14,21 @@
         </li>        
       </ul>
     </div>
+    <div class="navbar-text">
+      <small>Version: {{version}}</small>
+    </div>
   </nav>
 </template>
 
 <script>
-  export default {};
+  import {version} from '../../package.json';
+
+  export default {
+    name: 'NavBar',
+    data() {
+      return {
+        version
+      }
+    }
+  };
 </script>

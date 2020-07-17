@@ -38,8 +38,9 @@
           <h4 class="text-center">Round Tracker</h4>
           <div class="text-center mb-3">
             <div class="btn-group btn-group-sm w-75 mx-auto">
-              <button class="btn btn-success border-dark" @click="addPlayer">Add Player</button>
-              <button class="btn btn-warning border-dark" @click="resetRound">Reset</button>
+              <button class="btn btn-success border-dark" data-toggle="modal" data-target="#addPlayerModal" title="Add a new player to the scene">Add Player</button>
+              <button class="btn btn-danger" title="Clear all players from the scene" @click="clearPlayers">Clear Players</button>
+              <button class="btn btn-warning border-dark" @click="resetRound" title="Reset the round, marking all actors to not having acted yet">Reset Actors</button>
             </div>
           </div>
           <table class="table table-sm table-bordered table-dark table-stripped">
@@ -59,8 +60,9 @@
                 <td class="text-capitalize">{{item.type || item.baddieType}}</td>
                 <td>
                   <div class="btn-group btn-group-sm">
-                    <button class="btn btn-primary" @click="actorActed(item)">Acted</button>
-                    <button class="btn btn-warning" v-if="item.type === 'player'" @click="removePlayer(item.name)" title="Remove this Player">Remove</button>
+                    <button class="btn btn-primary" @click="actorActed(item)" title="Toggle this actor to have been acted already in this round">Acted</button>
+                    <button class="btn btn-secondary" v-if="item.type === 'player'" @click="renamePlayerModal(item)" title="Rename this player">Rename</button>
+                    <button class="btn btn-danger" v-if="item.type === 'player'" @click="removePlayer(item.name)" title="Remove this player from the scene">Remove</button>
                   </div>
                 </td>
               </tr>
@@ -83,19 +85,19 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Green</div>
               </div>
-              <input class="form-control" v-model.number="green" type="number">
+              <input class="form-control" v-model.number="green" type="number" ref="green" @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Yellow</div>
               </div>
-              <input class="form-control" v-model.number="yellow" type="number">
+              <input class="form-control" v-model.number="yellow" type="number" ref="yellow" @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm">
               <div class="input-group-prepend">
                 <div class="input-group-text">Red</div>
               </div>
-              <input class="form-control" v-model.number="red" type="number">
+              <input class="form-control" v-model.number="red" type="number" ref="red" @keypress.enter="createScene">
             </div>
           </div>
           <div class="modal-footer">
@@ -105,6 +107,46 @@
         </div>
       </div>      
     </div>
+    <div id="addPlayerModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add a Player</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Add a player to the Scene.
+            <input type="text" v-model="newPlayerName" class="form-control form-control-sm" @keypress.enter="addPlayer" ref="newPlayerName">
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="addPlayer">Create</button>
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>      
+    </div>
+    <div id="renamePlayerModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Rename a Player</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Rename the player ({{this.renamePlayerData.target.name || '---'}})
+            <input type="text" v-model.trim="renamePlayerData.text" class="form-control form-control-sm" @keypress.enter="renamePlayer" ref="renamePlayer">
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="renamePlayer">Rename</button>
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>      
+    </div>    
   </div>
 </template>
 
@@ -128,6 +170,13 @@
           red: []
         },
         players: [],
+        newPlayerName: '',
+        renamePlayerData: {
+          target: {
+            name: ''
+          },
+          text: ''
+        }
       }
     },
     methods: {
@@ -144,6 +193,7 @@
           this.scene.red.push({checked: false});
         }
         Cookies.set('sceneTracker', this.scene);
+        $('#sceneTrackerModal').modal('hide');
       },
       progressScene(item) {
         item.checked = !item.checked;
@@ -163,23 +213,45 @@
         .then(r => {
           this.clearScene();
           this.$store.commit('RESET_SCENE');
-        })
-      },
-      addPlayer() {
-        this.$dialog.prompt({
-          title: 'Add a Player',
-          body: 'Add a player to add to the scene'
-        })
-        .then(r => {
-          this.players.push({name: r.data, acted: false, type: 'player'});
-          Cookies.set('players', this.players);
         });
       },
-      removePlayer(player) {
-        const index = this.players.findIndex(x => x.name === player.name);
+      addPlayer() {
+        if (this.newPlayerName !== '') {
+          this.players.push({name: this.newPlayerName, acted: false, type: 'player'});
+          Cookies.set('players', this.players);
+          $('#addPlayerModal').modal('hide');
+        }
+      },
+      removePlayer(playerName) {
+        const index = this.players.findIndex(x => x.name === playerName);
         if (index > -1) {
           this.players.splice(index, 1);
           Cookies.set('players', this.players);
+        }
+      },
+      clearPlayers() {
+        this.$dialog.confirm({
+          title: 'Are You Sure?',
+          body: 'Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.',
+        }, {
+          okText: 'Yes',
+          cancelText: 'No'
+        })
+        .then(r => {
+          this.players = [];
+          Cookies.set('players', this.players);
+        });
+      },
+      renamePlayerModal(player) {
+        if (player) {
+          this.renamePlayerData.target = player;
+          this.renamePlayerData.text = player.name;
+          $("#renamePlayerModal").modal('show');
+        }
+      },
+      renamePlayer() {
+        if (this.renamePlayerData.text !== '') {
+          this.renamePlayerData.target.name = this.renamePlayerData.text;
         }
       },
       actorActed(actor) {
@@ -221,6 +293,17 @@
       if (playerData) {
         this.players = playerData;
       }
+    },
+    mounted() {
+      $('#sceneTrackerModal').on('shown.bs.modal', e => {
+        this.$refs.green.focus();
+      });
+      $('#addPlayerModal').on('shown.bs.modal', e => {
+        this.$refs.newPlayerName.focus();
+      });
+      $('#addPlayerModal').on('shown.bs.modal', e => {
+        this.$refs.renamePlayer.focus();
+      });
     }
   };
 </script>
