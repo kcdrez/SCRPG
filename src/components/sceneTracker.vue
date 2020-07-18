@@ -1,5 +1,5 @@
 <template>
-  <div class="scene-tracker">
+  <div class="scene-tracker-component">
     <div class="row scene-tracker-header">
       <div class="col">
         <h3><a href="#sceneTrackerData" data-toggle="collapse">Environment</a></h3>
@@ -7,7 +7,7 @@
     </div>
     <div id="sceneTrackerData" class="collapse show">
       <div class="row">
-        <div class="col-7 text-center">
+        <div class="col-7 text-center scene-tracker">
           <h4>Scene Tracker</h4>
           <div class="btn-group btn-group-sm w-50">
             <button class="btn btn-sm btn-success border-dark" 
@@ -34,7 +34,7 @@
             </div>
           </div>
         </div>
-        <div class="col-5">
+        <div class="col-5 round-tracker">
           <h4 class="text-center">Round Tracker</h4>
           <div class="text-center mb-3">
             <div class="btn-group btn-group-sm w-75 mx-auto">
@@ -82,7 +82,8 @@
                 <tr v-for="(item, index) in lieutenant.list" :key="'roundTracker-lieutenant' + lieutenant.name + index">
                   <td class="text-capitalize" @click="actorActed(lieutenant, index)">
                     <i class="fa fa-check text-success" v-if="item.acted"></i>
-                    {{lieutenant.name}} (d{{item.size}})
+                    {{lieutenant.name}}
+                    <img :src="`images/d${item.size}.png`" :title="`This minion uses a d${item.size}`">
                   </td>
                   <td class="text-capitalize" @click="actorActed(lieutenant, index)">Lieutenant</td>
                   <td>
@@ -96,7 +97,8 @@
                 <tr v-for="(item, index) in minion.list" :key="'roundTracker-minion' + minion.name + index">
                   <td class="text-capitalize" @click="actorActed(minion, index)">
                     <i class="fa fa-check text-success" v-if="item.acted"></i>
-                    {{minion.name}} (d{{item.size}})
+                    {{minion.name}} 
+                    <img :src="`images/d${item.size}.png`" :title="`This minion uses a d${item.size}`">
                   </td>
                   <td class="text-capitalize" @click="actorActed(minion, index)">Minion</td>
                   <td>
@@ -303,7 +305,6 @@
         }
       },
       resetRound() {
-        // this.roundData.forEach(item => item.acted = false);
         this.players.forEach(x => x.acted = false);
         this.villains.forEach(x => x.acted = false);
         this.lieutenants.forEach(x => x.resetRound());
@@ -358,23 +359,12 @@
         transform: translate(0px, -3px);
       }
     }
+  }
 
-    ul {
-      padding: 0;
-
-      li {
-        cursor: pointer;
-        list-style-type: none;
-        padding: .25rem;
-
-        &:hover {
-          background-color: lightgray;
-          border-radius: 5px;
-        }
-        
-        &.acted {
-        }
-      }
+  .round-tracker {
+    img {
+      max-width: 20px;
+      margin: 0 .25rem;
     }
   }
 </style>
