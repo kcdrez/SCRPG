@@ -19,10 +19,10 @@ const store = new Vuex.Store({
       const lieutenants = Cookies.getJSON('lieutenants');
       const villains = Cookies.getJSON('villains');
       if (minions) {
-        state.minions = minions.map(x => new Baddie(x.name, null, null, x.types, 'minions', x.acted))
+        state.minions = minions.map(x => new Baddie(x, 'minions'))
       }
       if (lieutenants) {
-        state.lieutenants = lieutenants.map(x => new Baddie(x.name, null, null, x.types, 'lieutenants', x.acted))
+        state.lieutenants = lieutenants.map(x => new Baddie(x, 'lieutenants'))
       }
       if (villains) {
         state.villains = villains.map(x => new Villain(x.name, x.bonuses, x.penalties, x.defends, x.acted))
@@ -32,19 +32,21 @@ const store = new Vuex.Store({
     UPSERT_BADDIE(state, {baddie, baddieType}) {
       const match = state[baddieType].find(x => x.name === baddie.name);
       if (match && baddieType !== 'villains') {
-        Object.entries(baddie.types).forEach(([size, list]) => {
-          list.forEach(item => {
-            match.addBaddie(size, item.bonuses, item.penalties, item.count);
-          })
-        })
+        baddie.list.forEach(x => match.addBaddie(x));
       } else {
         state[baddieType].push(baddie);
       }
       Cookies.set(baddieType, state[baddieType]);
     },
-    DELETE_BADDIE(state, {type, index}) {
-      state[type].splice(index, 1);
-      Cookies.set(type, state[type]);
+    DELETE_BADDIE(state, {baddieType, index, baddie}) {
+      if (baddie !== undefined) {
+        index = state[baddieType].findIndex(x => x.name === baddie.name);
+        state[baddieType]
+      } 
+      if (index > -1) {
+        state[baddieType].splice(index, 1);
+        Cookies.set(baddieType, state[baddieType]);
+      }
     },
     RESET_SCENE(state) {
       state.minions = [];
