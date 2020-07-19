@@ -3,82 +3,110 @@ import store from '../vuex-state/store';
 import {unvue} from './utilities';
 
 class Baddie {
-  constructor(name, size, count, types, baddieType, acted) {
-    this.name = name;
+  constructor(data, baddieType) {
+    this.name = data.name;
     this.baddieType = baddieType;
-    this.acted = acted === undefined ? false : acted;
-    this.types = {
-      12: [],
-      10: [],
-      8: [],
-      6: [],
-      4: []
-    };
-    if (size) {
-      for (let i = 0; i < count; i++) {
-        this.addBaddie(size, [], [], []);
-      }
-    } else if (types) {
-      this.types = types;
+    this.list = [];
+    if (data.types) {
+      Object.entries(data.types).forEach(([size, baddieData]) => {
+        baddieData.forEach(x => this.addBaddie(x, size))
+      })
+    } else if (data.list) {
+      this.list = data.list;
+    } else {
+      this.addBaddie({size: data.size, count: data.count});
     }
   }
 
-  demote(size, index) {
-    const {bonuses, penalties, defends} = this.types[size][index];
-    this.remove(size, index);
-    if (size > 4) {
-      this.addBaddie(size - 2, bonuses, penalties, defends);
+  match(baddie, byIndex) {
+    if (byIndex) {
+      return this.list.findIndex(x => isSame(x));
+    } else {
+      return this.list.find(x => isSame(x));
+    }
+
+    function isSame({bonuses, penalties, defends, size}) {
+      return JSON.stringify(bonuses) === JSON.stringify(baddie.bonuses) &&
+        JSON.stringify(penalties) === JSON.stringify(baddie.penalties) &&
+        JSON.stringify(defends) === JSON.stringify(baddie.defends) &&
+        size === baddie.size; 
     }
   }
-  addBaddie(size, bonuses, penalties, defends, count) {
-    count = count || 1;
-    const match = this.types[size].find(x => {
-      return JSON.stringify(bonuses) === JSON.stringify(x.bonuses) &&
-        JSON.stringify(penalties) === JSON.stringify(x.penalties) &&
-        JSON.stringify(defends) === JSON.stringify(x.defends);
-    });
+  demote(baddie) {
+    const copy = unvue(baddie);
+    copy.size = baddie.size - 2;
+    copy.count = 1;
+    if (copy.size >= 4) {
+      console.log(copy)
+      this.addBaddie(copy);
+      this.remove(baddie);
+    }
+  }
+  addBaddie(baddie, size) {
+    baddie.count = baddie.count || 1;
+    baddie.acted = baddie.acted === undefined ? false: baddie.acted;
+    baddie.size = size || baddie.size || 12;
+    baddie.bonuses = baddie.bonuses || [];
+    baddie.penalties = baddie.penalties || [];
+    baddie.defends = baddie.defends || [];
+    const match = this.match(baddie, false);
     if (match) {
-      match.count += count;
+      match.count++;
     } else {
-      this.types[size].push({ bonuses, penalties, defends, count});
+      this.list.push(baddie);
     }
   }
-  remove(size, index) {
-    if (this.types[size][index].count === 1) {
-      this.types[size].splice(index, 1);
+  remove(baddie) {
+    if (baddie.count <= 1) {
+      const index = this.match(baddie, true);
+      if (index > -1) {
+        this.list.splice(index, 1);
+        if (this.list.length === 0) {
+          store.commit('DELETE_BADDIE', {baddie: this, baddieType: this.baddieType});
+        }
+      }
     } else {
-      this.types[size][index].count--;
+      baddie.count--;
     }
   }
-  boost(name, amount, size, index, {persistent, exclusive}) {
-    const {bonuses, penalties, defends} = this.types[size][index];
-    this.addBaddie(size, bonuses.concat({amount, name, persistent, exclusive}), penalties, defends);
-    this.remove(size, index);
-    this.refresh(size);
+  boost(name, amount, persistent, exclusive, baddie) {
+    const copy = unvue(baddie);
+    copy.count = 1;
+    copy.bonuses.push({amount, name, persistent, exclusive});
+    this.addBaddie(copy);
+    this.remove(baddie);
+    this.refresh(baddie.size);
   }
-  hinder(name, amount, size, index, {persistent, exclusive}) {
-    const {bonuses, penalties, defends} = this.types[size][index];
-    this.addBaddie(size, bonuses, penalties.concat({amount, name, persistent, exclusive}), defends);
-    this.remove(size, index);
-    this.refresh(size);
+  hinder(name, amount, persistent, exclusive, baddie) {
+    const copy = unvue(baddie);
+    copy.penalties.push({amount, name, persistent, exclusive});
+    this.addBaddie(copy);
+    this.remove(baddie);
+    this.refresh(baddie.size);
   }
-  defend(name, amount, size, index) {
-    const {bonuses, penalties, defends} = this.types[size][index];
-    this.addBaddie(size, bonuses, penalties, defends.concat({amount, name}));
-    this.remove(size, index);
-    this.refresh(size);
+  defend(name, amount, baddie) {
+    const copy = unvue(baddie);
+    copy.defends.push({amount, name});
+    this.addBaddie(copy);
+    this.remove(baddie);
+    this.refresh(baddie.size);
   }
   countBySize(size) {
-    return this.types[size].reduce((total, item) => {
-      return total + item.count;
+    return this.list.reduce((total, item) => {
+      if (item.size === size) {
+        return total + item.count;
+      } else {
+        return total;
+      }
     }, 0);
   }
   refresh(size) {
-    this.types[size] = unvue(this.types[size]).reduce((acc, el) => {
+    this.list = unvue(this.list).reduce((acc, el) => {
       const match = acc.find(x => {
         return JSON.stringify(x.bonuses) === JSON.stringify(el.bonuses) &&
           JSON.stringify(x.penalties) === JSON.stringify(el.penalties) &&
-          JSON.stringify(x.defends) === JSON.stringify(el.defends);
+          JSON.stringify(x.defends) === JSON.stringify(el.defends) &&
+          x.size === size;
       });
       if (match) {
         match.count += el.count;
@@ -89,31 +117,39 @@ class Baddie {
     }, []);
     store.dispatch('saveBaddies', this.baddieType);
   }
-  addAffix({name, type, amount, size, index, persistent, exclusive}) {
+  addAffix({name, type, amount, persistent, exclusive}, baddie) {
     if (name === '') return;
     else if (type === 'Bonus') {
-      this.boost(name, amount, size, index, {persistent, exclusive});
+      this.boost(name, amount, persistent, exclusive, baddie);
     } else if (type === 'Penalty') {
-      this.hinder(name, amount, size, index, {persistent, exclusive});
+      this.hinder(name, amount, persistent, exclusive, baddie);
     } else if (type === 'Defend') {
-      this.defend(name, amount, size, index);
+      this.defend(name, amount, baddie);
     }
   }
-  removeAffix(size, affixType, affixIndex, baddieIndex) {
-    const affixData = this.types[size][baddieIndex][affixType];
+  removeAffix(baddie, affixType, affixIndex) {
+    const affixData = baddie[affixType];
     const remove = () => {
-      if (affixData.count > 1) {
-        const copy = unvue(affixData);
-        affixData.count--;
-        copy[type].splice(affixIndex, 1);
-        this.addBaddie(size, copy.bonuses, copy.penalties, copy.defends, 1);
+      if (baddie.count > 1) {
+        const copy = unvue(baddie);
+        copy.count = 1;
+        copy[affixType].splice(affixIndex, 1);
+        this.remove(baddie);
+        this.addBaddie(copy);
       } else {
-        this.types[size][baddieIndex][affixType].splice(affixIndex, 1);
+        baddie[affixType].splice(affixIndex, 1);
       }
-      this.refresh(size);
+      this.refresh(baddie.size);
     }
     if (affixData[affixIndex].exclusive || affixData[affixIndex].persistent) {
-      Vue.dialog.confirm(`This ${affixType} is persistent and/or exclusive. Are you sure you want to remove it?`)
+      Vue.dialog.confirm({
+        title: 'Are you sure?',
+        body: `This ${affixType} is persistent and/or exclusive. Are you sure you want to remove it?`
+      },
+      {
+        okText: 'Yes',
+        cancelText: 'No'
+      })
       .then(() => {
         remove();
       });
@@ -121,9 +157,12 @@ class Baddie {
       remove();
     }
   }
-  takenAction() {
-    this.acted = !this.acted;
+  takenAction(index) {
+    this.list[index].acted = !this.list[index].acted;
     store.dispatch('saveBaddies', this.baddieType);
+  }
+  resetRound() {
+    this.list.forEach(x => x.acted = false);
   }
 }
 

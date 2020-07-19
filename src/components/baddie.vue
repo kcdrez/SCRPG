@@ -13,100 +13,80 @@
       <div class="col" v-if="list.length === 0">
         There are no {{label}}.
       </div>
-      <div class="col-6 mb-3" v-for="(baddie, baddieIndex) in list" :key="baddie.name + baddieIndex">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="d-inline">
-              <a :href="`#${label}-${baddie.name.replace(/\s/g, '')}`" data-toggle="collapse">{{baddie.name}}</a>
-            </h3>
-            <div class="btn-group btn-group-sm float-right w-25">
-              <button class="btn btn-success border-dark" @click="addBaddie(baddie.name)">Add</button>
-              <button class="btn btn-danger border-dark" 
-                @click="$store.commit('DELETE_BADDIE', {baddieIndex, type: label.toLowerCase()})">Remove</button>
-            </div>
-          </div>
-          <div :id="`${label}-${baddie.name.replace(/\s/g, '')}`" class="card-body collapse show">
-            <div v-for="(data, size) in baddie.types" :key="baddie.name + 'size' + size">
-              <template v-if="data.length > 0">
-                <h4>
-                  <a :href="`#${label}-${baddie.name.replace(/\s/g, '')}-${size}`" data-toggle="collapse"><b>Size:</b></a>
-                  <img :src="`images/d${size}.png`" :title="`This minion uses a d${size}`">
-                  <div class="d-inline" :title="`There are ${baddie.countBySize(size)} minions that use this die size`">
-                    ({{baddie.countBySize(size)}})
-                  </div>
-                </h4>
-                <table :id="`${label}-${baddie.name.replace(/\s/g, '')}-${size}`"
-                  class="collapse table table-sm table-striped table-bordered">
-                  <thead class="text-center">
-                    <tr>
-                      <th width="15%">Count</th>
-                      <th width="25%">Bonuses</th>
-                      <th width="25%">Penalties</th>
-                      <th width="25%">Defends</th>
-                      <th width="35%">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(el, index) in data" :key="size + '-' + index">
-                      <td class="text-center align-middle">{{el.count}}</td>
-                      <td class="text-center">
-                        <template v-if="el.bonuses.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(bonus, affixIndex) in el.bonuses" :key="'bonus' + affixIndex">
-                          <div class="remove-affix" 
-                            title="Remove this Bonus"
-                            @click="baddie.removeAffix(size, 'bonuses', affixIndex, index)">&times;</div>
-                          <div><b>Name: </b>{{bonus.name}}</div>
-                          <div><b>Amount: </b>+{{bonus.amount}}</div>
-                          <div v-if="bonus.persistent" class="font-italic">Persistent</div>
-                          <div v-if="bonus.exclusive" class="font-italic">Exclusive</div>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <template v-if="el.penalties.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(penalty, affixIndex) in el.penalties" :key="'penalty' + affixIndex">
-                          <div class="remove-affix" 
-                            title="Remove this Penalty"
-                            @click="baddie.removeAffix(size, 'penalties', affixIndex, index)">&times;</div>
-                          <div><b>Name: </b>{{penalty.name}}</div>
-                          <div><b>Amount: </b>{{penalty.amount}}</div>
-                          <div v-if="penalty.persistent" class="font-italic">Persistent</div>
-                          <div v-if="penalty.exclusive" class="font-italic">Exclusive</div>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <template v-if="el.defends.length === 0">-</template>
-                        <div class="border border-dark position-relative" v-for="(defend, affixIndex) in el.defends" :key="'defend' + affixIndex">
-                          <div class="remove-affix" 
-                            title="Remove this Penalty"
-                            @click="baddie.removeAffix(size, 'defends', affixIndex, index)">&times;</div>
-                          <div><b>Name: </b>{{defend.name}}</div>
-                          <div><b>Amount: </b>{{defend.amount}}</div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <div class="btn-group btn-group-sm w-100 mb-2" role="group">
-                          <button class="btn btn-success border-dark" 
-                            @click="affectBaddie(size, index, 'boost', baddie)">Boost</button>
-                          <button class="btn btn-warning border-dark" 
-                            @click="affectBaddie(size, index, 'hinder', baddie)">Hinder</button>
-                          <button class="btn btn-secondary border-dark" 
-                            @click="affectBaddie(size, index, 'defend', baddie)">Defend</button>
-                        </div>
-                        <div class="btn-group btn-group-sm w-100">
-                          <button class="btn btn-info border-dark" 
-                            @click="demoteBaddie(baddie, size, index)">Demote</button>
-                          <button class="btn btn-danger border-dark" 
-                            @click="removeBaddie(baddie, size, index)">Remove</button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
+      <table class="table table-sm table-striped table-bordered col" v-else>
+        <thead class="text-center">
+          <tr>
+            <th width="10%">Name</th>
+            <th width="10%">Die Size</th>
+            <th width="10%">Count</th>
+            <th width="15%">Bonuses</th>
+            <th width="15%">Penalties</th>
+            <th width="15%">Defends</th>
+            <th width="25%">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="baddie in list">
+            <tr v-for="(baddieRow, index) in baddie.list" :key="baddie.name + '-' + index">
+              <td class="text-center align-middle text-capitalize">{{baddie.name}}</td>
+              <td class="text-center align-middle">
+                <img :src="`images/d${baddieRow.size}.png`" :title="`This minion uses a d${baddieRow.size}`">
+              </td>
+              <td class="text-center align-middle">{{baddieRow.count}}</td>
+              <td class="text-center">
+                <template v-if="baddieRow.bonuses.length === 0">-</template> 
+                <div class="border border-dark position-relative" v-for="(bonus, affixIndex) in baddieRow.bonuses" :key="'bonus' + affixIndex">
+                  <div class="remove-affix" 
+                    title="Remove this Bonus"
+                    @click="baddie.removeAffix(baddieRow, 'bonuses', affixIndex)">&times;</div>
+                  <div><b>Name: </b>{{bonus.name}}</div>
+                  <div><b>Amount: </b>+{{bonus.amount}}</div>
+                  <div v-if="bonus.persistent" class="font-italic">Persistent</div>
+                  <div v-if="bonus.exclusive" class="font-italic">Exclusive</div>
+                </div>
+              </td>
+              <td class="text-center">
+                <template v-if="baddieRow.penalties.length === 0">-</template>
+                <div class="border border-dark position-relative" v-for="(penalty, affixIndex) in baddieRow.penalties" :key="'penalty' + affixIndex">
+                  <div class="remove-affix" 
+                    title="Remove this Penalty"
+                    @click="baddie.removeAffix(baddieRow, 'penalties', affixIndex)">&times;</div>
+                  <div><b>Name: </b>{{penalty.name}}</div>
+                  <div><b>Amount: </b>{{penalty.amount}}</div>
+                  <div v-if="penalty.persistent" class="font-italic">Persistent</div>
+                  <div v-if="penalty.exclusive" class="font-italic">Exclusive</div>
+                </div>
+              </td>
+              <td class="text-center">
+                <template v-if="baddieRow.defends.length === 0">-</template>
+                <div class="border border-dark position-relative" v-for="(defend, affixIndex) in baddieRow.defends" :key="'defend' + affixIndex">
+                  <div class="remove-affix" 
+                    title="Remove this Penalty"
+                    @click="baddie.removeAffix(baddieRow, 'defends', affixIndex)">&times;</div>
+                  <div><b>Name: </b>{{defend.name}}</div>
+                  <div><b>Amount: </b>{{defend.amount}}</div>
+                </div>
+              </td>
+              <td class="align-middle">
+                <div class="btn-group btn-group-sm w-100 mb-2" role="group">
+                  <button class="btn btn-success border-dark" :title="`Add a Bonus to this ${label}`"
+                    @click="affectBaddie(baddieRow.size, 'boost', baddie, baddieRow)">Boost</button>
+                  <button class="btn btn-warning border-dark" :title="`Add a Penalty to this ${label}`"
+                    @click="affectBaddie(baddieRow.size, 'hinder', baddie, baddieRow)">Hinder</button>
+                  <button class="btn btn-secondary border-dark" :title="`Add a Defend to this ${label}`"
+                    @click="affectBaddie(baddieRow.size, 'defend', baddie, baddieRow)">Defend</button>
+                </div>
+                <div class="btn-group btn-group-sm w-100">
+                  <button class="btn btn-info border-dark" :title="`Demote this ${label} one die size`"
+                    @click="demoteBaddie(baddie, baddieRow)" :disabled="baddieRow.size <= 4">Demote</button>
+                  <button class="btn btn-danger border-dark" :title="`Remove one ${label} from this group from the scene`"
+                    @click="removeBaddie(baddie, baddieRow)">Remove</button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
     </div>
     <div :id="`createModal-${label}`" class="modal" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
@@ -164,7 +144,7 @@
               </div>
               <input class="form-control" type="text"
                 v-model.trim="baddieData.affix.name"
-                @keydown.enter="baddieData.affix.target.addAffix(baddieData.affix)">
+                @keydown.enter="addAffix">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -175,7 +155,7 @@
                 type="number" 
                 :max="baddieData.affix.max"
                 :min="baddieData.affix.min"
-                @keydown.enter="baddieData.affix.target.addAffix(baddieData.affix)">
+                @keydown.enter="addAffix">
             </div>
             <div class="d-inline" v-if="baddieData.affix.type !== 'Defend'">
               <label>Persistent?</label>
@@ -188,7 +168,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" 
-              @click="baddieData.affix.target.addAffix(baddieData.affix)" data-dismiss="modal">Add</button>
+              @click="addAffix">Add</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -226,8 +206,8 @@
             min: 0,
             type: '',
             size: 0,
-            index: -1,
             target: null,
+            parent: null,
             persistent: false,
             exclusive: false
           }
@@ -238,15 +218,21 @@
       createBaddie() {
         const {name, size, count} = this.baddieData;
         if (name !== '') {
+          const baddie = new Baddie({
+            name, 
+            size, 
+            count
+          }, this.label.toLowerCase());
           this.$store.commit('UPSERT_BADDIE', 
-            {baddie: new Baddie(name, size, count, null, this.label.toLowerCase()), baddieType: this.label.toLowerCase()});
+            {baddie, baddieType: this.label.toLowerCase()});
+          $(`#createModal-${this.label}`).modal('hide');
         }
       },
       addBaddie(name) {
         this.baddieData.name = name;
         $('#createModal-' + this.label).modal('show');
       },
-      affectBaddie(size, index, type, baddie) {
+      affectBaddie(size, type, parent, target) {
         if (type === 'boost') {
           this.baddieData.affix.max = 4;
           this.baddieData.affix.min = 1;
@@ -268,18 +254,24 @@
           return;
         }
         this.baddieData.affix.size = size;
-        this.baddieData.affix.index = index;
-        this.baddieData.affix.target = baddie;
+        this.baddieData.affix.parent = parent;
+        this.baddieData.affix.target = target;
         this.$store.dispatch('saveBaddies', this.label.toLowerCase());
         $(`#affixModal-${this.label}`).modal('show');
       },
-      demoteBaddie(baddie, size, index) {
-        baddie.demote(size, index);
+      demoteBaddie(parent, target) {
+        parent.demote(target);
         this.$store.dispatch('saveBaddies', this.label.toLowerCase());
       },
-      removeBaddie(baddie, size, index) {
-        baddie.remove(size, index);
+      removeBaddie(parent, target) {
+        parent.remove(target);
         this.$store.dispatch('saveBaddies', this.label.toLowerCase());
+      },
+      addAffix() {
+        if (this.baddieData.affix.name !== '') {
+          this.baddieData.affix.parent.addAffix(this.baddieData.affix, this.baddieData.affix.target);
+          $(`#affixModal-${this.label}`).modal('hide');
+        }
       }
     }
   };
