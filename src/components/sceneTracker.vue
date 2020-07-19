@@ -52,6 +52,18 @@
               </tr>
             </thead>
             <tbody class="text-center">
+              <tr v-if="scene.name !== ''">
+                <td class="text-capitalize" @click="actorActed(scene)">
+                  <i class="fa fa-check text-success" v-if="scene.acted"></i>
+                  {{scene.name}}
+                </td>
+                <td class="text-capitalize" @click="actorActed(scene)">Environment</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-primary border-dark" @click="actorActed(scene)" title="Toggle the Environment to have acted already in the current round">Acted</button>
+                  </div>
+                </td>
+              </tr>
               <tr v-for="player in players" :key="'roundTracker-player' + player.name">
                 <td class="text-capitalize" @click="actorActed(player)">
                   <i class="fa fa-check text-success" v-if="player.acted"></i>
@@ -125,6 +137,12 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
+                <div class="input-group-text">Name</div>
+              </div>
+              <input class="form-control" v-model.trim="scene.text" type="text" ref="scene" @keypress.enter="createScene">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
                 <div class="input-group-text">Green</div>
               </div>
               <input class="form-control" v-model.number="green" type="number" ref="green" @keypress.enter="createScene">
@@ -143,11 +161,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="createScene">Create</button>
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="createScene" :disabled="scene.text === ''">Create</button>
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
           </div>
         </div>
-      </div>      
+      </div>
     </div>
     <div id="addPlayerModal" class="modal" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
@@ -160,14 +178,14 @@
           </div>
           <div class="modal-body">
             Add a player to the Scene.
-            <input type="text" v-model="newPlayerName" class="form-control form-control-sm" @keypress.enter="addPlayer" ref="newPlayerName">
+            <input type="text" v-model.trim="newPlayerName" class="form-control form-control-sm" @keypress.enter="addPlayer" ref="newPlayerName">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="addPlayer">Create</button>
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="addPlayer" :disabled="newPlayerName === ''">Create</button>
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
           </div>
         </div>
-      </div>      
+      </div>
     </div>
     <div id="renamePlayerModal" class="modal" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
@@ -179,16 +197,16 @@
             </button>
           </div>
           <div class="modal-body">
-            Rename the player ({{this.renamePlayerData.target.name || '---'}})
+            Rename the player ({{renamePlayerData.target.name || '---'}})
             <input type="text" v-model.trim="renamePlayerData.text" class="form-control form-control-sm" @keypress.enter="renamePlayer" ref="renamePlayer">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="renamePlayer">Rename</button>
+            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="renamePlayer" :disabled="renamePlayerData.text === ''">Rename</button>
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
           </div>
         </div>
-      </div>      
-    </div>    
+      </div>
+    </div>
   </div>
 </template>
 
@@ -209,7 +227,10 @@
         scene: {
           green: [],
           yellow: [],
-          red: []
+          red: [],
+          name: '',
+          text: '',
+          acted: ''
         },
         players: [],
         newPlayerName: '',
@@ -223,19 +244,22 @@
     },
     methods: {
       createScene() {
-        this.clearScene();
-
-        for (let i = 0; i < this.green; i++) {
-          this.scene.green.push({checked: false});
+        if (this.scene.text !== '') {
+          this.clearScene();
+  
+          for (let i = 0; i < this.green; i++) {
+            this.scene.green.push({checked: false});
+          }
+          for (let i = 0; i < this.yellow; i++) {
+            this.scene.yellow.push({checked: false});
+          }
+          for (let i = 0; i < this.red; i++) {
+            this.scene.red.push({checked: false});
+          }
+          this.scene.name = this.scene.text;
+          Cookies.set('sceneTracker', this.scene);
+          $('#sceneTrackerModal').modal('hide');
         }
-        for (let i = 0; i < this.yellow; i++) {
-          this.scene.yellow.push({checked: false});
-        }
-        for (let i = 0; i < this.red; i++) {
-          this.scene.red.push({checked: false});
-        }
-        Cookies.set('sceneTracker', this.scene);
-        $('#sceneTrackerModal').modal('hide');
       },
       progressScene(item) {
         item.checked = !item.checked;
@@ -245,6 +269,8 @@
         this.scene.green = [];
         this.scene.yellow = [];
         this.scene.red = [];
+        this.scene.acted = false;
+        this.scene.name = '';
         Cookies.set('sceneTracker', this.scene);
       },
       resetScene() {
@@ -338,7 +364,7 @@
     },
     mounted() {
       $('#sceneTrackerModal').on('shown.bs.modal', e => {
-        this.$refs.green.focus();
+        this.$refs.scene.focus();
       });
       $('#addPlayerModal').on('shown.bs.modal', e => {
         this.$refs.newPlayerName.focus();

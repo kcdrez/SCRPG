@@ -33,12 +33,13 @@ class Baddie {
     }
   }
   demote(baddie) {
-    this.remove(baddie);
     const copy = unvue(baddie);
     copy.size = baddie.size - 2;
     copy.count = 1;
     if (copy.size >= 4) {
+      console.log(copy)
       this.addBaddie(copy);
+      this.remove(baddie);
     }
   }
   addBaddie(baddie, size) {
