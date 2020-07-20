@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 
 Vue.use(VueRouter);
 
-import CharacterCreationPage from '../pages/characterCreation.vue';
+// import CharacterCreationPage from '../pages/characterCreation.vue';
 import GMToolsPage from '../pages/gmTools.vue';
 
 import store from '../vuex-state/store';
