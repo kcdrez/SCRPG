@@ -6,8 +6,8 @@
         <h1 class="col text-center">GM Management</h1>
       </div>
       <sceneTracker />
-      <baddies :list="$store.state.minions" label="Minions"></baddies>
-      <baddies :list="$store.state.lieutenants" label="Lieutenants"></baddies>
+      <baddies label="Minions"></baddies>
+      <baddies label="Lieutenants"></baddies>
       <villains />
     </div>
   </div>

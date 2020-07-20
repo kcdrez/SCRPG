@@ -77,8 +77,10 @@
                     @click="affectBaddie(baddieRow.size, 'defend', baddie, baddieRow)">Defend</button>
                 </div>
                 <div class="btn-group btn-group-sm w-100">
-                  <button class="btn btn-info border-dark" :title="`Demote this ${label} one die size`"
+                  <button class="btn btn-info border-dark" :title="`Demote this ${label} one die size (min 4)`"
                     @click="demoteBaddie(baddie, baddieRow)" :disabled="baddieRow.size <= 4">Demote</button>
+                  <button class="btn btn-success border-dark" :title="`Promote this ${label} one die size (max 12)`"
+                    @click="promoteBaddie(baddie, baddieRow)" :disabled="baddieRow.size >= 12">Promote</button>
                   <button class="btn btn-danger border-dark" :title="`Remove one ${label} from this group from the scene`"
                     @click="removeBaddie(baddie, baddieRow)">Remove</button>
                 </div>
@@ -184,10 +186,6 @@
   export default {
     name: 'BaddieList',
     props: {
-      list: {
-        type: Array,
-        required: true
-      },
       label: {
         type: String,
         required: true
@@ -212,6 +210,19 @@
             exclusive: false
           }
         }
+      }
+    },
+    computed: {
+      list() {
+        return this.$store.state[this.label.toLowerCase()].sort((a, b) => {
+          if (a.name > b.name) {
+            return 1;
+          } else if (b.name > a.name) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
       }
     },
     methods: {
@@ -261,6 +272,10 @@
       },
       demoteBaddie(parent, target) {
         parent.demote(target);
+        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
+      },
+      promoteBaddie(parent, target) {
+        parent.promote(target);
         this.$store.dispatch('saveBaddies', this.label.toLowerCase());
       },
       removeBaddie(parent, target) {

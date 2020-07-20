@@ -37,7 +37,17 @@ class Baddie {
     copy.size = baddie.size - 2;
     copy.count = 1;
     if (copy.size >= 4) {
-      console.log(copy)
+      this.addBaddie(copy);
+      this.remove(baddie);
+    }
+  }
+  promote(baddie) {
+    if (baddie.size >= 12) {
+      return;
+    } else {
+      const copy = unvue(baddie);
+      copy.size = baddie.size + 2;
+      copy.count = 1;
       this.addBaddie(copy);
       this.remove(baddie);
     }
@@ -51,7 +61,7 @@ class Baddie {
     baddie.defends = baddie.defends || [];
     const match = this.match(baddie, false);
     if (match) {
-      match.count++;
+      match.count += baddie.count;
     } else {
       this.list.push(baddie);
     }
@@ -75,21 +85,23 @@ class Baddie {
     copy.bonuses.push({amount, name, persistent, exclusive});
     this.addBaddie(copy);
     this.remove(baddie);
-    this.refresh(baddie.size);
+    this.refresh();
   }
   hinder(name, amount, persistent, exclusive, baddie) {
     const copy = unvue(baddie);
+    copy.count = 1;
     copy.penalties.push({amount, name, persistent, exclusive});
     this.addBaddie(copy);
     this.remove(baddie);
-    this.refresh(baddie.size);
+    this.refresh();
   }
   defend(name, amount, baddie) {
     const copy = unvue(baddie);
+    copy.count = 1;
     copy.defends.push({amount, name});
     this.addBaddie(copy);
     this.remove(baddie);
-    this.refresh(baddie.size);
+    this.refresh();
   }
   countBySize(size) {
     return this.list.reduce((total, item) => {
@@ -100,13 +112,13 @@ class Baddie {
       }
     }, 0);
   }
-  refresh(size) {
+  refresh() {
     this.list = unvue(this.list).reduce((acc, el) => {
       const match = acc.find(x => {
         return JSON.stringify(x.bonuses) === JSON.stringify(el.bonuses) &&
           JSON.stringify(x.penalties) === JSON.stringify(el.penalties) &&
           JSON.stringify(x.defends) === JSON.stringify(el.defends) &&
-          x.size === size;
+          x.size === el.size;
       });
       if (match) {
         match.count += el.count;
@@ -114,7 +126,19 @@ class Baddie {
         acc.push(el);
       }
       return acc;
-    }, []);
+    }, []).sort((a, b) => {
+      if (a.size !== b.size) {
+        return a.size > b.size ? 1: -1;
+      } else if (a.bonuses.length !== b.bonuses.length) {
+        return a.bonuses.length > b.bonuses.length ? 1: -1;
+      } else if (a.penalties.length !== b.penalties.length) {
+        return a.penalties.length > b.penalties.length ? 1: -1;
+      } else if (a.defends.length !== b.defends.length) {
+        return a.defends.length > b.defends.length ? 1: -1;
+      } else {
+        return 0;
+      }
+    });
     store.dispatch('saveBaddies', this.baddieType);
   }
   addAffix({name, type, amount, persistent, exclusive}, baddie) {
@@ -139,7 +163,7 @@ class Baddie {
       } else {
         baddie[affixType].splice(affixIndex, 1);
       }
-      this.refresh(baddie.size);
+      this.refresh();
     }
     if (affixData[affixIndex].exclusive || affixData[affixIndex].persistent) {
       Vue.dialog.confirm({
@@ -178,14 +202,49 @@ class Villain {
 
   boost(name, amount, persistent, exclusive) {
     this.bonuses.push({name, amount, persistent, exclusive});
+    this.bonuses.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1: -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? 1: -1;
+      } else if (a.persistent !== b.persistent) {
+        return a.persistent ? 1: -1;
+      } else if (a.exclusive !== b.exclusive) {
+        return a.exclusive ? 1: -1;
+      } else {
+        return 0;
+      }
+    })
     this.refresh();
   }
   hinder(name, amount, persistent, exclusive) {
     this.penalties.push({name, amount, persistent, exclusive});
+    this.penalties.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1: -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? -1: 1;
+      } else if (a.persistent !== b.persistent) {
+        return a.persistent ? 1: -1;
+      } else if (a.exclusive !== b.exclusive) {
+        return a.exclusive ? 1: -1;
+      } else {
+        return 0;
+      }
+    });
     this.refresh();
   }
   defend(name, amount) {
     this.defends.push({name, amount});
+    this.defends.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1: -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? 1: -1;
+      } else {
+        return 0;
+      }
+    });
     this.refresh();
   }
   addAffix({name, type, amount, persistent, exclusive}) {

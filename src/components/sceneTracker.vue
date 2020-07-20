@@ -230,7 +230,7 @@
           red: [],
           name: '',
           text: '',
-          acted: ''
+          acted: false
         },
         players: [],
         newPlayerName: '',
@@ -335,6 +335,7 @@
         this.villains.forEach(x => x.acted = false);
         this.lieutenants.forEach(x => x.resetRound());
         this.minions.forEach(x => x.resetRound() );
+        this.scene.acted = false;
       }
     },
     computed: {
