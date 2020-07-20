@@ -64,6 +64,7 @@ class Baddie {
       match.count += baddie.count;
     } else {
       this.list.push(baddie);
+      this.refresh();
     }
   }
   remove(baddie) {
@@ -71,6 +72,7 @@ class Baddie {
       const index = this.match(baddie, true);
       if (index > -1) {
         this.list.splice(index, 1);
+        this.refresh();
         if (this.list.length === 0) {
           store.commit('DELETE_BADDIE', {baddie: this, baddieType: this.baddieType});
         }
@@ -83,6 +85,19 @@ class Baddie {
     const copy = unvue(baddie);
     copy.count = 1;
     copy.bonuses.push({amount, name, persistent, exclusive});
+    copy.bonuses.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1: -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? -1: 1;
+      } else if (a.persistent !== b.persistent) {
+        return a.persistent ? -1: 1;
+      } else if (a.exclusive !== b.exclusive) {
+        return a.exclusive ? -1: 1;
+      } else {
+        return 0;
+      }
+    });
     this.addBaddie(copy);
     this.remove(baddie);
     this.refresh();
@@ -91,6 +106,19 @@ class Baddie {
     const copy = unvue(baddie);
     copy.count = 1;
     copy.penalties.push({amount, name, persistent, exclusive});
+    copy.penalties.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1: -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? 1: -1;
+      } else if (a.persistent !== b.persistent) {
+        return a.persistent ? -1: 1;
+      } else if (a.exclusive !== b.exclusive) {
+        return a.exclusive ? -1: 1;
+      } else {
+        return 0;
+      }
+    });
     this.addBaddie(copy);
     this.remove(baddie);
     this.refresh();
@@ -99,6 +127,15 @@ class Baddie {
     const copy = unvue(baddie);
     copy.count = 1;
     copy.defends.push({amount, name});
+    copy.defends.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1: -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? -1: 1;
+      } else {
+        return 0;
+      }
+    });
     this.addBaddie(copy);
     this.remove(baddie);
     this.refresh();
@@ -128,13 +165,13 @@ class Baddie {
       return acc;
     }, []).sort((a, b) => {
       if (a.size !== b.size) {
-        return a.size > b.size ? 1: -1;
+        return a.size > b.size ? -1: 1;
       } else if (a.bonuses.length !== b.bonuses.length) {
-        return a.bonuses.length > b.bonuses.length ? 1: -1;
+        return a.bonuses.length > b.bonuses.length ? -1: 1;
       } else if (a.penalties.length !== b.penalties.length) {
-        return a.penalties.length > b.penalties.length ? 1: -1;
+        return a.penalties.length > b.penalties.length ? -1: 1;
       } else if (a.defends.length !== b.defends.length) {
-        return a.defends.length > b.defends.length ? 1: -1;
+        return a.defends.length > b.defends.length ? -1: 1;
       } else {
         return 0;
       }
@@ -206,15 +243,15 @@ class Villain {
       if (a.name !== b.name) {
         return a.name > b.name ? 1: -1;
       } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? 1: -1;
+        return a.amount > b.amount ? -1: 1;
       } else if (a.persistent !== b.persistent) {
-        return a.persistent ? 1: -1;
+        return a.persistent ? -1: 1;
       } else if (a.exclusive !== b.exclusive) {
-        return a.exclusive ? 1: -1;
+        return a.exclusive ? -1: 1;
       } else {
         return 0;
       }
-    })
+    });
     this.refresh();
   }
   hinder(name, amount, persistent, exclusive) {
@@ -223,11 +260,11 @@ class Villain {
       if (a.name !== b.name) {
         return a.name > b.name ? 1: -1;
       } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? -1: 1;
+        return a.amount > b.amount ? 1: -1;
       } else if (a.persistent !== b.persistent) {
-        return a.persistent ? 1: -1;
+        return a.persistent ? -1: 1;
       } else if (a.exclusive !== b.exclusive) {
-        return a.exclusive ? 1: -1;
+        return a.exclusive ? -1: 1;
       } else {
         return 0;
       }
@@ -240,7 +277,7 @@ class Villain {
       if (a.name !== b.name) {
         return a.name > b.name ? 1: -1;
       } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? 1: -1;
+        return a.amount > b.amount ? -1: 1;
       } else {
         return 0;
       }
