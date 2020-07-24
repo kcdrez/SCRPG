@@ -11,10 +11,10 @@
           <h4>Scene Tracker</h4>
           <div class="btn-group btn-group-sm w-50">
             <button class="btn btn-sm btn-success border-dark" 
-              data-toggle="modal" data-target="#sceneTrackerModal" title="Create a new Scene Tracker">Create</button>
-            <button class="btn btn-sm btn-warning border-dark" @click="clearScene" title="Clear the Scene Tracker">Clear</button>
+              data-toggle="modal" data-target="#sceneTrackerModal" title="Create a new Scene Tracker">Create Scene</button>
+            <button class="btn btn-sm btn-warning border-dark" @click="clearScene" title="Clear the Scene Tracker">Clear Scene</button>
             <button class="btn btn-sm btn-danger border-dark" @click="resetScene" 
-              title="Reset the Environment, removing the Scene Tracker and all Minions, Lieutenants, and Villains">Reset</button>
+              title="Reset the Environment, removing the Scene Tracker and all Minions, Lieutenants, Villains, and Obstacles">Reset Scene</button>
           </div>
           <div class="" v-if="noScenes">
             There is no Scene Tracker.
@@ -33,22 +33,80 @@
               <img src="images/red.png" v-else>
             </div>
           </div>
+          <hr class="border-dark">
+          <div class="container">
+            <div class="row">
+              <div class="col">
+                <h4>Obstacles</h4>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-success border-dark" data-toggle="modal" data-target="#obstacleModal" title="Add a new Obstacle to the Scene">Add Obstacle</button>
+                  <button class="btn btn-danger border-dark" title="Remove all Obstacles from the Scene" @click="scene.obstacles = []">Reset Obstacles</button>
+                </div>
+              </div>
+            </div>
+            <div class="row" v-for="(obstacle, obstacleIndex) in scene.obstacles" :key="obstacle.name">
+              <div class="mb-1">
+                <div class="mb-1">
+                  <h5 class="d-inline">{{obstacle.name}}</h5>
+                  <button class="btn btn-sm btn-danger border-dark mx-1" title="Remove this Obstacle from the Scene" 
+                    @click="scene.obstacles.splice(obstacleIndex, 1)">Remove</button>
+                </div>
+                <div class="input-group input-group-sm mb-1">
+                  <input type="text" class="form-control" placeholder="New Obstacle Description" v-model.trim="obstacle.newEntry">
+                  <div class="input-group-append">
+                    <button class="btn btn-success border-dark" type="button"  title="Add a new entry to this Obstacle" 
+                      @click="addObstacle(obstacle)">Add Entry</button>
+                  </div>
+                </div>
+              </div>
+              <table class="col table table-sm table-stripped table-bordered table-dark">
+                <thead>
+                  <tr>
+                    <th width="20%">Completed?</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, itemIndex) in obstacle.list" :key="item.label">
+                    <td>
+                      <input type="checkbox" v-model="item.completed">
+                    </td>
+                    <td>
+                      <input type="text" v-model.trim="item.tempLabel" v-if="item.editing" class="form-control form-control-sm">
+                      <template v-else>{{item.label}}</template>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <button class="btn btn-primary border-dark" @click="item.editing = true" v-if="!item.editing">Edit</button>
+                        <template v-else>
+                          <button class="btn btn-success border-dark" @click="item.editing = false; item.label = item.tempLabel">Save</button>
+                          <button class="btn btn-secondary border-dark" @click="item.editing = false">Cancel</button>
+                        </template>
+                        <button class="btn btn-danger border-dark" @click="obstacle.list.splice(itemIndex, 1)">Remove</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
         <div class="col-5 round-tracker">
           <h4 class="text-center">Round Tracker</h4>
           <div class="text-center mb-3">
             <div class="btn-group btn-group-sm w-75 mx-auto">
               <button class="btn btn-success border-dark" data-toggle="modal" data-target="#addPlayerModal" title="Add a new player to the scene">Add Player</button>
-              <button class="btn btn-danger border-dark" title="Clear all players from the scene" @click="clearPlayers">Clear Players</button>
-              <button class="btn btn-warning border-dark" @click="resetRound" title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
+              <button class="btn btn-warning border-dark" title="Clear all players from the scene" @click="clearPlayers">Clear Players</button>
+              <button class="btn btn-danger border-dark" @click="resetRound" title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
             </div>
           </div>
           <table class="table table-sm table-bordered table-dark table-stripped">
             <thead class="text-center">
               <tr>
-                <th>Actor Name</th>
-                <th>Actor Type</th>
-                <th>Actions</th>
+                <th width="40%">Actor Name</th>
+                <th width="30%">Actor Type</th>
+                <th width="30%">Actions</th>
               </tr>
             </thead>
             <tbody class="text-center">
@@ -207,6 +265,45 @@
         </div>
       </div>
     </div>
+    <div id="obstacleModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add an Obstacle</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group input-group-sm mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Name</span>
+              </div>
+              <input type="text" v-model.trim="obstacle.name" class="form-control" placeholder="Obstacle Name" @keypress.enter="addObstacle()">
+            </div>
+            <div>
+              <h6>Add some obstacles (optional)</h6>
+              <div class="input-group input-group-sm mb-3">
+                <input type="text" class="form-control" placeholder="Obstacle Description" v-model.trim="obstacle.description" @keydown.enter="addTempObstacle">
+                <div class="input-group-append">
+                  <button class="btn btn-primary border-dark" type="button" @click="addTempObstacle" :disabled="obstacle.description === ''">Add</button>
+                </div>
+              </div>
+              <div class="input-group input-group-sm mb-1" v-for="(item, index) in obstacle.list" :key="'obstacle' + index">
+                <input type="text" class="form-control" placeholder="Obstacle Description" v-model.trim="item.label">
+                <div class="input-group-append">
+                  <button class="btn btn-danger border-dark" type="button" @click="obstacle.list.splice(index, 1)">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success" type="button" data-dismiss="modal" @click="addObstacle()" :disabled="obstacle.name === ''">Save</button>
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>    
   </div>
 </template>
 
@@ -230,7 +327,16 @@
           red: [],
           name: '',
           text: '',
-          acted: false
+          acted: false,
+          obstacles: [
+            {
+              name: 'Argent Adept is in trouble!',
+              newEntry: '',
+              list: [
+                { label: 'complete the thing', completed: false }
+              ]
+            }
+          ]
         },
         players: [],
         newPlayerName: '',
@@ -239,6 +345,11 @@
             name: ''
           },
           text: ''
+        },
+        obstacle: {
+          name: '',
+          description: '',
+          list: []
         }
       }
     },
@@ -257,13 +368,11 @@
             this.scene.red.push({checked: false});
           }
           this.scene.name = this.scene.text;
-          Cookies.set('sceneTracker', this.scene);
           $('#sceneTrackerModal').modal('hide');
         }
       },
       progressScene(item) {
         item.checked = !item.checked;
-        Cookies.set('sceneTracker', this.scene);
       },
       clearScene() {
         this.scene.green = [];
@@ -271,7 +380,7 @@
         this.scene.red = [];
         this.scene.acted = false;
         this.scene.name = '';
-        Cookies.set('sceneTracker', this.scene);
+        this.scene.obstacles = [];
       },
       resetScene() {
         this.$dialog.confirm({
@@ -286,7 +395,6 @@
       addPlayer() {
         if (this.newPlayerName !== '') {
           this.players.push({name: this.newPlayerName, acted: false, type: 'player'});
-          Cookies.set('players', this.players);
           $('#addPlayerModal').modal('hide');
         }
       },
@@ -294,7 +402,6 @@
         const index = this.players.findIndex(x => x.name === playerName);
         if (index > -1) {
           this.players.splice(index, 1);
-          Cookies.set('players', this.players);
         }
       },
       clearPlayers() {
@@ -307,7 +414,6 @@
         })
         .then(r => {
           this.players = [];
-          Cookies.set('players', this.players);
         });
       },
       renamePlayerModal(player) {
@@ -327,7 +433,6 @@
           actor.takenAction(index);
         } else {
           actor.acted = !actor.acted;
-          Cookies.set('players', this.players);
         }
       },
       resetRound() {
@@ -336,6 +441,38 @@
         this.lieutenants.forEach(x => x.resetRound());
         this.minions.forEach(x => x.resetRound() );
         this.scene.acted = false;
+      },
+      addObstacle(obstacle) {
+        if (obstacle) {
+          obstacle.list.push({
+            label: obstacle.newEntry,
+            tempLabel: obstacle.newEntry,
+            completed: false,
+            editing: false
+          });
+          obstacle.newEntry = '';
+        } else if (this.obstacle.name !== '') {
+          this.scene.obstacles.push({
+            name: this.obstacle.name,
+            newEntry: '',
+            list: unvue(this.obstacle.list)
+          });
+          this.obstacle.name = '';
+          this.obstacle.list = [];
+          this.obstacle.description = '';
+          $("#obstacleModal").modal('hide');
+        }
+      },
+      addTempObstacle() {
+        if (this.obstacle.description !== '') {
+          this.obstacle.list.push({
+            label: this.obstacle.description,
+            tempLabel: this.obstacle.description,
+            completed: false,
+            editing: false
+          });
+          this.obstacle.description = '';
+        }
       }
     },
     computed: {
@@ -353,9 +490,13 @@
     created() {
       const sceneData = Cookies.getJSON('sceneTracker');
       if (sceneData) {
-        this.scene.green = sceneData.green;
-        this.scene.yellow = sceneData.yellow;
-        this.scene.red = sceneData.red;
+        this.scene.green = sceneData.green || [];
+        this.scene.yellow = sceneData.yellow || [];
+        this.scene.red = sceneData.red || [];
+        this.scene.obstacles = sceneData.obstacles || [];
+        this.scene.name = sceneData.name || '';
+        this.scene.text = sceneData.text || '';
+        this.scene.acted = sceneData.acted || false;
       }
 
       const playerData = Cookies.getJSON('players');
@@ -373,6 +514,20 @@
       $('#addPlayerModal').on('shown.bs.modal', e => {
         this.$refs.renamePlayer.focus();
       });
+    },
+    watch: {
+      scene: {
+        deep: true,
+        handler(newVal) {
+          Cookies.set('sceneTracker', newVal);
+        }
+      },
+      players: {
+        deep: true,
+        handler(newVal) {
+          Cookies.set('players', newVal);
+        }
+      }
     }
   };
 </script>
