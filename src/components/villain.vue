@@ -2,7 +2,7 @@
   <div class="villain-list">
     <div class="row baddie-list-header">
       <div class="col">
-        <h3><a href="#villain-Data" data-toggle="collapse">Villains</a></h3>
+        <h2><a href="#villain-Data" data-toggle="collapse">Villains</a></h2>
         <div class="btn-group btn-group-sm">
           <button class="btn btn-sm btn-success border-dark" 
             data-toggle="modal" data-target="#createModal-villain">Create</button>

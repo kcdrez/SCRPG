@@ -2,7 +2,7 @@
   <div class="baddie-list">
     <div class="row baddie-list-header">
       <div class="col">
-        <h3><a :href="`#${label}-Data`" data-toggle="collapse">{{label}}</a></h3>
+        <h2><a :href="`#${label}-Data`" data-toggle="collapse">{{label}}</a></h2>
         <div class="btn-group btn-group-sm">
           <button class="btn btn-sm btn-success border-dark" 
             data-toggle="modal" :data-target="`#createModal-${label}`">Create</button>
