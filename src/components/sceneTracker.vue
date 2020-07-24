@@ -2,13 +2,13 @@
   <div class="scene-tracker-component">
     <div class="row scene-tracker-header">
       <div class="col">
-        <h3><a href="#sceneTrackerData" data-toggle="collapse">Environment</a></h3>
+        <h2><a href="#sceneTrackerData" data-toggle="collapse">Environment</a></h2>
       </div>
     </div>
     <div id="sceneTrackerData" class="collapse show">
       <div class="row">
         <div class="col-7 text-center scene-tracker">
-          <h4>Scene Tracker</h4>
+          <h3>Scene Tracker</h3>
           <div class="btn-group btn-group-sm w-50">
             <button class="btn btn-sm btn-success border-dark" 
               data-toggle="modal" data-target="#sceneTrackerModal" title="Create a new Scene Tracker">Create Scene</button>
@@ -16,10 +16,11 @@
             <button class="btn btn-sm btn-danger border-dark" @click="resetScene" 
               title="Reset the Environment, removing the Scene Tracker and all Minions, Lieutenants, Villains, and Obstacles">Reset Scene</button>
           </div>
-          <div class="" v-if="noScenes">
+          <div v-if="noScenes">
             There is no Scene Tracker.
           </div>
-          <div class="" v-else>
+          <div v-else>
+            <h4>{{scene.name}}</h4>
             <div v-for="(item, index) in scene.green" class="d-inline" @click="progressScene(item)" :key="'green' + index">
               <img src="images/green_checked.png" v-if="item.checked">
               <img src="images/green.png" v-else>
@@ -33,62 +34,65 @@
               <img src="images/red.png" v-else>
             </div>
           </div>
-          <hr class="border-dark">
-          <div class="container">
+          <div class="container p-0">
             <div class="row">
               <div class="col">
-                <h4>Obstacles</h4>
+                <hr class="border-dark">
+                <h3>Obstacles</h3>
                 <div class="btn-group btn-group-sm">
-                  <button class="btn btn-success border-dark" data-toggle="modal" data-target="#obstacleModal" title="Add a new Obstacle to the Scene">Add Obstacle</button>
+                  <button class="btn btn-success border-dark" @click="addObstacleModal" title="Add a new Obstacle to the Scene">Add Obstacle</button>
                   <button class="btn btn-danger border-dark" title="Remove all Obstacles from the Scene" @click="scene.obstacles = []">Reset Obstacles</button>
                 </div>
               </div>
             </div>
             <div class="row" v-for="(obstacle, obstacleIndex) in scene.obstacles" :key="obstacle.name">
-              <div class="mb-1">
-                <div class="mb-1">
-                  <h5 class="d-inline">{{obstacle.name}}</h5>
+              <div class="col-12 mb-1">
+                <div class="text-left mb-1">
+                  <h5 class="d-inline align-middle m-0">{{obstacle.name}}</h5>
                   <button class="btn btn-sm btn-danger border-dark mx-1" title="Remove this Obstacle from the Scene" 
                     @click="scene.obstacles.splice(obstacleIndex, 1)">Remove</button>
                 </div>
-                <div class="input-group input-group-sm mb-1">
-                  <input type="text" class="form-control" placeholder="New Obstacle Description" v-model.trim="obstacle.newEntry">
+                <div class="input-group input-group-sm mb-1 w-50">
+                  <input type="text" class="form-control border-dark" placeholder="New Obstacle Element" v-model.trim="obstacle.newEntry">
                   <div class="input-group-append">
                     <button class="btn btn-success border-dark" type="button"  title="Add a new entry to this Obstacle" 
-                      @click="addObstacle(obstacle)">Add Entry</button>
+                      @click="addObstacle(obstacle)">Add Element</button>
                   </div>
                 </div>
               </div>
-              <table class="col table table-sm table-stripped table-bordered table-dark">
-                <thead>
-                  <tr>
-                    <th width="20%">Completed?</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(item, itemIndex) in obstacle.list" :key="item.label">
-                    <td>
-                      <input type="checkbox" v-model="item.completed">
-                    </td>
-                    <td>
-                      <input type="text" v-model.trim="item.tempLabel" v-if="item.editing" class="form-control form-control-sm">
-                      <template v-else>{{item.label}}</template>
-                    </td>
-                    <td>
-                      <div class="btn-group btn-group-sm">
-                        <button class="btn btn-primary border-dark" @click="item.editing = true" v-if="!item.editing">Edit</button>
-                        <template v-else>
-                          <button class="btn btn-success border-dark" @click="item.editing = false; item.label = item.tempLabel">Save</button>
-                          <button class="btn btn-secondary border-dark" @click="item.editing = false">Cancel</button>
-                        </template>
-                        <button class="btn btn-danger border-dark" @click="obstacle.list.splice(itemIndex, 1)">Remove</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="col-12" v-if="obstacle.list.length > 0">
+                <table class="table table-sm table-stripped table-bordered table-dark">
+                  <thead>
+                    <tr>
+                      <th width="20%">Completed?</th>
+                      <th>Description</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(item, itemIndex) in obstacle.list" :key="item.label">
+                      <td @click="item.completed = !item.completed" class="h4">
+                        <i class="fa fa-check c-pointer text-success" v-if="item.completed"></i>
+                        <i class="fa fa-times c-pointer text-danger" v-else></i>
+                      </td>
+                      <td>
+                        <input type="text" v-model.trim="item.tempLabel" v-if="item.editing" class="form-control form-control-sm">
+                        <template v-else>{{item.label}}</template>
+                      </td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <button class="btn btn-primary border-dark" @click="item.editing = true" v-if="!item.editing">Edit</button>
+                          <template v-else>
+                            <button class="btn btn-success border-dark" @click="item.editing = false; item.label = item.tempLabel">Save</button>
+                            <button class="btn btn-secondary border-dark" @click="item.editing = false">Cancel</button>
+                          </template>
+                          <button class="btn btn-danger border-dark" @click="obstacle.list.splice(itemIndex, 1)">Remove</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -101,7 +105,7 @@
               <button class="btn btn-danger border-dark" @click="resetRound" title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
             </div>
           </div>
-          <table class="table table-sm table-bordered table-dark table-stripped">
+          <table class="table table-sm table-bordered table-dark table-stripped" v-if="actorsCount > 0">
             <thead class="text-center">
               <tr>
                 <th width="40%">Actor Name</th>
@@ -158,7 +162,8 @@
                   <td class="text-capitalize" @click="actorActed(lieutenant, index)">Lieutenant</td>
                   <td>
                     <div class="btn-group btn-group-sm">
-                      <button class="btn btn-primary border-dark" @click="actorActed(lieutenant)" title="Toggle this Lieutenant to have acted already in the current round">Acted</button>
+                      <button class="btn btn-primary border-dark" @click="actorActed(lieutenant)" 
+                        title="Toggle this Lieutenant to have acted already in the current round">Acted</button>
                     </div>
                   </td>
                 </tr>
@@ -173,11 +178,12 @@
                   <td class="text-capitalize" @click="actorActed(minion, index)">Minion</td>
                   <td>
                     <div class="btn-group btn-group-sm">
-                      <button class="btn btn-primary border-dark" @click="actorActed(minion, index)" title="Toggle this Minion to have acted already in the current round">Acted</button>
+                      <button class="btn btn-primary border-dark" @click="actorActed(minion, index)" 
+                        title="Toggle this Minion to have acted already in the current round">Acted</button>
                     </div>
                   </td>
                 </tr>
-              </template>              
+              </template>
             </tbody>
           </table>
         </div>
@@ -279,18 +285,18 @@
               <div class="input-group-prepend">
                 <span class="input-group-text">Name</span>
               </div>
-              <input type="text" v-model.trim="obstacle.name" class="form-control" placeholder="Obstacle Name" @keypress.enter="addObstacle()">
+              <input type="text" v-model.trim="obstacle.name" class="form-control" placeholder="Obstacle Name" @keypress.enter="addObstacle()" ref="obstacleName">
             </div>
             <div>
               <h6>Add some obstacles (optional)</h6>
               <div class="input-group input-group-sm mb-3">
-                <input type="text" class="form-control" placeholder="Obstacle Description" v-model.trim="obstacle.description" @keydown.enter="addTempObstacle">
+                <input type="text" class="form-control border-dark" placeholder="Obstacle Description" v-model.trim="obstacle.description" @keydown.enter="addTempObstacle">
                 <div class="input-group-append">
                   <button class="btn btn-primary border-dark" type="button" @click="addTempObstacle" :disabled="obstacle.description === ''">Add</button>
                 </div>
               </div>
               <div class="input-group input-group-sm mb-1" v-for="(item, index) in obstacle.list" :key="'obstacle' + index">
-                <input type="text" class="form-control" placeholder="Obstacle Description" v-model.trim="item.label">
+                <input type="text" class="form-control border-dark" placeholder="Obstacle Description" v-model.trim="item.label">
                 <div class="input-group-append">
                   <button class="btn btn-danger border-dark" type="button" @click="obstacle.list.splice(index, 1)">Remove</button>
                 </div>
@@ -328,15 +334,7 @@
           name: '',
           text: '',
           acted: false,
-          obstacles: [
-            {
-              name: 'Argent Adept is in trouble!',
-              newEntry: '',
-              list: [
-                { label: 'complete the thing', completed: false }
-              ]
-            }
-          ]
+          obstacles: []
         },
         players: [],
         newPlayerName: '',
@@ -380,14 +378,17 @@
         this.scene.red = [];
         this.scene.acted = false;
         this.scene.name = '';
-        this.scene.obstacles = [];
       },
       resetScene() {
         this.$dialog.confirm({
           title: 'Are You Sure?',
-          body: 'Are you sure you want to reset the scene? All minions, lieutenants, villans, and scene tracker will be removed.'
+          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Obstacles and the Scene Tracker will be removed.'
+        }, {
+          okText: 'Yes',
+          cancelText: 'No'
         })
         .then(r => {
+          this.scene.obstacles = [];
           this.clearScene();
           this.$store.commit('RESET_SCENE');
         });
@@ -442,6 +443,10 @@
         this.minions.forEach(x => x.resetRound() );
         this.scene.acted = false;
       },
+      addObstacleModal() {
+        $("#obstacleModal").modal('show');
+        this.$refs.obstacleName.focus();
+      },
       addObstacle(obstacle) {
         if (obstacle) {
           obstacle.list.push({
@@ -485,7 +490,15 @@
         'minions',
         'lieutenants',
         'villains'
-      ])
+      ]),
+      actorsCount() {
+        let count = 0;
+        count += this.players.length;
+        count += this.minions.length;
+        count += this.lieutenants.length;
+        count += this.villains.length;
+        return count;
+      }
     },
     created() {
       const sceneData = Cookies.getJSON('sceneTracker');
