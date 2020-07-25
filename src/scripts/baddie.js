@@ -78,7 +78,8 @@ class Baddie {
         }
       }
     } else {
-      baddie.count--;
+      const match = this.match(baddie);
+      if (match) match.count--;
     }
   }
   boost(name, amount, persistent, exclusive, baddie) {
