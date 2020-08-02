@@ -162,7 +162,7 @@
                   <td class="text-capitalize" @click="actorActed(lieutenant, index)">Lieutenant</td>
                   <td>
                     <div class="btn-group btn-group-sm">
-                      <button class="btn btn-primary border-dark" @click="actorActed(lieutenant)" 
+                      <button class="btn btn-primary border-dark" @click="actorActed(lieutenant, index)" 
                         title="Toggle this Lieutenant to have acted already in the current round">Acted</button>
                     </div>
                   </td>

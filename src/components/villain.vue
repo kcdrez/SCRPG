@@ -21,7 +21,7 @@
             </h3>
             <div class="btn-group btn-group-sm float-right w-25">
               <button class="btn btn-danger border-dark" 
-                @click="$store.commit('DELETE_BADDIE', {index: villainIndex, type: 'villains'})">Remove</button>
+                @click="$store.commit('DELETE_BADDIE', {index: villainIndex, baddieType: 'villains'})">Remove</button>
             </div>
           </div>
           <div :id="`villain-${villain.name.replace(/\s/g, '')}`" class="card-body collapse show">
