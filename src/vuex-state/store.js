@@ -41,7 +41,6 @@ const store = new Vuex.Store({
     DELETE_BADDIE(state, {baddieType, index, baddie}) {
       if (baddie !== undefined) {
         index = state[baddieType].findIndex(x => x.name === baddie.name);
-        state[baddieType]
       } 
       if (index > -1) {
         state[baddieType].splice(index, 1);
