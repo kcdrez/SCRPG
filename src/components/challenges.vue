@@ -53,15 +53,27 @@
                   <div class="btn-group btn-group-sm">
                       <button class="btn btn-primary border-dark"
                               @click="editChallengeElement(challenge, item, challengeIndex)"
-                              v-if="!item.editing">Edit</button>
+                              v-if="!item.editing"
+                              title="Edit this Challenge Element">
+                        <i class="fa fa-pencil-square-o"></i>
+                      </button>
                       <template v-else>
                       <button class="btn btn-success border-dark" 
-                              @click="saveChallengeElement(item)">Save</button>
+                              @click="saveChallengeElement(item)"
+                              title="Save this Challenge Element">
+                        <i class="fa fa-floppy-o"></i>
+                      </button>
                       <button class="btn btn-secondary border-dark" 
-                              @click="item.editing = false">Cancel</button>
+                              @click="item.editing = false"
+                              title="Cancel Editing">
+                        <i class="fa fa-ban"></i>
+                      </button>
                       </template>
                       <button class="btn btn-danger border-dark" 
-                              @click="challenge.list.splice(itemIndex, 1)">Remove</button>
+                              @click="challenge.list.splice(itemIndex, 1)"
+                              title="Remove this Challenge Element">
+                        <i class="fa fa-trash-o"></i>
+                      </button>
                   </div>
                   </td>
               </tr>
@@ -162,10 +174,7 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import {Baddie, Villain} from '../scripts/baddie.js';
   import {unvue} from '../scripts/utilities.js';
-  import {mapState} from 'vuex';
-  import {diff} from 'deep-diff';
 
   export default {
     name: 'ChallengesTracker',
