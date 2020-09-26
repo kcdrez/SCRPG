@@ -57,6 +57,10 @@
                    v-else>
             </div>
           </div>
+          <locations :locations="scene.locations"
+                     @add="scene.locations.push($event)"
+                     @remove="scene.locations.splice($event, 1)"
+                     @reset="scene.locations = []" />
           <ChallengesTracker :challenges="scene.challenges" 
                              @reset="scene.challenges = []" 
                              @add="scene.challenges.push($event)"
@@ -208,6 +212,34 @@
               </template>
             </tbody>
           </table>
+          <hr />
+          <div>
+            <h4>Notes</h4>
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#viewNotes" data-toggle="tab" role="tab">View</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#editNotes" data-toggle="tab" role="tab">Edit</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#helpNotes" data-toggle="tab" role="tab">Help</a>
+              </li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane fade show active" id="viewNotes" role="tabpanel" v-html="markdownNotes">
+              </div>
+              <div class="tab-pane fade" id="editNotes" role="tabpanel">
+                <textarea class="form-control form-control-sm" v-model.trim="scene.notes"></textarea>
+              </div>
+              <div class="tab-pane fade" id="helpNotes" role="tabpanel">
+                <div>This system uses mardown to display formatting.</div>
+                <div>Learn more about markdown 
+                  <a href="https://github.com/showdownjs/showdown/wiki/Showdown's-Markdown-syntax" target="_blank">here</a>.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -311,12 +343,15 @@
   import { Baddie, Villain } from '../scripts/baddie.js';
   import { unvue } from '../scripts/utilities.js';
   import ChallengesTracker from './challenges.vue';
+  import locations from './locations.vue';
   import { mapState } from 'vuex';
   import { diff } from 'deep-diff';
+  import showdown from 'showdown';
+  const converter = new showdown.Converter();
 
   export default {
     name: 'SceneTracker',
-    components: { ChallengesTracker },
+    components: { ChallengesTracker, locations },
     data() {
       return {
         green: 2,
@@ -329,7 +364,9 @@
           name: '',
           text: '',
           acted: false,
-          challenges: []
+          challenges: [],
+          locations: [],
+          notes: ''
         },
         players: [],
         newPlayerName: '',
@@ -380,13 +417,15 @@
       resetScene() {
         this.$dialog.confirm({
           title: 'Are You Sure?',
-          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges and the Scene Tracker will be removed.'
+          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed.'
         }, {
           okText: 'Yes',
           cancelText: 'No'
         })
         .then(r => {
           this.scene.challenges = [];
+          this.scene.locations = [];
+          this.scene.notes = '';
           this.clearScene();
           this.$store.commit('RESET_SCENE');
         }); 
@@ -440,67 +479,8 @@
         this.players.forEach(x => x.acted = false);
         this.villains.forEach(x => x.acted = false);
         this.lieutenants.forEach(x => x.resetRound());
-        this.minions.forEach(x => x.resetRound() );
+        this.minions.forEach(x => x.resetRound());
         this.scene.acted = false;
-      },
-      addChallengeModal() {
-        $("#challengeModal").modal('show');
-        this.$refs.challengeName.focus();
-      },
-      addChallenge(challenge) {
-        if (challenge && challenge.newEntry) {
-          challenge.list.push({
-            label: challenge.newEntry,
-            tempLabel: challenge.newEntry,
-            completed: false,
-            editing: false
-          });
-          challenge.newEntry = '';
-        } else if (this.challenge.name !== '') {
-          const challengeList = unvue(this.challenge.list);
-          if (challengeList.length === 0) {
-            challengeList.push({
-              label: `Complete ${this.challenge.name}`,
-              tempLabel: `Complete ${this.challenge.name}`,
-              completed: false,
-              editing: false
-            });
-          }
-          this.scene.challenges.push({
-            name: this.challenge.name,
-            newEntry: '',
-            list: challengeList
-          });
-          this.challenge.name = '';
-          this.challenge.list = [];
-          this.challenge.description = '';
-          $("#challengeModal").modal('hide');
-        }
-      },
-      addTempChallenge() {
-        if (this.challenge.description !== '') {
-          this.challenge.list.push({
-            label: this.challenge.description,
-            tempLabel: this.challenge.description,
-            completed: false,
-            editing: false
-          });
-          this.challenge.description = '';
-        }
-      },
-      challengeElementRef(challenge) {
-        return challenge.name.replace(/\s/g, '') + 'Element';
-      },
-      editChallengeElement(challenge, challengeElement, challengeIndex) {
-        challengeElement.editing = true;
-        this.$nextTick(() => {
-          const refName = this.challengeElementRef(challenge);
-          this.$refs[refName][challengeIndex].focus();
-        });
-      },
-      saveChallengeElement(item) {
-        item.editing = false; 
-        item.label = item.tempLabel
       }
     },
     computed: {
@@ -521,6 +501,9 @@
         count += this.lieutenants.length;
         count += this.villains.length;
         return count;
+      },
+      markdownNotes() {
+        return converter.makeHtml(this.scene.notes);
       }
     },
     created() {
@@ -530,9 +513,11 @@
         this.scene.yellow = sceneData.yellow || [];
         this.scene.red = sceneData.red || [];
         this.scene.challenges = sceneData.challenges || [];
+        this.scene.locations = sceneData.locations || [];
         this.scene.name = sceneData.name || '';
         this.scene.text = sceneData.text || '';
         this.scene.acted = sceneData.acted || false;
+        this.scene.notes = sceneData.notes || '';
       }
 
       const playerData = Cookies.getJSON('players');
