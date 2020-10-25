@@ -394,46 +394,6 @@
         </div>
       </div>
     </div>
-    <div id="renamePlayerModal" 
-         class="modal" 
-         tabindex="-1" 
-         role="dialog">
-      <div class="modal-dialog" 
-           role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Edit a Player</h5>
-            <button type="button" 
-                    class="close" 
-                    data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            Rename the Player ({{renamePlayerData.target.name || '---'}})
-            <input type="text" 
-                   v-model.trim="renamePlayerData.text" 
-                   class="form-control form-control-sm" 
-                   @keypress.enter="renamePlayer" ref="renamePlayer">
-            Edit the Player's HP
-            <input type="number" 
-                   v-model.number="renamePlayerData.hp" 
-                   class="form-control form-control-sm" 
-                   @keypress.enter="renamePlayer">
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" 
-                    type="button" 
-                    data-dismiss="modal" 
-                    @click="renamePlayer" 
-                    :disabled="renamePlayerData.text === ''">Rename</button>
-            <button class="btn btn-secondary" 
-                    type="button" 
-                    data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -473,14 +433,6 @@
         newPlayer: {
           name: '',
           hp: 30
-        },
-        renamePlayerData: {
-          target: {
-            name: '',
-            hp: 0
-          },
-          text: '',
-          hp: 0
         }
       }
     },
@@ -524,20 +476,6 @@
           this.$store.dispatch('resetPlayers');
         });
       },
-      renamePlayerModal(player) {
-        if (player) {
-          this.renamePlayerData.target = player;
-          this.renamePlayerData.text = player.name;
-          this.renamePlayerData.hp = player.hp;
-          $("#renamePlayerModal").modal('show');
-        }
-      },
-      renamePlayer() {
-        if (this.renamePlayerData.text !== '') {
-          this.renamePlayerData.target.name = this.renamePlayerData.text;
-          this.renamePlayerData.target.hp = this.renamePlayerData.hp;
-        }
-      },
       resetRound() {
         this.$store.dispatch('resetRound');
       }
@@ -556,9 +494,6 @@
       });
       $('#addPlayerModal').on('shown.bs.modal', e => {
         this.$refs.newPlayerName.focus();
-      });
-      $('#addPlayerModal').on('shown.bs.modal', e => {
-        this.$refs.renamePlayer.focus();
       });
       this.editor = new Editor({
         content: this.scene.notes,
