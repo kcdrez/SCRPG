@@ -6,7 +6,9 @@ import 'vue-form-wizard/dist/vue-form-wizard.min.css';
 import VueDialog from 'vuejs-dialog';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 // import '@fortawesome/fontawesome-free/css/all.css';
-// import '@fortawesome/fontawesome-free/js/all.js';
+import '@fortawesome/fontawesome-free/js/all.js';
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
+// import {library} from '@fortawesome/fontawesome-svg-core';
 
 import './styles/main.scss';
 
@@ -15,6 +17,7 @@ import router from './router/router';
 import navbar from './components/navbar.vue';
 
 Vue.component('navbar', navbar);
+Vue.component('icon', FontAwesomeIcon);
 
 Vue.use(formWizard);
 Vue.use(VueDialog);

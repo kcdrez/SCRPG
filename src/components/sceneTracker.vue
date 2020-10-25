@@ -18,20 +18,20 @@
                     data-target="#sceneTrackerModal" 
                     title="Create a new Scene Tracker">Create Scene</button>
             <button class="btn btn-sm btn-warning border-dark" 
-                    @click="clearScene" 
+                    @click="scene.clear()" 
                     title="Clear the Scene Tracker">Clear Scene</button>
             <button class="btn btn-sm btn-danger border-dark" 
-                    @click="resetScene" 
+                    @click="resetScene"
                     title="Reset the Environment, removing the Scene Tracker and all Minions, Lieutenants, Villains, and Challenges">Reset Scene</button>
           </div>
-          <div v-if="noScenes">
+          <div v-if="scene.isEmpty">
             There is no Scene Tracker.
           </div>
           <div v-else>
             <h4>{{scene.name}}</h4>
             <div v-for="(item, index) in scene.green" 
                  class="d-inline" 
-                 @click="progressScene(item)" 
+                 @click="scene.progressScene(item)" 
                  :key="'green' + index">
               <img src="images/green_checked.png" 
                    v-if="item.checked">
@@ -40,7 +40,7 @@
             </div>
             <div v-for="(item, index) in scene.yellow" 
                  class="d-inline" 
-                 @click="progressScene(item)"
+                 @click="scene.progressScene(item)"
                  :key="'yellow' + index">
               <img src="images/yellow_checked.png" 
                    v-if="item.checked">
@@ -49,7 +49,7 @@
             </div>
             <div v-for="(item, index) in scene.red" 
                  class="d-inline" 
-                 @click="progressScene(item)"
+                 @click="scene.progressScene(item)"
                  :key="'red' + index">
               <img src="images/red_checked.png" 
                    v-if="item.checked">
@@ -57,14 +57,8 @@
                    v-else>
             </div>
           </div>
-          <locations :locations="scene.locations"
-                     @add="scene.locations.push($event)"
-                     @remove="scene.locations.splice($event, 1)"
-                     @reset="scene.locations = []" />
-          <ChallengesTracker :challenges="scene.challenges" 
-                             @reset="scene.challenges = []" 
-                             @add="scene.challenges.push($event)"
-                             @remove="scene.challenges.splice($event, 1)" />
+          <Locations />
+          <ChallengesTracker />
         </div>
         <div class="col-5 round-tracker">
           <h4 class="text-center">Round Tracker</h4>
@@ -82,11 +76,11 @@
                       title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
             </div>
           </div>
-          <table class="table table-sm table-bordered table-dark table-stripped" v-if="actorsCount > 0">
+          <table class="table table-sm table-bordered table-dark table-stripped" v-if="actors.length > 0">
             <thead class="text-center">
               <tr>
-                <th width="35%">Actor Name</th>
-                <th width="25%">Actor Type</th>
+                <th width="35%">Name (Owner)</th>
+                <th width="25%">Type</th>
                 <th width="20%">HP/Die Size</th>
                 <th width="20%">Actions</th>
               </tr>
@@ -94,150 +88,167 @@
             <tbody class="text-center">
               <tr v-if="scene.name !== ''">
                 <td class="text-capitalize c-pointer" 
-                    @click="actorActed(scene)"
+                    @click="scene.acted = !scene.acted"
                     title="Click to toggle the Environment to have acted already in the current round">
-                  <i class="fa fa-check text-success" 
-                     v-if="scene.acted"></i>
-                    {{scene.name}}
+                  <span v-if="scene.acted">
+                    <icon :icon="['fas', 'check']" 
+                          class="text-success" />
+                  </span>
+                  {{scene.name}}
                 </td>
                 <td class="text-capitalize c-pointer" 
-                    @click="actorActed(scene)"
+                    @click="scene.acted = !scene.acted"
                     title="Click to toggle the Environment to have acted already in the current round">Environment</td>
                 <td class="c-pointer"
-                    @click="actorActed(villain)"
-                    title="Click to toggle this Environment to have acted already in the current round"></td>
+                    @click="scene.acted = !scene.acted"
+                    title="Click to toggle the Environment to have acted already in the current round"></td>
                 <td class="c-pointer"
-                    @click="actorActed(villain)"
-                    title="Click to toggle this Environment to have acted already in the current round"></td>
+                    @click="scene.acted = !scene.acted"
+                    title="Click to toggle the Environment to have acted already in the current round"></td>
               </tr>
-              <tr v-for="player in players" 
-                  :key="'roundTracker-player' + player.name">
-                <td class="text-capitalize c-pointer" 
-                    @click="actorActed(player)"
-                    title="Click to toggle this Player to have acted already in the current round">
-                  <i class="fa fa-check text-success" 
-                     v-if="player.acted"></i>
-                  {{player.name}}
-                </td>
-                <td class="text-capitalize c-pointer" 
-                    @click="actorActed(player)"
-                    title="Click to toggle this Player to have acted already in the current round">Player</td>
-                <td class="c-pointer">
-                    {{player.hp}}
-                    <i class="fa fa-chevron-circle-up c-pointer" 
-                       @click="player.hp++"
-                       title="Increase Player HP"></i>
-                    <i class="fa fa-chevron-circle-down c-pointer" 
-                       @click="player.hp--"
-                       title="Decrease Player HP"></i>
-                </td>
-                <td>
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-secondary border-dark" 
-                            @click="renamePlayerModal(player)" 
-                            title="Edit this Player">
-                      <i class="fa fa-pencil-square-o"></i>
-                    </button>
-                    <button class="btn btn-danger border-dark" 
-                            @click="removePlayer(player.name)" 
-                            title="Remove this Player from the scene">
-                      <i class="fa fa-trash-o"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr v-for="villain in villains" 
-                  :key="'roundTracker-villain' + villain.name">
-                <td class="text-capitalize c-pointer" 
-                    @click="actorActed(villain)"
-                    title="Click to toggle this Villain to have acted already in the current round">
-                  <i class="fa fa-check text-success" 
-                     v-if="villain.acted"></i>
-                    {{villain.name}}
-                </td>
-                <td class="text-capitalize c-pointer"
-                    @click="actorActed(villain)"
-                    title="Click to toggle this Villain to have acted already in the current round">Villain</td>
-                <td class="c-pointer"
-                    @click="actorActed(villain)"
-                    title="Click to toggle this Villain to have acted already in the current round">-</td>
-                <td class="c-pointer"
-                    @click="actorActed(villain)"
-                    title="Click to toggle this Villain to have acted already in the current round"></td>
-              </tr>
-              <template v-for="lieutenant in lieutenants">
-                <tr v-for="(item, index) in lieutenant.list" 
-                    :key="'roundTracker-lieutenant' + lieutenant.name + index">
-                  <td class="text-capitalize c-pointer" 
-                      @click="actorActed(lieutenant, index)"
-                      title="Click to toggle this Lieutenant to have acted already in the current round">
-                    <i class="fa fa-check text-success" v-if="item.acted"></i>
-                    {{lieutenant.name}}
+              <template v-for="actor in actors">
+                <tr v-for="(item, index) in actor.list" :key="item.id">
+                  <td class="text-capitalize c-pointer align-middle"
+                      @click="actor.takenAction(index)"
+                      :title="`Click to toggle this ${actor.type} to have acted already in the current round`">
+                    <span v-if="item.acted">
+                      <icon :icon="['fas', 'check']" 
+                            class="text-success" />
+                    </span>
+                    {{actor.name}} <template v-if="actor.owner">({{actor.owner.name}})</template>
                   </td>
-                  <td class="text-capitalize c-pointer" 
-                      @click="actorActed(lieutenant, index)"
-                      title="Click to toggle this Lieutenant to have acted already in the current round">Lieutenant</td>
-                  <td class="c-pointer"
-                      @click="actorActed(lieutenant, index)"
-                      title="Click to toggle this Lieutenant to have acted already in the current round">
-                    <img :src="`images/d${item.size}.png`" :title="`This minion uses a d${item.size}`">
+                  <td class="text-capitalize c-pointer align-middle"
+                      @click="actor.takenAction(index)"
+                      :title="`Click to toggle this ${actor.type} to have acted already in the current round`">
+                    {{actor.type}}
                   </td>
-                  <td class="c-pointer"
-                      @click="actorActed(lieutenant, index)"
-                      title="Click to toggle this Lieutenant to have acted already in the current round"></td>
-                </tr>
-              </template>
-              <template v-for="minion in minions">
-                <tr v-for="(item, index) in minion.list" 
-                    :key="'roundTracker-minion' + minion.name + index">
-                  <td class="text-capitalize c-pointer" 
-                      @click="actorActed(minion, index)"
-                      title="Click to toggle this Minion to have acted already in the current round">
-                    <i class="fa fa-check text-success" 
-                       v-if="item.acted"></i>
-                    {{minion.name}} 
+                  <td class="align-middle">
+                    <template v-if="typeof item.hp === 'number'">
+                      {{item.hp}}
+                      <span @click="item.hp++">
+                        <icon :icon="['fas', 'chevron-circle-up']" 
+                              title="Increase Player HP" 
+                              class="c-pointer" />
+                      </span>
+                      <span @click="item.hp--">
+                        <icon :icon="['fas', 'chevron-circle-down']" 
+                              title="Decrease Player HP" 
+                              class="c-pointer" />
+                      </span>
+                    </template>
+                    <template v-else-if="item.size">
+                      <img :src="`images/d${item.size}.png`" :title="`This minion uses a d${item.size}`">
+                    </template>
                   </td>
-                  <td class="text-capitalize c-pointer" 
-                      @click="actorActed(minion, index)"
-                      title="Click to toggle this Minion to have acted already in the current round">Minion</td>
-                  <td class="c-pointer" 
-                      @click="actorActed(minion, index)"
-                      title="Click to toggle this Minion to have acted already in the current round">
-                    <img :src="`images/d${item.size}.png`" :title="`This minion uses a d${item.size}`">
+                  <td class="align-middle">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-secondary border-dark" 
+                              @click="renamePlayerModal(item)"
+                              title="Edit this Player"
+                              v-if="item.type === 'player'">
+                        <icon :icon="['far', 'edit']" />
+                      </button>
+                      <button class="btn btn-primary border-dark add-minion"
+                              title="Add a Minion"
+                              @click="$emit('add-minion', item.id)"
+                              v-if="item.type === 'player' || item.type === 'villain'">
+                        <span class="fa-stack">
+                          <i class="fas fa-dragon" data-fa-transform="right-4 down-4"></i>
+                          <i class="fas fa-plus" data-fa-transform="shrink-6 left-4 down-4"></i>
+                        </span>
+                      </button>
+                      <button class="btn btn-danger border-dark" 
+                              @click="removePlayer(item.name)" 
+                              title="Remove this Player from the scene"
+                              v-if="item.type === 'player'">
+                        <icon :icon="['far', 'trash-alt']" />
+                      </button>
+                    </div>
                   </td>
-                  <td class="c-pointer"
-                      @click="actorActed(minion, index)"
-                      title="Click to toggle this Minion to have acted already in the current round"></td>
                 </tr>
               </template>
             </tbody>
           </table>
           <hr />
           <div>
-            <h4>Notes</h4>
-            <ul class="nav nav-tabs">
-              <li class="nav-item">
-                <a class="nav-link active" href="#viewNotes" data-toggle="tab" role="tab">View</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#editNotes" data-toggle="tab" role="tab">Edit</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#helpNotes" data-toggle="tab" role="tab">Help</a>
-              </li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane fade show active" id="viewNotes" role="tabpanel" v-html="markdownNotes">
-              </div>
-              <div class="tab-pane fade" id="editNotes" role="tabpanel">
-                <textarea class="form-control form-control-sm" v-model.trim="scene.notes"></textarea>
-              </div>
-              <div class="tab-pane fade" id="helpNotes" role="tabpanel">
-                <div>This system uses mardown to display formatting.</div>
-                <div>Learn more about markdown 
-                  <a href="https://github.com/showdownjs/showdown/wiki/Showdown's-Markdown-syntax" target="_blank">here</a>.
+            <h4 class="text-center">Notes</h4>
+            <div class="editor">
+              <editor-menu-bar :editor="editor" 
+                                v-slot="{ commands, isActive }">
+                <div class="menubar">
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.bold() }"
+                          @click="commands.bold"
+                          title="Bold">
+                    <icon :icon="['fas', 'bold']" />
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.italic() }"
+                          @click="commands.italic"
+                          title="Italic">
+                    <icon :icon="['fas', 'italic']" />
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.strike() }"
+                          @click="commands.strike"
+                          title="Strikethrough">
+                    <icon :icon="['fas', 'strikethrough']" />
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.underline() }"
+                          @click="commands.underline"
+                          title="Underline">
+                    <icon :icon="['fas', 'underline']" />
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.heading({ level: 1 }) }"
+                          @click="commands.heading({ level: 1 })"
+                          title="Heading 1">
+                    <icon :icon="['fas', 'heading']" />1
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.heading({ level: 2 }) }"
+                          @click="commands.heading({ level: 2 })"
+                          title="Heading 2">
+                    <icon :icon="['fas', 'heading']" />2
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.heading({ level: 3 }) }"
+                          @click="commands.heading({ level: 3 })"
+                          title="Heading 3">
+                    <icon :icon="['fas', 'heading']" />3
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.bullet_list() }"
+                          @click="commands.bullet_list"
+                          title="Unordered List">
+                    <icon :icon="['fas', 'list-ul']" />
+                  </button>
+                  <button class="menubar__button"
+                          :class="{ 'is-active': isActive.ordered_list() }"
+                          @click="commands.ordered_list"
+                          title="Ordered List">
+                    <icon :icon="['fas', 'list-ol']" />
+                  </button>
+                  <button class="menubar__button"
+                          @click="commands.horizontal_rule"
+                          title="Horizonal Line">
+                    <icon :icon="['fas', 'grip-lines']" />
+                  </button>
+                  <button class="menubar__button"
+                          @click="commands.undo"
+                          title="Undo">
+                    <icon :icon="['fas', 'undo']" />
+                  </button>
+                  <button class="menubar__button"
+                          @click="commands.redo"
+                          title="Redo">
+                    <icon :icon="['fas', 'redo']" />
+                  </button>
                 </div>
-              </div>
+              </editor-menu-bar>
+              <editor-content class="editor-container" 
+                              :editor="editor" />
             </div>
           </div>
         </div>
@@ -263,74 +274,134 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Name</div>
               </div>
-              <input class="form-control" v-model.trim="scene.text" type="text" ref="scene" @keypress.enter="createScene">
+              <input class="form-control" 
+                     v-model.trim="text" 
+                     type="text" 
+                     ref="scene" 
+                     @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Green</div>
               </div>
-              <input class="form-control" v-model.number="green" type="number" ref="green" @keypress.enter="createScene">
+              <input class="form-control" 
+                     v-model.number="green" 
+                     type="number" 
+                     ref="green" 
+                     @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Yellow</div>
               </div>
-              <input class="form-control" v-model.number="yellow" type="number" ref="yellow" @keypress.enter="createScene">
+              <input class="form-control" 
+                     v-model.number="yellow" 
+                     type="number" 
+                     ref="yellow" 
+                     @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm">
               <div class="input-group-prepend">
                 <div class="input-group-text">Red</div>
               </div>
-              <input class="form-control" v-model.number="red" type="number" ref="red" @keypress.enter="createScene">
+              <input class="form-control" 
+                     v-model.number="red" 
+                     type="number" 
+                     ref="red" 
+                     @keypress.enter="createScene">
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="createScene" :disabled="scene.text === ''">Create</button>
-            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            <button class="btn btn-primary" 
+                    type="button" 
+                    data-dismiss="modal" 
+                    @click="createScene" 
+                    :disabled="scene.text === ''">Create</button>
+            <button class="btn btn-secondary" 
+                    type="button" 
+                    data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
-    <div id="addPlayerModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
+    <div id="addPlayerModal" 
+         class="modal" 
+         tabindex="-1" 
+         role="dialog">
+      <div class="modal-dialog" 
+           role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Add a Player</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+            <button type="button" 
+                    class="close" 
+                    data-dismiss="modal">
+              <span>&times;</span>
             </button>
           </div>
           <div class="modal-body">
             Add a player to the Scene.
-            <input type="text" v-model.trim="newPlayerName" class="form-control form-control-sm" @keypress.enter="addPlayer" ref="newPlayerName">
+            <input type="text" 
+                   v-model.trim="newPlayer.name" 
+                   class="form-control form-control-sm" 
+                   @keypress.enter="addPlayer" 
+                   ref="newPlayerName">
             Add the current HP:
-            <input type="number" v-model.number="newPlayerHP" class="form-control form-control-sm" @keypress.enter="addPlayer" ref="newPlayerHP">
+            <input type="number" 
+                   v-model.number="newPlayer.hp" 
+                   class="form-control form-control-sm" 
+                   @keypress.enter="addPlayer" 
+                   ref="newPlayerHP">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="addPlayer" :disabled="newPlayerName === ''">Create</button>
-            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            <button class="btn btn-primary" 
+                    type="button" 
+                    data-dismiss="modal" 
+                    @click="addPlayer" 
+                    :disabled="newPlayer.name === ''">Create</button>
+            <button class="btn btn-secondary" 
+                    type="button" 
+                    data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
-    <div id="renamePlayerModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
+    <div id="renamePlayerModal" 
+         class="modal" 
+         tabindex="-1" 
+         role="dialog">
+      <div class="modal-dialog" 
+           role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Edit a Player</h5>
-            <button type="button" class="close" data-dismiss="modal">
+            <button type="button" 
+                    class="close" 
+                    data-dismiss="modal">
               <span>&times;</span>
             </button>
           </div>
           <div class="modal-body">
             Rename the Player ({{renamePlayerData.target.name || '---'}})
-            <input type="text" v-model.trim="renamePlayerData.text" class="form-control form-control-sm" @keypress.enter="renamePlayer" ref="renamePlayer">
+            <input type="text" 
+                   v-model.trim="renamePlayerData.text" 
+                   class="form-control form-control-sm" 
+                   @keypress.enter="renamePlayer" ref="renamePlayer">
             Edit the Player's HP
-            <input type="number" v-model.number="renamePlayerData.hp" class="form-control form-control-sm" @keypress.enter="renamePlayer">
+            <input type="number" 
+                   v-model.number="renamePlayerData.hp" 
+                   class="form-control form-control-sm" 
+                   @keypress.enter="renamePlayer">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" type="button" data-dismiss="modal" @click="renamePlayer" :disabled="renamePlayerData.text === ''">Rename</button>
-            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+            <button class="btn btn-primary" 
+                    type="button" 
+                    data-dismiss="modal" 
+                    @click="renamePlayer" 
+                    :disabled="renamePlayerData.text === ''">Rename</button>
+            <button class="btn btn-secondary" 
+                    type="button" 
+                    data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -343,34 +414,38 @@
   import { Baddie, Villain } from '../scripts/baddie.js';
   import { unvue } from '../scripts/utilities.js';
   import ChallengesTracker from './challenges.vue';
-  import locations from './locations.vue';
-  import { mapState } from 'vuex';
+  import Locations from './locations.vue';
+  import { mapState, mapGetters } from 'vuex';
   import { diff } from 'deep-diff';
-  import showdown from 'showdown';
-  const converter = new showdown.Converter();
+  import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
+  import {
+    HardBreak,
+    Heading,
+    HorizontalRule,
+    OrderedList,
+    BulletList,
+    ListItem,
+    Bold,
+    Italic,
+    Strike,
+    Underline,
+    History
+  } from 'tiptap-extensions';
 
   export default {
     name: 'SceneTracker',
-    components: { ChallengesTracker, locations },
+    components: { ChallengesTracker, Locations, EditorContent, EditorMenuBar },
     data() {
       return {
         green: 2,
         yellow: 4,
         red: 2,
-        scene: {
-          green: [],
-          yellow: [],
-          red: [],
+        text: '',
+        editor: null,
+        newPlayer: {
           name: '',
-          text: '',
-          acted: false,
-          challenges: [],
-          locations: [],
-          notes: ''
+          hp: 30
         },
-        players: [],
-        newPlayerName: '',
-        newPlayerHP: 30,
         renamePlayerData: {
           target: {
             name: '',
@@ -378,41 +453,15 @@
           },
           text: '',
           hp: 0
-        },
-        challenge: {
-          name: '',
-          description: '',
-          list: []
         }
       }
     },
     methods: {
       createScene() {
-        if (this.scene.text !== '') {
-          this.clearScene();
-  
-          for (let i = 0; i < this.green; i++) {
-            this.scene.green.push({checked: false});
-          }
-          for (let i = 0; i < this.yellow; i++) {
-            this.scene.yellow.push({checked: false});
-          }
-          for (let i = 0; i < this.red; i++) {
-            this.scene.red.push({checked: false});
-          }
-          this.scene.name = this.scene.text;
+        if (this.text !== '') {
+          this.scene.create(this.green, this.yellow, this.red, this.text);
           $('#sceneTrackerModal').modal('hide');
         }
-      },
-      progressScene(item) {
-        item.checked = !item.checked;
-      },
-      clearScene() {
-        this.scene.green = [];
-        this.scene.yellow = [];
-        this.scene.red = [];
-        this.scene.acted = false;
-        this.scene.name = '';
       },
       resetScene() {
         this.$dialog.confirm({
@@ -423,24 +472,17 @@
           cancelText: 'No'
         })
         .then(r => {
-          this.scene.challenges = [];
-          this.scene.locations = [];
-          this.scene.notes = '';
-          this.clearScene();
-          this.$store.commit('RESET_SCENE');
-        }); 
+          this.$store.dispatch('resetScene');
+        });
       },
       addPlayer() {
-        if (this.newPlayerName !== '') {
-          this.players.push({ name: this.newPlayerName, acted: false, type: 'player', hp: this.newPlayerHP });
+        if (this.newPlayer.name !== '') {
+          this.$store.dispatch('addPlayer', this.newPlayer);
           $('#addPlayerModal').modal('hide');
         }
       },
       removePlayer(playerName) {
-        const index = this.players.findIndex(x => x.name === playerName);
-        if (index > -1) {
-          this.players.splice(index, 1);
-        }
+        this.$store.dispatch('removePlayer', playerName);
       },
       clearPlayers() {
         this.$dialog.confirm({
@@ -451,7 +493,7 @@
           cancelText: 'No'
         })
         .then(r => {
-          this.players = [];
+          this.$store.dispatch('resetPlayers');
         });
       },
       renamePlayerModal(player) {
@@ -468,62 +510,17 @@
           this.renamePlayerData.target.hp = this.renamePlayerData.hp;
         }
       },
-      actorActed(actor, index) {
-        if (actor instanceof Baddie || actor instanceof Villain) {
-          actor.takenAction(index);
-        } else {
-          actor.acted = !actor.acted;
-        }
-      },
       resetRound() {
-        this.players.forEach(x => x.acted = false);
-        this.villains.forEach(x => x.acted = false);
-        this.lieutenants.forEach(x => x.resetRound());
-        this.minions.forEach(x => x.resetRound());
-        this.scene.acted = false;
+        this.$store.dispatch('resetRound');
       }
     },
     computed: {
-      noScenes() {
-        return this.scene.green.length === 0 &&
-          this.scene.yellow.length === 0 &&
-          this.scene.red.length === 0;
-      },
-      ...mapState([
-        'minions',
-        'lieutenants',
-        'villains'
+      ...mapGetters([
+        'actors'
       ]),
-      actorsCount() {
-        let count = 0;
-        count += this.players.length;
-        count += this.minions.length;
-        count += this.lieutenants.length;
-        count += this.villains.length;
-        return count;
-      },
-      markdownNotes() {
-        return converter.makeHtml(this.scene.notes);
-      }
-    },
-    created() {
-      const sceneData = Cookies.getJSON('sceneTracker');
-      if (sceneData) {
-        this.scene.green = sceneData.green || [];
-        this.scene.yellow = sceneData.yellow || [];
-        this.scene.red = sceneData.red || [];
-        this.scene.challenges = sceneData.challenges || [];
-        this.scene.locations = sceneData.locations || [];
-        this.scene.name = sceneData.name || '';
-        this.scene.text = sceneData.text || '';
-        this.scene.acted = sceneData.acted || false;
-        this.scene.notes = sceneData.notes || '';
-      }
-
-      const playerData = Cookies.getJSON('players');
-      if (playerData) {
-        this.players = playerData;
-      }
+      ...mapState([
+        'scene'
+      ])
     },
     mounted() {
       $('#sceneTrackerModal').on('shown.bs.modal', e => {
@@ -535,20 +532,28 @@
       $('#addPlayerModal').on('shown.bs.modal', e => {
         this.$refs.renamePlayer.focus();
       });
+      this.editor = new Editor({
+        content: this.scene.notes,
+        extensions: [
+          new BulletList(),
+          new HardBreak(),
+          new Heading({ levels: [1, 2, 3] }),
+          new HorizontalRule(),
+          new ListItem(),
+          new OrderedList(),
+          new Bold(),
+          new Italic(),
+          new Strike(),
+          new Underline(),
+          new History()
+        ],
+        onUpdate: (e) => {
+          this.scene.setNote(e.getHTML());
+        }
+      })
     },
-    watch: {
-      scene: {
-        deep: true,
-        handler(newVal) {
-          Cookies.set('sceneTracker', newVal);
-        }
-      },
-      players: {
-        deep: true,
-        handler(newVal) {
-          Cookies.set('players', newVal);
-        }
-      }
+    beforeDestroy() {
+      this.editor.destroy();
     }
   };
 </script>
@@ -568,6 +573,46 @@
     img {
       max-width: 20px;
       margin: 0 .25rem;
+    }
+  }
+
+  .add-minion {
+    width: 40px;
+
+    .fa-stack {
+      left: -4px;
+    }
+  }
+
+  .menubar__button {
+    font-weight: 700;
+    display: -webkit-inline-box;
+    display: inline-flex;
+    background: transparent;
+    border: 0;
+    color: #000;
+    padding: .2rem .5rem;
+    margin-right: .2rem;
+    border-radius: 3px;
+    cursor: pointer;
+
+    &.is-active {
+      background-color: rgba(0,0,0,.1);
+    }
+  }
+  .editor-container {
+    color: #495057;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    padding: 0.25rem .5rem;
+    border-radius: 5px;
+
+    /deep/ p {
+      margin: 0 !important;
+    }
+
+    hr {
+      background-color: black;
     }
   }
 </style>

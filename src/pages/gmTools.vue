@@ -5,22 +5,22 @@
       <div class="row">
         <h1 class="col text-center">GM Management</h1>
       </div>
-      <sceneTracker />
-      <baddies label="Minions"></baddies>
-      <baddies label="Lieutenants"></baddies>
-      <villains />
+      <SceneTracker @add-minion="$refs.minions.modal('show', $event)" />
+      <Baddies label="Minions" :allowOwner="true" ref="minions" />
+      <Baddies label="Lieutenants" ref="lieutenants" />
+      <Villains ref="villains" @add-minion="$refs.minions.modal('show', $event)" />
     </div>
-    <div id="overcomeChartModal" 
-        class="modal" 
-        tabindex="-1" 
+    <div id="overcomeChartModal"
+        class="modal"
+        tabindex="-1"
         role="dialog">
-      <div class="modal-dialog modal-lg" 
+      <div class="modal-dialog modal-lg"
           role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Overcome Chart</h5>
-            <button type="button" 
-                    class="close" 
+            <button type="button"
+                    class="close"
                     data-dismiss="modal">
               <span>&times;</span>
             </button>
@@ -29,24 +29,24 @@
             <img src="images/overcome.jpeg" class="img-fluid" data-dismiss="modal">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" 
-                    type="button" 
+            <button class="btn btn-secondary"
+                    type="button"
                     data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
     <div id="boostsChartModal" 
-        class="modal" 
-        tabindex="-1" 
+        class="modal"
+        tabindex="-1"
         role="dialog">
-      <div class="modal-dialog modal-lg" 
+      <div class="modal-dialog modal-lg"
           role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Boost/Hinder Chart</h5>
-            <button type="button" 
-                    class="close" 
+            <button type="button"
+                    class="close"
                     data-dismiss="modal">
               <span>&times;</span>
             </button>
@@ -55,8 +55,8 @@
             <img src="images/boosts.jpeg" class="img-fluid" data-dismiss="modal">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" 
-                    type="button" 
+            <button class="btn btn-secondary"
+                    type="button"
                     data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -66,13 +66,13 @@
 </template>
 
 <script>
-  import baddies from '../components/baddie.vue';
-  import sceneTracker from '../components/sceneTracker.vue';
-  import villains from '../components/villain.vue';
+  import Baddies from '../components/baddie.vue';
+  import SceneTracker from '../components/sceneTracker.vue';
+  import Villains from '../components/villain.vue';
 
   export default {
     name: 'GMTools',
-    components: { baddies, sceneTracker, villains }
+    components: { Baddies, SceneTracker, Villains }
   };
 </script>
 

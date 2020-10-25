@@ -1,21 +1,30 @@
 import Vue from 'vue';
 import store from '../vuex-state/store';
 import {unvue} from './utilities';
+import {v4 as uuid} from 'uuid';
 
 class Baddie {
   constructor(data, baddieType) {
-    this.name = data.name;
-    this.baddieType = baddieType;
+    this.name = data.name || '';
+    this.baddieType = baddieType; //todo: remove
+    this.type = baddieType;
     this.list = [];
+    this._owner = data.owner || data._owner;
+    this.id = uuid();
+    
     if (data.types) {
       Object.entries(data.types).forEach(([size, baddieData]) => {
-        baddieData.forEach(x => this.addBaddie(x, size))
-      })
+        baddieData.forEach(x => this.addBaddie(x, size));
+      });
     } else if (data.list) {
       this.list = data.list;
     } else {
       this.addBaddie({size: data.size, count: data.count});
     }
+  }
+
+  get owner() {
+    return store.getters.byID(this._owner);
   }
 
   match(baddie, byIndex) {
@@ -67,7 +76,7 @@ class Baddie {
       this.refresh();
     }
   }
-  remove(baddie) {
+  remove(baddie, all) {
     if (baddie.count <= 1) {
       const index = this.match(baddie, true);
       if (index > -1) {
@@ -79,12 +88,16 @@ class Baddie {
       }
     } else {
       const match = this.match(baddie);
-      if (match) match.count--;
+      if (match) {
+        if (all) match.count = 0;
+        else match.count--;
+        this.refresh();
+      }
     }
   }
-  boost(name, amount, persistent, exclusive, baddie) {
+  boost(name, amount, persistent, exclusive, baddie, singleEntry) {
     const copy = unvue(baddie);
-    copy.count = 1;
+    copy.count = singleEntry ? 1 : copy.count;
     copy.bonuses.push({amount, name, persistent, exclusive});
     copy.bonuses.sort((a, b) => {
       if (a.name !== b.name) {
@@ -100,12 +113,12 @@ class Baddie {
       }
     });
     this.addBaddie(copy);
-    this.remove(baddie);
+    this.remove(baddie, !singleEntry);
     this.refresh();
   }
-  hinder(name, amount, persistent, exclusive, baddie) {
+  hinder(name, amount, persistent, exclusive, baddie, singleEntry) {
     const copy = unvue(baddie);
-    copy.count = 1;
+    copy.count = singleEntry ? 1 : copy.count;
     copy.penalties.push({amount, name, persistent, exclusive});
     copy.penalties.sort((a, b) => {
       if (a.name !== b.name) {
@@ -121,12 +134,12 @@ class Baddie {
       }
     });
     this.addBaddie(copy);
-    this.remove(baddie);
+    this.remove(baddie, !singleEntry);
     this.refresh();
   }
-  defend(name, amount, baddie) {
+  defend(name, amount, baddie, singleEntry) {
     const copy = unvue(baddie);
-    copy.count = 1;
+    copy.count = singleEntry ? 1 : copy.count;
     copy.defends.push({amount, name});
     copy.defends.sort((a, b) => {
       if (a.name !== b.name) {
@@ -138,7 +151,7 @@ class Baddie {
       }
     });
     this.addBaddie(copy);
-    this.remove(baddie);
+    this.remove(baddie, !singleEntry);
     this.refresh();
   }
   countBySize(size) {
@@ -160,7 +173,7 @@ class Baddie {
       });
       if (match) {
         match.count += el.count;
-      } else {
+      } else if (el.count > 0) {
         acc.push(el);
       }
       return acc;
@@ -179,34 +192,44 @@ class Baddie {
     });
     store.dispatch('saveBaddies', this.baddieType);
   }
-  addAffix({name, type, amount, persistent, exclusive}, baddie) {
-    if (name === '') return;
-    else if (type === 'Bonus') {
-      this.boost(name, amount, persistent, exclusive, baddie);
-    } else if (type === 'Penalty') {
-      this.hinder(name, amount, persistent, exclusive, baddie);
-    } else if (type === 'Defend') {
-      this.defend(name, amount, baddie);
+  addModifier({name, type, amount, persistent, exclusive, applyTo}, baddie) {
+    if (!name) return;
+
+    const modify = (baddieItem) => {
+      if (type === 'Bonus') {
+        this.boost(name, amount, persistent, exclusive, baddieItem, applyTo === 'single');
+      } else if (type === 'Penalty') {
+        this.hinder(name, amount, persistent, exclusive, baddieItem, applyTo === 'single');
+      } else if (type === 'Defend') {
+        this.defend(name, amount, baddieItem, applyTo === 'single');
+      }
+    }
+    if (applyTo === 'name') {
+      this.list.forEach(x => {
+        modify(x);
+      });
+    } else {
+      modify(baddie);
     }
   }
-  removeAffix(baddie, affixType, affixIndex) {
-    const affixData = baddie[affixType];
+  removeModifier(baddie, type, index) {
+    const data = baddie[type];
     const remove = () => {
       if (baddie.count > 1) {
         const copy = unvue(baddie);
         copy.count = 1;
-        copy[affixType].splice(affixIndex, 1);
+        copy[type].splice(index, 1);
         this.remove(baddie);
         this.addBaddie(copy);
       } else {
-        baddie[affixType].splice(affixIndex, 1);
+        baddie[type].splice(index, 1);
       }
       this.refresh();
     }
-    if (affixData[affixIndex].exclusive || affixData[affixIndex].persistent) {
+    if (data[index].exclusive || data[index].persistent) {
       Vue.dialog.confirm({
         title: 'Are you sure?',
-        body: `This ${affixType} is persistent and/or exclusive. Are you sure you want to remove it?`
+        body: `This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`
       },
       {
         okText: 'Yes',
@@ -219,8 +242,14 @@ class Baddie {
       remove();
     }
   }
-  takenAction(index) {
-    this.list[index].acted = !this.list[index].acted;
+  takenAction(index, status) {
+    if (index === null) {
+      this.list.forEach(x => {
+        x.acted = status === undefined ? !x.acted : status;
+      });
+    } else {
+      this.list[index].acted = status === undefined ? !this.list[index].acted : status;
+    }
     store.dispatch('saveBaddies', this.baddieType);
   }
   resetRound() {
@@ -229,15 +258,20 @@ class Baddie {
 }
 
 class Villain {
-  constructor(name, bonuses, penalties, defends, acted) {
-    this.name = name;
-    this.acted = acted === undefined ? false : acted;
-    this.bonuses = bonuses || [];
-    this.penalties = penalties || [];
-    this.defends = defends || [];
-    this.baddieType = 'villain';
+  constructor(data) {
+    this.name = data.name;
+    this.acted = data.acted || false;
+    this.bonuses = data.bonuses || [];
+    this.penalties = data.penalties || [];
+    this.defends = data.defends || [];
+    this.baddieType = 'villain'; //todo remove
+    this.type = 'villain';
+    this.id = data.id || uuid();
   }
 
+  get list() {
+    return [this];
+  }
   boost(name, amount, persistent, exclusive) {
     this.bonuses.push({name, amount, persistent, exclusive});
     this.bonuses.sort((a, b) => {
@@ -285,7 +319,7 @@ class Villain {
     });
     this.refresh();
   }
-  addAffix({name, type, amount, persistent, exclusive}) {
+  addModifier({name, type, amount, persistent, exclusive}) {
     if (name === '') return;
     else if (type === 'Bonus') {
       this.boost(name, amount, persistent, exclusive);
@@ -295,7 +329,7 @@ class Villain {
       this.defend(name, amount);
     }
   }
-  removeAffix(type, index) {
+  removeModifier(type, index) {
     const remove = () => {
       this[type].splice(index, 1);
       this.refresh();
@@ -313,7 +347,31 @@ class Villain {
     store.dispatch('saveBaddies', 'villains');
   }
   takenAction() {
-    this.acted = !this.acted;
+    const minions = store.getters.childMinions(this.id); 
+    const newStatus = !this.acted;
+    const minionNotMatched = minions.some(minion => {
+      const match = minion.list.find(x => x.acted !== newStatus);
+      return !!match;
+    });
+    const message = newStatus ? 
+      `Some of this villain's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
+      `Some of this villain's minions have already acted. Do you also want to mark their minions as having not acted?`;
+    if (minionNotMatched && minions.length > 0) {
+      Vue.dialog.confirm({
+        title: 'Warning',
+        body: message
+      },
+      {
+        okText: 'Yes',
+        cancelText: 'No'
+      })
+      .then(() => {
+        minions.forEach(minion => {
+          minion.takenAction(null, newStatus);
+        })
+      });
+    }
+    this.acted = newStatus;
     this.refresh();
   }
 }

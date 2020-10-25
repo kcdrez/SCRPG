@@ -11,38 +11,38 @@
                       @click="addLocationModal">Add Location</button>
               <button class="btn btn-danger border-dark" 
                       title="Remove all Locations from the Scene"
-                      @click="$emit('reset')">Reset Locations</button>
+                      @click="scene.resetLocations()">Reset Locations</button>
           </div>
         </div>
       </div>
       <div class="row" >
         <div class="col">
-          <template v-if="locations.length === 0">There are no locations.</template>
+          <template v-if="scene.locations.length === 0">There are no locations.</template>
           <table class="table table-sm table-stripped table-bordered table-dark" v-else>
             <thead>
               <tr>
                   <th width="30%">Name</th>
-                  <th>Description</th>
-                  <th>Actions</th>
+                  <th width="50%">Description</th>
+                  <th width="20%">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(location, index) in locations" :key="'location' + index">
+              <tr v-for="(location, index) in scene.locations" :key="'location' + location.id">
                 <td width="30%">
                   <input type="text" 
                           v-model.trim="location.tempName" 
                           v-if="location.editing" 
                           class="form-control form-control-sm"
-                          @keypress.enter="saveLocationElement(location)"
-                          :ref="locationElementRef(location)">
+                          @keypress.enter="location.edit()"
+                          :ref="location.id + 'locationName'">
                   <template v-else>{{location.name || '-'}}</template>
                 </td>
                 <td width="50%">
                   <textarea v-model.trim="location.tempDescription" 
                           v-if="location.editing" 
                           class="form-control form-control-sm"
-                          @keypress.enter="saveLocationElement(location)"
-                          :ref="locationElementRef(location)">
+                          @keypress.enter="location.edit()"
+                          :ref="location.id + 'locationDescription'">
                   </textarea>
                   <template v-else>{{location.description || '-'}}</template>
                 </td>
@@ -52,24 +52,24 @@
                               @click="editLocationElement(location, index)"
                               v-if="!location.editing"
                               title="Edit this Location">
-                        <i class="fa fa-pencil-square-o"></i>
+                        <icon :icon="['far', 'edit']" />
                       </button>
                       <template v-else>
                       <button class="btn btn-success border-dark" 
-                              @click="saveLocationElement(location)"
+                              @click="location.edit()"
                               title="Save changes on this Location">
-                        <i class="fa fa-floppy-o"></i>
+                        <icon :icon="['far', 'save']" />
                       </button>
                       <button class="btn btn-secondary border-dark" 
                               @click="location.editing = false"
                               title="Cancel Editing">
-                        <i class="fa fa-ban"></i>
+                        <icon :icon="['fas', 'ban']" />
                       </button>
                       </template>
                       <button class="btn btn-danger border-dark" 
-                              @click="$emit('remove', index)"
+                              @click="scene.removeLocation(index)"
                               title="Remove this Location">
-                        <i class="fa fa-trash-o"></i>
+                        <icon :icon="['far', 'trash-alt']" />
                       </button>
                   </div>
                 </td>
@@ -108,7 +108,8 @@
                     class="form-control form-control-sm" 
                     placeholder="Location Description" 
                     @keypress.enter="addLocation()" 
-                    ref="locationDescription"></textarea>
+                    ref="locationDescription">
+            </textarea>
           </div>
           <div class="modal-footer">
             <button class="btn btn-success" 
@@ -133,12 +134,6 @@
 
   export default {
     name: 'LocationsTracker',
-    props: {
-      locations: {
-        type: Array,
-        requires: true
-      },
-    },
     data() {
       return {
         newLocation: {
@@ -147,37 +142,27 @@
         }
       }
     },
+    computed: {
+      ...mapState([
+        'scene'
+      ])
+    },
     methods: {
       addLocationModal() {
         $("#locationModal").modal('show');
         this.$refs.locationName.focus();
       },
       addLocation() {
-        this.$emit('add', {
-          name: this.newLocation.name,
-          description: this.newLocation.description,
-          tempName: this.newLocation.name,
-          tempDescription: this.newLocation.description,
-          editing: false
-        });
+        this.scene.addLocation(this.newLocation);
         $("#locationModal").modal('hide');
         this.newLocation.name = '';
         this.newLocation.description = '';
       },
-      locationElementRef(location) {
-        return location.name.replace(/\s/g, '') + 'Element';
-      },
       editLocationElement(location, index) {
-        location.editing = true;
+        location.beginEdit();
         this.$nextTick(() => {
-          const refName = this.locationElementRef(location);
-          this.$refs[refName][index].focus();
+          this.$refs[location.id + 'locationName'][index].focus();
         });
-      },
-      saveLocationElement(location) {
-        location.editing = false;
-        location.name = location.tempName;
-        location.description = location.tempDescription;
       }
     }
   };
