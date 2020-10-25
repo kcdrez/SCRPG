@@ -25,6 +25,15 @@ class Baddie {
   get owner() {
     return store.getters.byID(this._owner);
   }
+  get typeLabel() {
+    switch (this.type) {
+      case 'minions':
+      default:
+        return 'minion';
+      case 'lieutenants':
+        return 'lieutenant';
+    }
+  }
 
   match(baddie, byIndex) {
     if (byIndex) {

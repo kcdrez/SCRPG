@@ -60,7 +60,7 @@
                               title="Save changes on this Location">
                         <icon :icon="['far', 'save']" />
                       </button>
-                      <button class="btn btn-secondary border-dark" 
+                      <button class="btn btn-warning border-dark" 
                               @click="location.editing = false"
                               title="Cancel Editing">
                         <icon :icon="['fas', 'ban']" />
