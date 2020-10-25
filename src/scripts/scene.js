@@ -61,7 +61,7 @@ class Scene {
   }
   resetLocations() {
     this.locations = [];
-    store.dispatch('saveBaddies', 'scene');
+    store.dispatch('saveData', 'scene');
   }
   addChallenge(challenge) {
     console.log(challenge);
@@ -71,19 +71,19 @@ class Scene {
   removeChallenge(index) {
     if (index >= 0) {
       this.challenges.splice(index, 1);
-      store.dispatch('saveBaddies', 'scene');
+      store.dispatch('saveData', 'scene');
     }
   }
   resetChallenges() {
     this.challenges = [];
-    store.dispatch('saveBaddies', 'scene');
+    store.dispatch('saveData', 'scene');
   }
   setNote(note) {
     this.notes = note;
     this.save();
   }
   save() {
-    store.dispatch('saveBaddies', 'scene');
+    store.dispatch('saveData', 'scene');
   }
 }
 
@@ -109,7 +109,7 @@ class Challenge {
     }
   }
   save() {
-    store.dispatch('saveBaddies', 'scene');
+    store.dispatch('saveData', 'scene');
   }
 }
 
@@ -137,7 +137,7 @@ class ChallengeEntry {
     this.editing = false;
   }
   save() {
-    store.dispatch('saveBaddies', 'scene');
+    store.dispatch('saveData', 'scene');
   }
 }
 
@@ -161,7 +161,7 @@ class Location {
     this.save();
   }
   save() {
-    store.dispatch('saveBaddies', 'scene');
+    store.dispatch('saveData', 'scene');
   }
 }
 

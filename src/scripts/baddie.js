@@ -6,8 +6,7 @@ import {v4 as uuid} from 'uuid';
 class Baddie {
   constructor(data, baddieType) {
     this.name = data.name || '';
-    this.baddieType = baddieType; //todo: remove
-    this.type = baddieType;
+    this.type = data.type || baddieType;
     this.list = [];
     this._owner = data.owner || data._owner;
     this.id = uuid();
@@ -83,7 +82,7 @@ class Baddie {
         this.list.splice(index, 1);
         this.refresh();
         if (this.list.length === 0) {
-          store.commit('DELETE_BADDIE', {baddie: this, baddieType: this.baddieType});
+          store.commit('DELETE_BADDIE', {baddie: this, baddieType: this.type});
         }
       }
     } else {
@@ -190,7 +189,7 @@ class Baddie {
         return 0;
       }
     });
-    store.dispatch('saveBaddies', this.baddieType);
+    store.dispatch('saveData', this.type);
   }
   addModifier({name, type, amount, persistent, exclusive, applyTo}, baddie) {
     if (!name) return;
@@ -250,7 +249,7 @@ class Baddie {
     } else {
       this.list[index].acted = status === undefined ? !this.list[index].acted : status;
     }
-    store.dispatch('saveBaddies', this.baddieType);
+    store.dispatch('saveData', this.type);
   }
   resetRound() {
     this.list.forEach(x => x.acted = false);
@@ -264,7 +263,6 @@ class Villain {
     this.bonuses = data.bonuses || [];
     this.penalties = data.penalties || [];
     this.defends = data.defends || [];
-    this.baddieType = 'villain'; //todo remove
     this.type = 'villain';
     this.id = data.id || uuid();
   }
@@ -344,7 +342,7 @@ class Villain {
     }
   }
   refresh() {
-    store.dispatch('saveBaddies', 'villains');
+    store.dispatch('saveData', 'villains');
   }
   takenAction() {
     const minions = store.getters.childMinions(this.id); 

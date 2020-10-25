@@ -63,41 +63,41 @@
                 <div class="btn-group btn-group-sm w-100 mb-2 actions" 
                      role="group">
                   <button class="btn btn-success border-dark" 
-                          :title="`Add a Bonus to this ${label}`"
+                          :title="`Add a Bonus to this ${labelSingle}`"
                           @click="modifyBaddie(baddieRow.size, 'boost', baddie, baddieRow)">
                     <img src="images/boost.png">
                   </button>
                   <button class="btn btn-warning border-dark" 
-                          :title="`Add a Penalty to this ${label}`"
+                          :title="`Add a Penalty to this ${labelSingle}`"
                           @click="modifyBaddie(baddieRow.size, 'hinder', baddie, baddieRow)">
                     <img src="images/hinder.png">
                   </button>
                   <button class="btn btn-secondary border-dark" 
-                         :title="`Add a Defend to this ${label}`"
+                         :title="`Add a Defend to this ${labelSingle}`"
                          @click="modifyBaddie(baddieRow.size, 'defend', baddie, baddieRow)">
                     <img src="images/defend.png">
                   </button>
                 </div>
                 <div class="btn-group btn-group-sm w-100 actions">
                   <button class="btn btn-warning border-dark text-dark" 
-                          :title="`Demote this ${label} one die size (min 4)`"
+                          :title="`Demote this ${labelSingle} one die size (min 4)`"
                           @click="demoteBaddie(baddie, baddieRow)" 
                           :disabled="baddieRow.size <= 4">
                     <icon :icon="['fas', 'level-down-alt']" />
                   </button>
                   <button class="btn btn-success border-dark text-dark" 
-                          :title="`Promote this ${label} one die size (max 12)`"
+                          :title="`Promote this ${labelSingle} one die size (max 12)`"
                           @click="promoteBaddie(baddie, baddieRow)" 
                           :disabled="baddieRow.size >= 12">
                     <icon :icon="['fas', 'level-up-alt']" />
                   </button>
                   <button class="btn btn-info border-dark text-dark" 
-                          :title="`Add another ${label} of this type (and size) to the scene`"
+                          :title="`Add another ${labelSingle} of this type (and size) to the scene`"
                           @click="createBaddie(baddieRow, baddie.name)">
                     <icon :icon="['far', 'plus-square']" />
                   </button>
                   <button class="btn btn-danger border-dark text-dark"
-                          :title="`Remove one ${label} from this group from the scene`"
+                          :title="`Remove one ${labelSingle} from this group from the scene`"
                           @click="removeBaddie(baddie, baddieRow)">
                     <icon :icon="['far', 'trash-alt']" />
                   </button>
@@ -116,7 +116,7 @@
            role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Create a {{label}}</h5>
+            <h5 class="modal-title">Create a {{labelSingle}}</h5>
             <button type="button" 
                     class="close" 
                     data-dismiss="modal">
@@ -323,7 +323,16 @@
       ...mapState([
         'players',
         'villains'
-      ])
+      ]),
+      labelSingle() {
+        switch (this.label) {
+          case 'Minions':
+          default:
+            return 'Minion';
+          case 'Lieutenants':
+            return 'Lieutenant';
+        }
+      }
     },
     methods: {
       createBaddie(data, name) { 
@@ -341,7 +350,7 @@
       },
       addBaddie(name) {
         this.baddieData.name = name;
-        $('#createModal-' + this.label).modal('show');
+        $(`#createModal-${this.label}`).modal('show');
       },
       modifyBaddie(size, type, parent, target) {
         if (type === 'boost') {
@@ -367,20 +376,20 @@
         this.baddieData.modifier.size = size;
         this.baddieData.modifier.parent = parent;
         this.baddieData.modifier.target = target;
-        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
+        this.$store.dispatch('saveData', this.label.toLowerCase());
         $(`#modifierModal-${this.label}`).modal('show');
       },
       demoteBaddie(parent, target) {
         parent.demote(target);
-        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
+        this.$store.dispatch('saveData', this.label.toLowerCase());
       },
       promoteBaddie(parent, target) {
         parent.promote(target);
-        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
+        this.$store.dispatch('saveData', this.label.toLowerCase());
       },
       removeBaddie(parent, target) {
         parent.remove(target);
-        this.$store.dispatch('saveBaddies', this.label.toLowerCase());
+        this.$store.dispatch('saveData', this.label.toLowerCase());
       },
       addModifier() {
         if (this.baddieData.modifier.name !== '') {

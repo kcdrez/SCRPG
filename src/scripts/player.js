@@ -51,7 +51,7 @@ class Player {
     this.save();
   }
   save() {
-    store.dispatch('saveBaddies', 'players');
+    store.dispatch('saveData', 'players');
   }
 }
 

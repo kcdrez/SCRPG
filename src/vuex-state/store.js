@@ -88,34 +88,34 @@ const store = new Vuex.Store({
         ctx.commit('INIT');
       }
     },
-    saveBaddies(ctx, baddieType) {
-      Cookies.set(baddieType, ctx.rootState[baddieType]); 
+    saveData(ctx, dataType) {
+      Cookies.set(dataType, ctx.rootState[dataType]); 
     },
     resetScene(ctx) {
       ctx.commit('RESET_SCENE');
-      ctx.dispatch('saveBaddies', 'minions');
-      ctx.dispatch('saveBaddies', 'lieutenants');
-      ctx.dispatch('saveBaddies', 'villains');
-      ctx.dispatch('saveBaddies', 'scene');
+      ctx.dispatch('saveData', 'minions');
+      ctx.dispatch('saveData', 'lieutenants');
+      ctx.dispatch('saveData', 'villains');
+      ctx.dispatch('saveData', 'scene');
     },
     resetRound(ctx) {
       ctx.commit('RESET_ROUND');
-      ctx.dispatch('saveBaddies', 'minions');
-      ctx.dispatch('saveBaddies', 'lieutenants');
-      ctx.dispatch('saveBaddies', 'villains');
-      ctx.dispatch('saveBaddies', 'scene');
+      ctx.dispatch('saveData', 'minions');
+      ctx.dispatch('saveData', 'lieutenants');
+      ctx.dispatch('saveData', 'villains');
+      ctx.dispatch('saveData', 'scene');
     },
     addPlayer(ctx, playerData) {
       ctx.commit('ADD_PLAYER', playerData);
-      ctx.dispatch('saveBaddies', 'players');
+      ctx.dispatch('saveData', 'players');
     },
     removePlayer(ctx, name) {
       ctx.commit('REMOVE_PLAYER', name);
-      ctx.dispatch('saveBaddies', 'players');
+      ctx.dispatch('saveData', 'players');
     },
     resetPlayers(ctx) {
       ctx.commit('RESET_PLAYERS');
-      ctx.dispatch('saveBaddies', 'players'); 
+      ctx.dispatch('saveData', 'players'); 
     }
   },
   getters: {
