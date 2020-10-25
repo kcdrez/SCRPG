@@ -123,7 +123,7 @@ const store = new Vuex.Store({
       return [...state.players, ...state.villains].find(player => player.id === id);
     },
     childMinions: state => id => {
-      return state.minions.filter(minion => minion.owner.id === id);
+      return state.minions.filter(minion => minion.owner && minion.owner.id === id);
     },
     actors: state => {
       let arr = [];
@@ -132,14 +132,17 @@ const store = new Vuex.Store({
         const minions = state.minions.filter(m => m.owner ? m.owner.id === player.id : false);
         arr = arr.concat(minions);
       });
+      state.villains.sort((a, b) => a.name > b.name).forEach(villain => {
+        arr.push(villain);
+        const minions = state.minions.filter(m => m.owner ? m.owner.id === villain.id : false);
+        arr = arr.concat(minions);
+      });
       const remainingMinions = state.minions.filter(m => {
         const match = arr.find(x => x.id === m.id);
         return !match;
       });
-      return arr.concat(state.villains, 
-        state.lieutenants, 
-        remainingMinions);
-        return [];
+
+      return arr.concat(state.lieutenants, remainingMinions);
     }
   }
 })

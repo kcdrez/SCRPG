@@ -23,7 +23,7 @@ class Player {
   }
 
   takenAction() {
-    const minions = store.getters.childMinions(this.id); 
+    const minions = store.getters.childMinions(this.id);
     const newStatus = !this.acted;
     const minionNotMatched = minions.some(minion => {
       const match = minion.list.find(x => x.acted !== newStatus);
