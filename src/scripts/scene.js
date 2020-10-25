@@ -161,7 +161,7 @@ class Location {
     this.save();
   }
   save() {
-    store.dispatch('saveData', 'scene');
+    store.dispatch('saveData ', 'scene');
   }
 }
 

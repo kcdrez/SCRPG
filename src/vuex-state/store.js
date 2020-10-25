@@ -61,7 +61,7 @@ const store = new Vuex.Store({
       state.minions = [];
       state.lieutenants = [];
       state.villains = [];
-      state.scene.reset();
+      state.scene.clear();
     },
     RESET_ROUND(state) {
       state.minions.forEach(x => x.resetRound());
