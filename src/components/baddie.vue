@@ -418,5 +418,10 @@
         font-size: 20px;
       }
     }
+    thead {
+      position: sticky;
+      z-index: 4;
+      top: 56px; //will need to adjust if navbar ever changes
+    }
   }
 </style>
