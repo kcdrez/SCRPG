@@ -1,7 +1,13 @@
 <template>
   <div v-if="list.length > 0">
-    <h6><b class="text-capitalize">{{labelPlural}}:</b></h6>
-    <div class="border border-dark position-relative text-center ml-3" 
+    <h6>
+      <b class="text-capitalize" 
+         :class="textClass">
+        {{labelPlural}}:
+      </b>
+      </h6>
+    <div class="border position-relative text-center ml-3" 
+        :class="borderClass"
          v-for="(modifier, index) in list" 
          :key="label + index">
       <div class="remove-modifier"
@@ -45,6 +51,30 @@
           return amount;
         }
       }
+    },
+    computed: {
+      borderClass() {
+        switch (this.label.toLowerCase()) {
+          case 'bonus':
+          default:
+            return 'border-success';
+          case 'penalty':
+            return 'border-warning';
+          case 'defend':
+            return 'border-secondary';
+        }
+      },
+      textClass() {
+        switch (this.label.toLowerCase()) {
+          case 'bonus':
+          default:
+            return 'text-success';
+          case 'penalty':
+            return 'text-dark-warning';
+          case 'defend':
+            return 'text-secondary';
+        }
+      }
     }
   }
 </script>
@@ -59,6 +89,9 @@
     &:hover {
       transform: scale(1.5);
       color: red;
-    };
+    }
+  }
+  .text-dark-warning {
+    color: #e6ac00;
   }
 </style>

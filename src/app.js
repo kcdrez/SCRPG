@@ -1,16 +1,13 @@
 import Vue from 'vue';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
+import './styles/main.scss';
 import formWizard from 'vue-form-wizard';
 import 'vue-form-wizard/dist/vue-form-wizard.min.css';
 import VueDialog from 'vuejs-dialog';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
-// import '@fortawesome/fontawesome-free/css/all.css';
 import '@fortawesome/fontawesome-free/js/all.js';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
-// import {library} from '@fortawesome/fontawesome-svg-core';
 
-import './styles/main.scss';
 
 import store from './vuex-state/store';
 import router from './router/router';

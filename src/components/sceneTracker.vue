@@ -72,100 +72,109 @@
                       title="Clear all players from the scene" 
                       @click="clearPlayers">Clear Players</button>
               <button class="btn btn-danger border-dark" 
-                      @click="resetRound" 
+                      @click="$store.dispatch('resetRound')" 
                       title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
             </div>
           </div>
-          <table class="table table-sm table-bordered table-dark table-stripped" v-if="actors.length > 0">
+          <table class="table table-sm table-bordered table-dark table-stripped" 
+                 v-if="actors.length > 0">
             <thead class="text-center">
               <tr>
-                <th width="35%">Name (Owner)</th>
+                <th width="30%">Name (Owner)</th>
                 <th width="25%">Type</th>
                 <th width="20%">HP/Die Size</th>
-                <th width="20%">Actions</th>
+                <th width="25%">Actions</th>
               </tr>
             </thead>
             <tbody class="text-center">
-              <tr v-if="scene.name !== ''">
-                <td class="text-capitalize c-pointer" 
-                    @click="scene.acted = !scene.acted"
-                    title="Click to toggle the Environment to have acted already in the current round">
-                  <span v-if="scene.acted">
-                    <icon :icon="['fas', 'check']" 
-                          class="text-success" />
-                  </span>
-                  {{scene.name}}
-                </td>
-                <td class="text-capitalize c-pointer" 
-                    @click="scene.acted = !scene.acted"
-                    title="Click to toggle the Environment to have acted already in the current round">Environment</td>
-                <td class="c-pointer"
-                    @click="scene.acted = !scene.acted"
-                    title="Click to toggle the Environment to have acted already in the current round"></td>
-                <td class="c-pointer"
-                    @click="scene.acted = !scene.acted"
-                    title="Click to toggle the Environment to have acted already in the current round"></td>
-              </tr>
               <template v-for="actor in actors">
-                <tr v-for="(item, index) in actor.list" :key="item.id">
-                  <td class="text-capitalize c-pointer align-middle"
-                      @click="actor.takenAction(index)"
-                      :title="`Click to toggle this ${actor.type} to have acted already in the current round`">
-                    <span v-if="item.acted">
-                      <icon :icon="['fas', 'check']" 
-                            class="text-success" />
-                    </span>
-                    {{actor.name}} <template v-if="actor.owner">({{actor.owner.name}})</template>
-                  </td>
-                  <td class="text-capitalize c-pointer align-middle"
-                      @click="actor.takenAction(index)"
-                      :title="`Click to toggle this ${actor.type} to have acted already in the current round`">
-                    {{actor.type}}
-                  </td>
-                  <td class="align-middle">
-                    <template v-if="typeof item.hp === 'number'">
-                      {{item.hp}}
-                      <span @click="item.hp++">
-                        <icon :icon="['fas', 'chevron-circle-up']" 
-                              title="Increase Player HP" 
-                              class="c-pointer" />
-                      </span>
-                      <span @click="item.hp--">
-                        <icon :icon="['fas', 'chevron-circle-down']" 
-                              title="Decrease Player HP" 
-                              class="c-pointer" />
-                      </span>
-                    </template>
-                    <template v-else-if="item.size">
-                      <img :src="`images/d${item.size}.png`" :title="`This minion uses a d${item.size}`">
-                    </template>
-                  </td>
-                  <td class="align-middle">
-                    <div class="btn-group btn-group-sm">
-                      <button class="btn btn-secondary border-dark" 
-                              @click="renamePlayerModal(item)"
-                              title="Edit this Player"
-                              v-if="item.type === 'player'">
-                        <icon :icon="['far', 'edit']" />
-                      </button>
-                      <button class="btn btn-primary border-dark add-minion"
-                              title="Add a Minion"
-                              @click="$emit('add-minion', item.id)"
-                              v-if="item.type === 'player' || item.type === 'villain'">
-                        <span class="fa-stack">
-                          <i class="fas fa-dragon" data-fa-transform="right-4 down-4"></i>
-                          <i class="fas fa-plus" data-fa-transform="shrink-6 left-4 down-4"></i>
+                <template v-if="!!actor.name">
+                  <tr v-for="(item, index) in actor.list"
+                      :key="item.id">
+                    <td class="text-capitalize c-pointer align-middle">
+                      <input class="form-control form-control-sm"
+                            v-model="actor.tempName"
+                            v-if="actor.editing">
+                      <div v-else
+                          @click="actor.takenAction(index)"
+                          :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
+                        <span v-if="item.acted">
+                          <icon :icon="['fas', 'check']"
+                                class="text-success" />
                         </span>
-                      </button>
-                      <button class="btn btn-danger border-dark" 
-                              @click="removePlayer(item.name)" 
-                              title="Remove this Player from the scene"
-                              v-if="item.type === 'player'">
-                        <icon :icon="['far', 'trash-alt']" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                        {{actor.name}} <template v-if="actor.owner">({{actor.owner.name}})</template>
+                      </div>
+                    </td>
+                    <td class="text-capitalize c-pointer align-middle"
+                        @click="actor.takenAction(index)"
+                        :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
+                      {{actor.typeLabel}}
+                    </td>
+                    <td class="align-middle">
+                      <template v-if="typeof item.hp === 'number'">
+                        <input type="number"
+                                class="form-control form-control-sm"
+                                v-model.number="item.tempHP" 
+                                v-if="item.editing"
+                                min="0">
+                        <template v-else>
+                          {{item.hp}}
+                          <span @click="item.hp++">
+                            <icon :icon="['fas', 'chevron-circle-up']" 
+                                  title="Increase Player HP" 
+                                  class="c-pointer" />
+                          </span>
+                          <span @click="item.hp--">
+                            <icon :icon="['fas', 'chevron-circle-down']" 
+                                  title="Decrease Player HP" 
+                                  class="c-pointer" />
+                          </span>
+                        </template>
+                      </template>
+                      <template v-else-if="item.size">
+                        <img :src="`images/d${item.size}.png`"
+                            :title="`This minion uses a d${item.size}`">
+                      </template>
+                    </td>
+                    <td class="align-middle">
+                      <div class="btn-group btn-group-sm">
+                        <button class="btn btn-secondary border-dark"
+                                @click="item.beginEdit()"
+                                title="Edit this player"
+                                v-if="item.allowEdit">
+                          <icon :icon="['far', 'edit']" />
+                        </button>
+                        <button class="btn btn-success border-dark"
+                                @click="item.saveEdit()"
+                                v-if="item.editing"
+                                title="Save edits on this player">
+                          <icon :icon="['far', 'save']" />
+                        </button>
+                        <button class="btn btn-warning border-dark"
+                                @click="item.cancelEdit()"
+                                v-if="item.editing"
+                                title="Cancel edits on this player">
+                          <icon :icon="['fas', 'ban']" />
+                        </button>
+                        <button class="btn btn-primary border-dark add-minion"
+                                title="Add a Minion"
+                                @click="$emit('add-minion', item.id)"
+                                v-if="item.allowAddMinion">
+                          <span class="fa-stack">
+                            <i class="fas fa-dragon" data-fa-transform="right-4 down-4"></i>
+                            <i class="fas fa-plus" data-fa-transform="shrink-6 left-4 down-4"></i>
+                          </span>
+                        </button>
+                        <button class="btn btn-danger border-dark"
+                                @click="$store.dispatch('removePlayer', item.name)" 
+                                title="Remove this Player from the scene"
+                                v-if="item.allowRemove">
+                          <icon :icon="['far', 'trash-alt']" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
               </template>
             </tbody>
           </table>
@@ -173,7 +182,7 @@
           <div>
             <h4 class="text-center">Notes</h4>
             <div class="editor">
-              <editor-menu-bar :editor="editor" 
+              <editor-menu-bar :editor="editor"
                                 v-slot="{ commands, isActive }">
                 <div class="menubar">
                   <button class="menubar__button"
@@ -247,7 +256,7 @@
                   </button>
                 </div>
               </editor-menu-bar>
-              <editor-content class="editor-container" 
+              <editor-content class="editor-container"
                               :editor="editor" />
             </div>
           </div>
@@ -350,7 +359,8 @@
             <input type="number" 
                    v-model.number="newPlayer.hp" 
                    class="form-control form-control-sm" 
-                   @keypress.enter="addPlayer" 
+                   @keypress.enter="addPlayer"
+                   min="0"
                    ref="newPlayerHP">
           </div>
           <div class="modal-footer">
@@ -359,46 +369,6 @@
                     data-dismiss="modal" 
                     @click="addPlayer" 
                     :disabled="newPlayer.name === ''">Create</button>
-            <button class="btn btn-secondary" 
-                    type="button" 
-                    data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="renamePlayerModal" 
-         class="modal" 
-         tabindex="-1" 
-         role="dialog">
-      <div class="modal-dialog" 
-           role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Edit a Player</h5>
-            <button type="button" 
-                    class="close" 
-                    data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            Rename the Player ({{renamePlayerData.target.name || '---'}})
-            <input type="text" 
-                   v-model.trim="renamePlayerData.text" 
-                   class="form-control form-control-sm" 
-                   @keypress.enter="renamePlayer" ref="renamePlayer">
-            Edit the Player's HP
-            <input type="number" 
-                   v-model.number="renamePlayerData.hp" 
-                   class="form-control form-control-sm" 
-                   @keypress.enter="renamePlayer">
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" 
-                    type="button" 
-                    data-dismiss="modal" 
-                    @click="renamePlayer" 
-                    :disabled="renamePlayerData.text === ''">Rename</button>
             <button class="btn btn-secondary" 
                     type="button" 
                     data-dismiss="modal">Close</button>
@@ -445,14 +415,6 @@
         newPlayer: {
           name: '',
           hp: 30
-        },
-        renamePlayerData: {
-          target: {
-            name: '',
-            hp: 0
-          },
-          text: '',
-          hp: 0
         }
       }
     },
@@ -481,9 +443,6 @@
           $('#addPlayerModal').modal('hide');
         }
       },
-      removePlayer(playerName) {
-        this.$store.dispatch('removePlayer', playerName);
-      },
       clearPlayers() {
         this.$dialog.confirm({
           title: 'Are You Sure?',
@@ -495,23 +454,6 @@
         .then(r => {
           this.$store.dispatch('resetPlayers');
         });
-      },
-      renamePlayerModal(player) {
-        if (player) {
-          this.renamePlayerData.target = player;
-          this.renamePlayerData.text = player.name;
-          this.renamePlayerData.hp = player.hp;
-          $("#renamePlayerModal").modal('show');
-        }
-      },
-      renamePlayer() {
-        if (this.renamePlayerData.text !== '') {
-          this.renamePlayerData.target.name = this.renamePlayerData.text;
-          this.renamePlayerData.target.hp = this.renamePlayerData.hp;
-        }
-      },
-      resetRound() {
-        this.$store.dispatch('resetRound');
       }
     },
     computed: {
@@ -528,9 +470,6 @@
       });
       $('#addPlayerModal').on('shown.bs.modal', e => {
         this.$refs.newPlayerName.focus();
-      });
-      $('#addPlayerModal').on('shown.bs.modal', e => {
-        this.$refs.renamePlayer.focus();
       });
       this.editor = new Editor({
         content: this.scene.notes,
@@ -614,5 +553,8 @@
     hr {
       background-color: black;
     }
+  }
+  input.hp {
+    width: 30px;
   }
 </style>

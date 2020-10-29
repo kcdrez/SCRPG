@@ -66,8 +66,9 @@ const store = new Vuex.Store({
     RESET_ROUND(state) {
       state.minions.forEach(x => x.resetRound());
       state.lieutenants.forEach(x => x.resetRound());
-      state.villains.forEach(x => x.acted = false);
-      state.players.forEach(x => x.acted = false);
+      state.villains.forEach(x => x.resetRound());
+      state.players.forEach(x => x.resetRound());
+      state.scene.resetRound();
     },
     ADD_PLAYER(state, playerData) {
       state.players.push(new Player(playerData));
@@ -100,10 +101,6 @@ const store = new Vuex.Store({
     },
     resetRound(ctx) {
       ctx.commit('RESET_ROUND');
-      ctx.dispatch('saveData', 'minions');
-      ctx.dispatch('saveData', 'lieutenants');
-      ctx.dispatch('saveData', 'villains');
-      ctx.dispatch('saveData', 'scene');
     },
     addPlayer(ctx, playerData) {
       ctx.commit('ADD_PLAYER', playerData);
@@ -120,13 +117,14 @@ const store = new Vuex.Store({
   },
   getters: {
     byID: state => id => {
-      return [...state.players, ...state.villains].find(player => player.id === id);
+      return [...state.players, ...state.villains, state.scene].find(entry => entry.id === id);
     },
     childMinions: state => id => {
       return state.minions.filter(minion => minion.owner && minion.owner.id === id);
     },
     actors: state => {
-      let arr = [];
+      const envMinions = state.minions.filter(m => m.owner ? m.owner.id === state.scene.id : false);
+      let arr = [state.scene, ...envMinions];
       state.players.sort((a, b) => a.name > b.name).forEach(player => {
         arr.push(player);
         const minions = state.minions.filter(m => m.owner ? m.owner.id === player.id : false);

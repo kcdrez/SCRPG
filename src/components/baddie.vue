@@ -92,8 +92,8 @@
                     <icon :icon="['fas', 'level-up-alt']" />
                   </button>
                   <button class="btn btn-info border-dark text-dark" 
-                          :title="`Add another ${labelSingle} of this type (and size) to the scene`"
-                          @click="createBaddie(baddieRow, baddie.name)">
+                          :title="`Add another ${labelSingle} to this row`"
+                          @click="createBaddie(baddieRow)">
                     <icon :icon="['far', 'plus-square']" />
                   </button>
                   <button class="btn btn-danger border-dark text-dark"
@@ -131,7 +131,8 @@
               <input class="form-control" 
                      v-model.trim="baddieData.name" 
                      type="text"
-                     @keydown.enter="createBaddie()">
+                     @keydown.enter="createBaddie()"
+                     ref="createName">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -169,7 +170,8 @@
                         :value="player.id">{{player.name}}</option>
                 <option v-for="villain in villains"
                         :key="villain.id"
-                        :value="villain.id">{{villain.name}}</option>                        
+                        :value="villain.id">{{villain.name}}</option>
+                <option v-if="scene.name" :value="scene.id">{{scene.name}}</option>
               </select>
             </div>
           </div>
@@ -229,8 +231,8 @@
                      v-model.number="baddieData.modifier.applyTo" 
                      @keydown.enter="addModifier">
                 <option value="single">Just one</option>
-                <option value="die">All of the same die size</option>
-                <option value="name">All of the same name</option>
+                <option value="row">All of the {{label.toLowerCase()}} in this row</option>
+                <option value="name">All of the {{label.toLowerCase()}} with the same name</option>
               </select>
             </div>
             <div class="d-inline" 
@@ -322,7 +324,8 @@
       },
       ...mapState([
         'players',
-        'villains'
+        'villains',
+        'scene'
       ]),
       labelSingle() {
         switch (this.label) {
@@ -335,14 +338,11 @@
       }
     },
     methods: {
-      createBaddie(data, name) { 
-        if (!!data) {
-          data = Object.assign(data, {name});
+      createBaddie(baddieRow) {
+        if (!!baddieRow) {
+          baddieRow.count++;
         } else {
-          data = this.baddieData;
-        }
-        if (!!data.name) {
-          const baddie = new Baddie(data, this.label.toLowerCase());
+          const baddie = new Baddie(this.baddieData, this.label.toLowerCase());
           this.$store.commit('UPSERT_BADDIE', 
             {baddie, baddieType: this.label.toLowerCase()});
           $(`#createModal-${this.label}`).modal('hide');
@@ -400,6 +400,9 @@
       modal(status, owner) {
         $(`#createModal-${this.label}`).modal(status);
         this.baddieData.owner = owner || null;
+        this.$nextTick(() => {
+          this.$refs.createName.focus();
+        }); 
       }
     }
   };
@@ -414,6 +417,11 @@
       button {
         font-size: 20px;
       }
+    }
+    thead {
+      position: sticky;
+      z-index: 4;
+      top: 56px; //will need to adjust if navbar ever changes
     }
   }
 </style>

@@ -1,22 +1,25 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <router-link :to="{name: 'home'}" class="navbar-brand">Home</router-link>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-toggler" aria-controls="navbar-toggler" aria-expanded="false" aria-label="Toggle navigation">
+    <router-link :to="{name: 'home'}"
+                 class="navbar-brand">Home</router-link>
+    <button class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbar-toggler">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbar-toggler">
+    <div class="collapse navbar-collapse"
+         id="navbar-toggler">
       <ul class="navbar-nav mr-auto">
-        <!-- <li class="nav-item">
-          <router-link :to="{name: 'characterCreation'}" class="nav-link">Character Creation</router-link>
-        </li> -->
         <li class="nav-item">
-          <router-link :to="{name: 'gmTools'}" class="nav-link">GM Tools</router-link>
+          <div class="nav-link c-pointer"
+               data-toggle="modal"
+               data-target="#overcomeChartModal">Overcome Chart</div>
         </li>
         <li class="nav-item">
-          <div class="nav-link c-pointer" data-toggle="modal" data-target="#overcomeChartModal">Overcome Chart</div>
-        </li>
-        <li class="nav-item">
-          <div class="nav-link c-pointer" data-toggle="modal" data-target="#boostsChartModal">Boost/Hinder Chart</div>
+          <div class="nav-link c-pointer"
+               data-toggle="modal"
+               data-target="#boostsChartModal">Boost/Hinder Chart</div>
         </li>
       </ul>
     </div>
