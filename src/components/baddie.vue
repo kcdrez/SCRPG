@@ -131,7 +131,8 @@
               <input class="form-control" 
                      v-model.trim="baddieData.name" 
                      type="text"
-                     @keydown.enter="createBaddie()">
+                     @keydown.enter="createBaddie()"
+                     ref="createName">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -169,7 +170,8 @@
                         :value="player.id">{{player.name}}</option>
                 <option v-for="villain in villains"
                         :key="villain.id"
-                        :value="villain.id">{{villain.name}}</option>                        
+                        :value="villain.id">{{villain.name}}</option>
+                <option v-if="scene.name" :value="scene.id">{{scene.name}}</option>
               </select>
             </div>
           </div>
@@ -229,8 +231,8 @@
                      v-model.number="baddieData.modifier.applyTo" 
                      @keydown.enter="addModifier">
                 <option value="single">Just one</option>
-                <option value="die">All of the same die size</option>
-                <option value="name">All of the same name</option>
+                <option value="row">All of the {{label.toLowerCase()}} in this row</option>
+                <option value="name">All of the {{label.toLowerCase()}} with the same name</option>
               </select>
             </div>
             <div class="d-inline" 
@@ -322,7 +324,8 @@
       },
       ...mapState([
         'players',
-        'villains'
+        'villains',
+        'scene'
       ]),
       labelSingle() {
         switch (this.label) {
@@ -397,6 +400,9 @@
       modal(status, owner) {
         $(`#createModal-${this.label}`).modal(status);
         this.baddieData.owner = owner || null;
+        this.$nextTick(() => {
+          this.$refs.createName.focus();
+        }); 
       }
     }
   };

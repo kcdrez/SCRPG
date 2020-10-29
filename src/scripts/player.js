@@ -29,6 +29,15 @@ class Player {
   get typeLabel() {
     return this.type;
   }
+  get allowEdit() {
+    return !this.editing;
+  }
+  get allowAddMinion() {
+    return true;
+  }
+  get allowRemove() {
+    return true;
+  }
 
   takenAction() {
     const minions = store.getters.childMinions(this.id);
@@ -71,6 +80,10 @@ class Player {
     this.editing = false;
     this.name = this.tempName;
     this.hp = this.tempHP;
+    this.save();
+  }
+  resetRound() {
+    this.acted = false;
     this.save();
   }
 }

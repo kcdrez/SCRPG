@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
 
@@ -11,6 +12,8 @@ class Scene {
     this.name = data.name || '';
     this.acted = data.acted || false;
     this.notes = data.notes || '';
+    this.id = data.id || uuid();
+    this.type = data.type || 'environment';
   }
 
   get isEmpty() {
@@ -18,7 +21,48 @@ class Scene {
       this.yellow.length === 0 &&
       this.red.length === 0;
   }
+  get list () {
+    return [this];
+  }
+  get typeLabel() {
+    return this.type;
+  }
+  get allowAddMinion() {
+    return true;
+  }
 
+  takenAction() {
+    const minions = store.getters.childMinions(this.id);
+    const newStatus = !this.acted;
+    const minionNotMatched = minions.some(minion => {
+      const match = minion.list.find(x => x.acted !== newStatus);
+      return !!match;
+    });
+    const message = newStatus ? 
+      `Some of the environment's minions have not acted. Do you also want to mark all of it's minions as having acted too?`:
+      `Some of the environment's minions have already acted. Do you also want to mark it's minions as having not acted?`;
+    if (minionNotMatched && minions.length > 0) {
+      Vue.dialog.confirm({
+        title: 'Warning',
+        body: message
+      },
+      {
+        okText: 'Yes',
+        cancelText: 'No'
+      })
+      .then(() => {
+        minions.forEach(minion => {
+          minion.takenAction(null, newStatus);
+        })
+      });
+    }
+    this.acted = newStatus;
+    this.save();
+  }
+  resetRound() {
+    this.acted = false;
+    this.save();
+  }
   create(green, yellow, red, name) {
     this.clear();
 

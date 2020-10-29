@@ -198,7 +198,7 @@ class Baddie {
         return 0;
       }
     });
-    store.dispatch('saveData', this.type);
+    this.save();
   }
   addModifier({name, type, amount, persistent, exclusive, applyTo}, baddie) {
     if (!name) return;
@@ -258,10 +258,14 @@ class Baddie {
     } else {
       this.list[index].acted = status === undefined ? !this.list[index].acted : status;
     }
-    store.dispatch('saveData', this.type);
+    this.save();
   }
   resetRound() {
     this.list.forEach(x => x.acted = false);
+    this.save();
+  }
+  save() {
+    store.dispatch('saveData', this.type);
   }
 }
 
@@ -279,6 +283,10 @@ class Villain {
   get list() {
     return [this];
   }
+  get allowAddMinion() {
+    return true;
+  }
+
   boost(name, amount, persistent, exclusive) {
     this.bonuses.push({name, amount, persistent, exclusive});
     this.bonuses.sort((a, b) => {
@@ -294,7 +302,7 @@ class Villain {
         return 0;
       }
     });
-    this.refresh();
+    this.save();
   }
   hinder(name, amount, persistent, exclusive) {
     this.penalties.push({name, amount, persistent, exclusive});
@@ -311,7 +319,7 @@ class Villain {
         return 0;
       }
     });
-    this.refresh();
+    this.save();
   }
   defend(name, amount) {
     this.defends.push({name, amount});
@@ -324,7 +332,7 @@ class Villain {
         return 0;
       }
     });
-    this.refresh();
+    this.save();
   }
   addModifier({name, type, amount, persistent, exclusive}) {
     if (name === '') return;
@@ -339,7 +347,7 @@ class Villain {
   removeModifier(type, index) {
     const remove = () => {
       this[type].splice(index, 1);
-      this.refresh();
+      this.save();
     }
     if (this[type][index].exclusive || this[type][index].persistent) {
       Vue.dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
@@ -349,9 +357,6 @@ class Villain {
     } else { 
       remove();
     }
-  }
-  refresh() {
-    store.dispatch('saveData', 'villains');
   }
   takenAction() {
     const minions = store.getters.childMinions(this.id); 
@@ -379,7 +384,14 @@ class Villain {
       });
     }
     this.acted = newStatus;
-    this.refresh();
+    this.save();
+  }
+  resetRound() {
+    this.acted = false;
+    this.save();
+  }
+  save() {
+    store.dispatch('saveData', this.type);
   }
 }
 
