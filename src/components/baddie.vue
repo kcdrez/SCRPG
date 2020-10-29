@@ -92,8 +92,8 @@
                     <icon :icon="['fas', 'level-up-alt']" />
                   </button>
                   <button class="btn btn-info border-dark text-dark" 
-                          :title="`Add another ${labelSingle} of this type (and size) to the scene`"
-                          @click="createBaddie(baddieRow, baddie.name)">
+                          :title="`Add another ${labelSingle} to this row`"
+                          @click="createBaddie(baddieRow)">
                     <icon :icon="['far', 'plus-square']" />
                   </button>
                   <button class="btn btn-danger border-dark text-dark"
@@ -335,14 +335,11 @@
       }
     },
     methods: {
-      createBaddie(data, name) { 
-        if (!!data) {
-          data = Object.assign(data, {name});
+      createBaddie(baddieRow) {
+        if (!!baddieRow) {
+          baddieRow.count++;
         } else {
-          data = this.baddieData;
-        }
-        if (!!data.name) {
-          const baddie = new Baddie(data, this.label.toLowerCase());
+          const baddie = new Baddie(this.baddieData, this.label.toLowerCase());
           this.$store.commit('UPSERT_BADDIE', 
             {baddie, baddieType: this.label.toLowerCase()});
           $(`#createModal-${this.label}`).modal('hide');
