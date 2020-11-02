@@ -129,6 +129,19 @@ class Scene {
   save() {
     store.dispatch('saveData', 'scene');
   }
+  export() {
+    return {
+      id: this.id,
+      name: this.name,
+      acted: this.acted,
+      notes: this.notes,
+      green: this.green,
+      yellow: this.yellow,
+      red: this.red,
+      // challenges: this.challenges.map(x => x.export()),
+      // locations: this.locations.map(x => x.export()),
+    }
+  }
 }
 
 class Challenge {
@@ -155,6 +168,12 @@ class Challenge {
   save() {
     store.dispatch('saveData', 'scene');
   }
+  export() {
+    return {
+      id: this.id,
+      name: this.name,
+    }
+  }
 }
 
 class ChallengeEntry {
@@ -163,6 +182,7 @@ class ChallengeEntry {
     this.editing = data.editing || false;
     this.label = data.label || '';
     this.tempLabel = data.label || data.tempLabel || '';
+    this.id = data.id || uuid();
   }
 
   complete() {
@@ -182,6 +202,12 @@ class ChallengeEntry {
   }
   save() {
     store.dispatch('saveData', 'scene');
+  }
+  export() {
+    return {
+      label: this.label,
+      completed: this.completed
+    }
   }
 }
 
@@ -206,6 +232,13 @@ class Location {
   }
   save() {
     store.dispatch('saveData ', 'scene');
+  }
+  export() {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description
+    }
   }
 }
 

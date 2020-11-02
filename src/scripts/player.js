@@ -86,6 +86,14 @@ class Player {
     this.acted = false;
     this.save();
   }
+  export() {
+    return {
+      id: this.id,
+      name: this.name,
+      hp: this.hp,
+      acted: this.acted,
+    }
+  }
 }
 
 export default Player;

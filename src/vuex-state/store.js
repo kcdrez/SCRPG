@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Cookies from 'js-cookie';
+import xlsx from 'xlsx';
 import {Baddie, Villain} from '../scripts/baddie';
 import {Player} from '../scripts/player';
 import {Scene} from '../scripts/scene';
@@ -113,6 +114,42 @@ const store = new Vuex.Store({
     resetPlayers(ctx) {
       ctx.commit('RESET_PLAYERS');
       ctx.dispatch('saveData', 'players'); 
+    },
+    export(ctx) {
+      const wb = xlsx.utils.book_new();
+      const playersWorksheet = xlsx.utils.json_to_sheet(ctx.state.players.map(x => x.export()));
+      const sceneWorksheet = xlsx.utils.json_to_sheet(ctx.scene.export());
+      const challengeWorksheet = xlsx.utils.json_to_sheet(ctx.scene.exportChallenges());
+      const challengeElementsWorksheet = xlsx.utils.json_to_sheet(ctx.scene.exportChallengeElements());
+
+      xlsx.utils.book_append_sheet(wb, playersWorkSheet, "players");
+      xlsx.utils.book_append_sheet(wb, playersWorkSheet, "scene");
+
+      xlsx.writeFile(wb, 'test.xlsx');
+    },
+    import(ctx, files) {
+      for (let i = 0; i < files.length; i++) {
+        const fileReader = new FileReader();
+        fileReader.onload = (e) => {
+          const bytes = new Uint8Array(e.target.result);
+          let binary = "";
+          for (let j = 0; j < bytes.byteLength; j++) {
+            binary += String.fromCharCode(bytes[j]);
+          }
+          const wb = xlsx.read(binary, {type: 'binary'});
+          const sheetNames = wb.SheetNames;
+          wb.SheetNames.forEach(sheetName => {
+            xlsx.utils.sheet_to_json(wb.Sheets[sheetName]).forEach(row => {
+              switch (sheetName.toLowerCase()) {
+                case 'player':
+                case 'players':
+                  ctx.commit('ADD_PLAYER', row);
+              }
+            });
+          });
+        }
+        fileReader.readAsArrayBuffer(files[i]);
+      }
     }
   },
   getters: {
