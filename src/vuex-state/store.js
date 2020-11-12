@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Cookies from 'js-cookie';
+import xlsx from 'xlsx';
 import {Baddie, Villain} from '../scripts/baddie';
 import {Player} from '../scripts/player';
 import {Scene} from '../scripts/scene';
@@ -39,14 +40,14 @@ const store = new Vuex.Store({
       state.scene = new Scene(sceneData || {});
       state.initialized = true;
     },
-    UPSERT_BADDIE(state, {baddie, baddieType}) {
-      const match = state[baddieType].find(x => x.name === baddie.name);
-      if (match && baddieType !== 'villains') {
+    UPSERT_BADDIE(state, baddie) {
+      const match = state[baddie.type].find(x => x.id === baddie.id);
+      if (match && baddie.type !== 'villains') {
         baddie.list.forEach(x => match.addBaddie(x));
       } else {
-        state[baddieType].push(baddie);
+        state[baddie.type].push(baddie);
       }
-      Cookies.set(baddieType, state[baddieType]);
+      Cookies.set(baddie.type, state[baddie.type]); //todo: make an action to remove this
     },
     DELETE_BADDIE(state, {baddieType, index, baddie}) {
       if (baddie !== undefined) {
@@ -113,6 +114,117 @@ const store = new Vuex.Store({
     resetPlayers(ctx) {
       ctx.commit('RESET_PLAYERS');
       ctx.dispatch('saveData', 'players'); 
+    },
+    export(ctx) {
+      const players = ctx.state.players.map(x => x.export());
+      const {scene, challenges, locations} = ctx.state.scene.export();
+      const minions = ctx.getters.exportBaddie(ctx.state.minions);
+      const lieutenants = ctx.getters.exportBaddie(ctx.state.lieutenants);
+      const villains = ctx.getters.exportBaddie(ctx.state.villains);
+
+      const wb = xlsx.utils.book_new();
+      const sceneWS = xlsx.utils.json_to_sheet([
+        ...players, 
+        ...scene, 
+        ...challenges, 
+        ...locations,
+        ...minions.baddies,
+        ...minions.list,
+        ...minions.modifiers,
+        ...lieutenants.baddies,
+        ...lieutenants.list,
+        ...lieutenants.modifiers,
+        ...villains.baddies,
+        ...villains.modifiers
+      ]);
+
+      xlsx.utils.book_append_sheet(wb, sceneWS, "SCRPG");
+
+      xlsx.writeFile(wb, 'SCRPG-GM.xlsx');
+    },
+    import(ctx, files) {
+      ctx.dispatch('resetScene');
+      // ctx.dispatch('resetPlayers');
+      for (let i = 0; i < files.length; i++) {
+        const fileReader = new FileReader();
+        fileReader.onload = (e) => {
+          const bytes = new Uint8Array(e.target.result);
+          let binary = "";
+          for (let j = 0; j < bytes.byteLength; j++) {
+            binary += String.fromCharCode(bytes[j]);
+          }
+          const wb = xlsx.read(binary, {type: 'binary'});
+          wb.SheetNames.forEach(sheetName => {
+            xlsx.utils.sheet_to_json(wb.Sheets[sheetName]).forEach(row => {
+              if (!row.type) return;
+              switch (row.type.toLowerCase()) {
+                case 'player':
+                case 'players':
+                  ctx.dispatch('addPlayer', row);
+                  break;
+                case 'scene':
+                case 'environment':
+                  ctx.state.scene.import(row);
+                  break;
+                case 'minion':
+                case 'minions':
+                  ctx.commit('UPSERT_BADDIE', new Baddie(row, 'minions', true));
+                  break;
+                case 'minions element': 
+                case 'lieutenants element': {
+                  const minionMatch = ctx.state.minions.find(x => x.id === row.parent);
+                  const lieutenantMatch = ctx.state.lieutenants.find(x => x.id === row.parent);
+                  if (minionMatch) minionMatch.addBaddie(row);
+                  if (lieutenantMatch) lieutenantMatch.addBaddie(row);
+                  break;
+                }
+                case 'lieutenant':
+                case 'lieutenants':
+                  ctx.commit('UPSERT_BADDIE', new Baddie(row, 'lieutenants', true));
+                  break;
+                case 'villain':
+                case 'villains':
+                  ctx.commit('UPSERT_BADDIE', new Villain(row));
+                  break;
+                case 'challenge':
+                  ctx.state.scene.addChallenge(row, true);
+                  break;
+                case 'challenge element':
+                  const challenge = ctx.state.scene.challenges.find(x => x.id === row.parent);
+                  if (challenge) challenge.add(row);
+                  break;
+                case 'location':
+                  ctx.state.scene.addLocation(row);
+                  break;
+                case 'bonus': 
+                case 'penalty':
+                case 'defend': {
+                  let baddie = null;
+                  let baddieData = null;
+                  ctx.state.minions.forEach(x => {
+                    baddieData = x.findChild(row.parent);
+                    if (baddieData) baddie = x;
+                  });
+                  if (!baddie) {
+                    ctx.state.lieutenants.forEach(x => {
+                      baddieData = x.findChild(row.parent);
+                      if (baddieData) baddie = x;
+                    });
+                  }
+                  if (!baddie) {
+                    baddie = ctx.state.villains.find(x => x.id === row.parent);
+                  }
+                  if (baddie) {
+                    baddie.addModifier(row, baddieData);
+                  } 
+                  break;
+                }
+              }
+            });
+          });
+        }
+        fileReader.readAsArrayBuffer(files[i]);
+      }
     }
   },
   getters: {
@@ -141,6 +253,15 @@ const store = new Vuex.Store({
       });
 
       return arr.concat(state.lieutenants, remainingMinions);
+    },
+    exportBaddie: state => baddieList => {
+      return baddieList.reduce((acc, x) => {
+        const {baddie, list, modifiers} = x.export();
+        acc.baddies.push(baddie);
+        if (list) acc.list = acc.list.concat(list);
+        acc.modifiers = acc.modifiers.concat(modifiers);
+        return acc;
+      }, { baddies: [], list: [], modifiers: [] });
     }
   }
 })

@@ -196,9 +196,11 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Name</div>
               </div>
-              <input class="form-control" type="text"
+              <input class="form-control" 
+                     type="text"
                      v-model.trim="modifier.name"
-                     @keydown.enter="target.addModifier(modifier)">
+                     @keydown.enter="target.addModifier(modifier)"
+                     ref="modifierName">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -267,7 +269,7 @@
     methods: {
       createVillain() {
         if (this.name !== '') {
-          this.$store.commit('UPSERT_BADDIE', {baddie: new Villain({name: this.name}), baddieType: 'villains'});
+          this.$store.commit('UPSERT_BADDIE', new Villain({name: this.name}));
         }
       },
       modifyVillain(villain, type) {
@@ -290,11 +292,10 @@
           return;
         }
         this.target = villain;
-        villain.refresh();
         $(`#modifierModal-villain`).modal('show');
-      },
-      addMinion() {
-
+        this.$nextTick(() => {
+          this.$refs.modifierName.focus();
+        }); 
       }
     }
   };

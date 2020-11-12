@@ -263,17 +263,17 @@
         </div>
       </div>
     </div>
-    <div id="sceneTrackerModal" 
-         class="modal" 
-         tabindex="-1" 
+    <div id="sceneTrackerModal"
+         class="modal"
+         tabindex="-1"
          role="dialog">
-      <div class="modal-dialog" 
+      <div class="modal-dialog"
            role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Edit Scene Tracker</h5>
-            <button type="button" 
-                    class="close" 
+            <button type="button"
+                    class="close"
                     data-dismiss="modal">
               <span>&times;</span>
             </button>
@@ -283,94 +283,94 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Name</div>
               </div>
-              <input class="form-control" 
-                     v-model.trim="text" 
-                     type="text" 
-                     ref="scene" 
+              <input class="form-control"
+                     v-model.trim="text"
+                     type="text"
+                     ref="scene"
                      @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Green</div>
               </div>
-              <input class="form-control" 
-                     v-model.number="green" 
-                     type="number" 
-                     ref="green" 
+              <input class="form-control"
+                     v-model.number="green"
+                     type="number"
+                     ref="green"
                      @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
                 <div class="input-group-text">Yellow</div>
               </div>
-              <input class="form-control" 
-                     v-model.number="yellow" 
-                     type="number" 
-                     ref="yellow" 
+              <input class="form-control"
+                     v-model.number="yellow"
+                     type="number"
+                     ref="yellow"
                      @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm">
               <div class="input-group-prepend">
                 <div class="input-group-text">Red</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control"
                      v-model.number="red" 
-                     type="number" 
-                     ref="red" 
+                     type="number"
+                     ref="red"
                      @keypress.enter="createScene">
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" 
-                    type="button" 
-                    data-dismiss="modal" 
-                    @click="createScene" 
+            <button class="btn btn-primary"
+                    type="button"
+                    data-dismiss="modal"
+                    @click="createScene"
                     :disabled="scene.text === ''">Create</button>
-            <button class="btn btn-secondary" 
-                    type="button" 
+            <button class="btn btn-secondary"
+                    type="button"
                     data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
-    <div id="addPlayerModal" 
-         class="modal" 
-         tabindex="-1" 
+    <div id="addPlayerModal"
+         class="modal"
+         tabindex="-1"
          role="dialog">
-      <div class="modal-dialog" 
+      <div class="modal-dialog"
            role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Add a Player</h5>
-            <button type="button" 
-                    class="close" 
+            <button type="button"
+                    class="close"
                     data-dismiss="modal">
               <span>&times;</span>
             </button>
           </div>
           <div class="modal-body">
             Add a player to the Scene.
-            <input type="text" 
-                   v-model.trim="newPlayer.name" 
-                   class="form-control form-control-sm" 
-                   @keypress.enter="addPlayer" 
+            <input type="text"
+                   v-model.trim="newPlayer.name"
+                   class="form-control form-control-sm"
+                   @keypress.enter="addPlayer"
                    ref="newPlayerName">
             Add the current HP:
-            <input type="number" 
-                   v-model.number="newPlayer.hp" 
-                   class="form-control form-control-sm" 
+            <input type="number"
+                   v-model.number="newPlayer.hp"
+                   class="form-control form-control-sm"
                    @keypress.enter="addPlayer"
                    min="0"
                    ref="newPlayerHP">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" 
-                    type="button" 
-                    data-dismiss="modal" 
-                    @click="addPlayer" 
+            <button class="btn btn-primary"
+                    type="button"
+                    data-dismiss="modal"
+                    @click="addPlayer"
                     :disabled="newPlayer.name === ''">Create</button>
-            <button class="btn btn-secondary" 
-                    type="button" 
+            <button class="btn btn-secondary"
+                    type="button"
                     data-dismiss="modal">Close</button>
           </div>
         </div>

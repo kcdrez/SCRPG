@@ -4,12 +4,12 @@ import {unvue} from './utilities';
 import {v4 as uuid} from 'uuid';
 
 class Baddie {
-  constructor(data, baddieType) {
+  constructor(data, baddieType, skip) {
     this.name = data.name || '';
     this.type = data.type || baddieType;
     this.list = [];
     this._owner = data.owner || data._owner;
-    this.id = uuid();
+    this.id = data.id || uuid();
     
     if (data.types) {
       Object.entries(data.types).forEach(([size, baddieData]) => {
@@ -17,7 +17,7 @@ class Baddie {
       });
     } else if (data.list) {
       this.list = data.list;
-    } else {
+    } else if (!skip) {
       this.addBaddie({size: data.size, count: data.count});
     }
   }
@@ -42,12 +42,15 @@ class Baddie {
       return this.list.find(x => isSame(x));
     }
 
-    function isSame({bonuses, penalties, defends, size}) {
+    function isSame({bonuses, penalties, defends, size}) { //todo: use id?
       return JSON.stringify(bonuses) === JSON.stringify(baddie.bonuses) &&
         JSON.stringify(penalties) === JSON.stringify(baddie.penalties) &&
         JSON.stringify(defends) === JSON.stringify(baddie.defends) &&
         size === baddie.size; 
     }
+  }
+  findChild(id) {
+    return this.list.find(x => x.id === id);
   }
   demote(baddie) {
     const copy = unvue(baddie);
@@ -76,6 +79,7 @@ class Baddie {
     baddie.bonuses = baddie.bonuses || [];
     baddie.penalties = baddie.penalties || [];
     baddie.defends = baddie.defends || [];
+    baddie.id = baddie.id || uuid();
     const match = this.match(baddie, false);
     if (match) {
       match.count += baddie.count;
@@ -204,12 +208,16 @@ class Baddie {
     if (!name) return;
 
     const modify = (baddieItem) => {
-      if (type === 'Bonus') {
-        this.boost(name, amount, persistent, exclusive, baddieItem, applyTo === 'single');
-      } else if (type === 'Penalty') {
-        this.hinder(name, amount, persistent, exclusive, baddieItem, applyTo === 'single');
-      } else if (type === 'Defend') {
-        this.defend(name, amount, baddieItem, applyTo === 'single');
+      switch (type.toLowerCase()) {
+        case 'bonus':
+          this.boost(name, amount, persistent, exclusive, baddieItem, applyTo === 'single');
+          break;
+        case 'penalty':
+          this.hinder(name, amount, persistent, exclusive, baddieItem, applyTo === 'single');
+          break;
+        case 'defend':
+          this.defend(name, amount, baddieItem, applyTo === 'single');
+          break;
       }
     }
     if (applyTo === 'name') {
@@ -267,6 +275,58 @@ class Baddie {
   save() {
     store.dispatch('saveData', this.type);
   }
+  export() {
+    const list = [];
+    let modifiersList = [];
+    this.list.forEach(x => {
+      const {baddie, modifiers} = this.exportBaddie(x);
+      list.push(baddie);
+      modifiersList = modifiersList.concat(modifiers);
+    });
+
+    return {
+      baddie: {
+        id: this.id,
+        owner: this.owner,
+        name: this.name,
+        type: this.type,
+      },
+      list,
+      modifiers: modifiersList
+    }
+  }
+  exportBaddie(baddieData) {
+    const id = baddieData.id || uuid();
+    return {
+      baddie: {
+        id,
+        acted: baddieData.acted,
+        count: baddieData.count,
+        size: baddieData.size,
+        parent: this.id,
+        type: `${this.type} element`
+      },
+      modifiers: [
+        ...baddieData.bonuses.map(x => exportModifier(x, id, 'bonus')),
+        ...baddieData.defends.map(x => exportModifier(x, id, 'penalty')),
+        ...baddieData.penalties.map(x => exportModifier(x, id, 'defend'))
+      ]
+    }
+  }
+}
+
+class BaddieElement {
+  constructor(data, label) {
+    this.count = data.count || 1;
+    this.acted = data.acted || false;
+    this.id = data.id || uuid();
+    this.parent = data.parent || null;
+    this.size = data.size || 8;
+    this.type = data.type || `${label} element`;
+    this.bonuses = data.bonuses || [];
+    this.penalties = data.penalties || [];
+    this.defends = data.defends || [];
+  }
 }
 
 class Villain {
@@ -276,7 +336,7 @@ class Villain {
     this.bonuses = data.bonuses || [];
     this.penalties = data.penalties || [];
     this.defends = data.defends || [];
-    this.type = 'villain';
+    this.type = 'villains';
     this.id = data.id || uuid();
   }
 
@@ -336,12 +396,16 @@ class Villain {
   }
   addModifier({name, type, amount, persistent, exclusive}) {
     if (name === '') return;
-    else if (type === 'Bonus') {
-      this.boost(name, amount, persistent, exclusive);
-    } else if (type === 'Penalty') {
-      this.hinder(name, amount, persistent, exclusive);
-    } else if (type === 'Defend') {
-      this.defend(name, amount);
+    switch (type.toLowerCase()) {
+      case 'bonus':
+        this.boost(name, amount, persistent, exclusive);
+        break;
+      case 'penalty':
+        this.hinder(name, amount, persistent, exclusive);
+        break;
+      case 'defend':
+        this.defend(name, amount);
+        break;
     }
   }
   removeModifier(type, index) {
@@ -392,6 +456,42 @@ class Villain {
   }
   save() {
     store.dispatch('saveData', this.type);
+  }
+  export() {
+    return {
+      baddie: {
+        id: this.id,
+        name: this.name,
+        type: this.type,
+        acted: this.acted
+      },
+      modifiers: [
+        ...this.bonuses.map(x => exportModifier(x, this.id, 'bonus')),
+        ...this.defends.map(x => exportModifier(x, this.id, 'penalty')),
+        ...this.penalties.map(x => exportModifier(x, this.id, 'defend'))
+      ]
+    }
+  }
+}
+
+class Modifier {
+  constructor(data) {
+    this.id = data.id || uuid();
+    this.name = data.name;
+    this.amount = data.amount;
+    this.exclusive = data.exclusive || false;
+    this.persistent = data.persistent || false;
+  }
+}
+
+function exportModifier(modifier, parent, type) {
+  return {
+    name: modifier.name,
+    amount: modifier.amount,
+    exclusive: modifier.exclusive,
+    persistent: modifier.persistent,
+    parent,
+    type
   }
 }
 

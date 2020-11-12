@@ -21,6 +21,26 @@
                data-toggle="modal"
                data-target="#boostsChartModal">Boost/Hinder Chart</div>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle"
+             role="button"
+             data-toggle="dropdown">
+             Data
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item"
+               href="#"
+               @click="$refs.import.click()">Import</a>
+            <input type="file"
+                   accept=".xlsx"
+                   class="d-none"
+                   ref="import"
+                   @change="$store.dispatch('import', $event.target.files)">
+            <a class="dropdown-item"
+               href="#"
+               @click="$store.dispatch('export')">Export</a>
+          </div>
+        </li>
       </ul>
     </div>
     <div class="navbar-text">
@@ -38,7 +58,7 @@
       return {
         version
       }
-    }
+    },
   };
 </script>
 
