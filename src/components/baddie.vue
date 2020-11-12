@@ -342,9 +342,8 @@
         if (!!baddieRow) {
           baddieRow.count++;
         } else {
-          const baddie = new Baddie(this.baddieData, this.label.toLowerCase());
           this.$store.commit('UPSERT_BADDIE', 
-            {baddie, baddieType: this.label.toLowerCase()});
+            new Baddie(this.baddieData, this.label.toLowerCase()));
           $(`#createModal-${this.label}`).modal('hide');
         }
       },
@@ -393,6 +392,7 @@
       },
       addModifier() {
         if (this.baddieData.modifier.name !== '') {
+          console.log(this.baddieData.modifier.target);
           this.baddieData.modifier.parent.addModifier(this.baddieData.modifier, this.baddieData.modifier.target);
           $(`#modifierModal-${this.label}`).modal('hide');
         }
@@ -402,7 +402,7 @@
         this.baddieData.owner = owner || null;
         this.$nextTick(() => {
           this.$refs.createName.focus();
-        }); 
+        });
       }
     }
   };

@@ -92,6 +92,7 @@ class Player {
       name: this.name,
       hp: this.hp,
       acted: this.acted,
+      type: 'player'
     }
   }
 }

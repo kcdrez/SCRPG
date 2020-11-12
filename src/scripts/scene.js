@@ -107,9 +107,8 @@ class Scene {
     this.locations = [];
     store.dispatch('saveData', 'scene');
   }
-  addChallenge(challenge) {
-    console.log(challenge);
-    this.challenges.push(new Challenge(challenge));
+  addChallenge(challenge, skipInitialize) {
+    this.challenges.push(new Challenge(challenge, skipInitialize));
     this.save();
   }
   removeChallenge(index) {
@@ -131,31 +130,68 @@ class Scene {
   }
   export() {
     return {
-      id: this.id,
-      name: this.name,
-      acted: this.acted,
-      notes: this.notes,
-      green: this.green,
-      yellow: this.yellow,
-      red: this.red,
-      // challenges: this.challenges.map(x => x.export()),
-      // locations: this.locations.map(x => x.export()),
+      scene: [{
+        id: this.id,
+        name: this.name,
+        acted: this.acted,
+        notes: this.notes,
+        green: this.exportSceneTracker(this.green),
+        yellow: this.exportSceneTracker(this.yellow),
+        red: this.exportSceneTracker(this.red),
+        type: 'scene'
+      }],
+      locations: this.locations.map(x => x.export()),
+      challenges: this.exportChallenges(),
     }
+  }
+  exportSceneTracker(arr) {
+    const completed = arr.filter(x => x.checked).length;
+    return `${completed}-${arr.length}`;
+  }
+  exportChallenges() {
+    return this.challenges.reduce((acc, el) => {
+      acc.push(el.export());
+      el.list.forEach(x => {
+        acc.push(x.export(el.id));
+      });
+      return acc;
+    }, []);
+  }
+  import(data) {
+    const greens = data.green.split('-');
+    const yellows = data.yellow.split('-');
+    const reds = data.red.split('-');
+    this.create(Number(greens[1]), Number(yellows[1]), Number(reds[1]), data.name || 'Default Environment');
+    for (let i = 0; i < Number(greens[0]); i++) {
+      this.progressScene(this.green[i]);
+    }
+    for (let i = 0; i < Number(yellows[0]); i++) {
+      this.progressScene(this.yellow[i]);
+    }
+    for (let i = 0; i < Number(reds[0]); i++) {
+      this.progressScene(this.red[i]);
+    }
+    this.acted = data.acted || false;
+    this.notes = data.notes || '';
+    this.id = data.id || this.id;
   }
 }
 
 class Challenge {
-  constructor(data) {
+  constructor(data, skipInitialize) {
     this.name = data.name || '';
     this.id = data.id || uuid();
     this.list = (data.list || []).map(x => new ChallengeEntry(x));
+    if (!skipInitialize) this.initialize();
+  }
+  
+  initialize() {
     if (this.list.length === 0) {
       this.add({ label: `Complete ${this.name}` });
     }
   }
-
   add(data) {
-    if (!data.label) return;
+    if (!data.label && !data.name) return;
     this.list.push(new ChallengeEntry(data));
     this.save();
   }
@@ -172,6 +208,7 @@ class Challenge {
     return {
       id: this.id,
       name: this.name,
+      type: 'challenge'
     }
   }
 }
@@ -180,7 +217,7 @@ class ChallengeEntry {
   constructor(data) {
     this.completed = data.completed || false;
     this.editing = data.editing || false;
-    this.label = data.label || '';
+    this.label = data.label || data.name || '';
     this.tempLabel = data.label || data.tempLabel || '';
     this.id = data.id || uuid();
   }
@@ -203,10 +240,12 @@ class ChallengeEntry {
   save() {
     store.dispatch('saveData', 'scene');
   }
-  export() {
+  export(parent) {
     return {
-      label: this.label,
-      completed: this.completed
+      name: this.label,
+      parent,
+      completed: this.completed,
+      type: 'challenge element'
     }
   }
 }
@@ -237,7 +276,8 @@ class Location {
     return {
       id: this.id,
       name: this.name,
-      description: this.description
+      description: this.description,
+      type: 'location'
     }
   }
 }
