@@ -269,7 +269,7 @@
     methods: {
       createVillain() {
         if (this.name !== '') {
-          this.$store.commit('UPSERT_BADDIE', new Villain({name: this.name}));
+          this.$store.dispatch('upsertBaddie', {name: this.name, type: 'villains'});
         }
       },
       modifyVillain(villain, type) {

@@ -4,9 +4,9 @@ import {unvue} from './utilities';
 import {v4 as uuid} from 'uuid';
 
 class Baddie {
-  constructor(data, baddieType, skip) {
+  constructor(data, leaveEmptyList) {
     this.name = data.name || '';
-    this.type = data.type || baddieType;
+    this.type = data.type || 'minions';
     this.list = [];
     this._owner = data.owner || data._owner;
     this.id = data.id || uuid();
@@ -17,7 +17,7 @@ class Baddie {
       });
     } else if (data.list) {
       this.list = data.list;
-    } else if (!skip) {
+    } else if (!leaveEmptyList) {
       this.addBaddie({size: data.size, count: data.count});
     }
   }
@@ -42,7 +42,7 @@ class Baddie {
       return this.list.find(x => isSame(x));
     }
 
-    function isSame({bonuses, penalties, defends, size}) { //todo: use id?
+    function isSame({bonuses, penalties, defends, size}) {
       return JSON.stringify(bonuses) === JSON.stringify(baddie.bonuses) &&
         JSON.stringify(penalties) === JSON.stringify(baddie.penalties) &&
         JSON.stringify(defends) === JSON.stringify(baddie.defends) &&
@@ -84,6 +84,7 @@ class Baddie {
     if (match) {
       match.count += baddie.count;
     } else {
+      baddie.id = uuid();
       this.list.push(baddie);
       this.refresh();
     }

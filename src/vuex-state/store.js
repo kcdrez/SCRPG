@@ -47,7 +47,6 @@ const store = new Vuex.Store({
       } else {
         state[baddie.type].push(baddie);
       }
-      Cookies.set(baddie.type, state[baddie.type]); //todo: make an action to remove this
     },
     DELETE_BADDIE(state, {baddieType, index, baddie}) {
       if (baddie !== undefined) {
@@ -103,9 +102,18 @@ const store = new Vuex.Store({
     resetRound(ctx) {
       ctx.commit('RESET_ROUND');
     },
+    upsertBaddie(ctx, baddieData) {
+      let baddie;
+      if (baddieData.type === 'villain') baddie = new Villain(baddieData);
+      else baddie = new Baddie(baddieData);
+      ctx.commit('UPSERT_BADDIE', baddie);
+      ctx.dispatch('saveData', baddieData.type);
+    },
     addPlayer(ctx, playerData) {
-      ctx.commit('ADD_PLAYER', playerData);
-      ctx.dispatch('saveData', 'players');
+      if (!ctx.state.players.find(x => x.id === playerData.id)) {
+        ctx.commit('ADD_PLAYER', playerData);
+        ctx.dispatch('saveData', 'players');
+      }
     },
     removePlayer(ctx, name) {
       ctx.commit('REMOVE_PLAYER', name);
@@ -144,7 +152,6 @@ const store = new Vuex.Store({
     },
     import(ctx, files) {
       ctx.dispatch('resetScene');
-      // ctx.dispatch('resetPlayers');
       for (let i = 0; i < files.length; i++) {
         const fileReader = new FileReader();
         fileReader.onload = (e) => {
@@ -168,7 +175,7 @@ const store = new Vuex.Store({
                   break;
                 case 'minion':
                 case 'minions':
-                  ctx.commit('UPSERT_BADDIE', new Baddie(row, 'minions', true));
+                  ctx.displatch('upsertBaddie', row);
                   break;
                 case 'minions element': 
                 case 'lieutenants element': {
@@ -180,11 +187,11 @@ const store = new Vuex.Store({
                 }
                 case 'lieutenant':
                 case 'lieutenants':
-                  ctx.commit('UPSERT_BADDIE', new Baddie(row, 'lieutenants', true));
+                  ctx.displatch('upsertBaddie', row);
                   break;
                 case 'villain':
                 case 'villains':
-                  ctx.commit('UPSERT_BADDIE', new Villain(row));
+                  ctx.displatch('upsertBaddie', row);
                   break;
                 case 'challenge':
                   ctx.state.scene.addChallenge(row, true);

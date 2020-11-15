@@ -342,8 +342,7 @@
         if (!!baddieRow) {
           baddieRow.count++;
         } else {
-          this.$store.commit('UPSERT_BADDIE', 
-            new Baddie(this.baddieData, this.label.toLowerCase()));
+          this.$store.dispatch('upsertBaddie', Object.assign({type: this.label.toLowerCase()}, this.baddieData));
           $(`#createModal-${this.label}`).modal('hide');
         }
       },
@@ -392,7 +391,6 @@
       },
       addModifier() {
         if (this.baddieData.modifier.name !== '') {
-          console.log(this.baddieData.modifier.target);
           this.baddieData.modifier.parent.addModifier(this.baddieData.modifier, this.baddieData.modifier.target);
           $(`#modifierModal-${this.label}`).modal('hide');
         }
