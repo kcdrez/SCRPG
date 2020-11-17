@@ -546,8 +546,13 @@
     padding: 0.25rem .5rem;
     border-radius: 5px;
 
-    /deep/ p {
+    /deep/ .ProseMirror {
       margin: 0 !important;
+      min-height: 100px;
+
+      p {
+        margin: 0;
+      }
     }
 
     hr {
