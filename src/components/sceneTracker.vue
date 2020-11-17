@@ -6,6 +6,9 @@
           <a href="#sceneTrackerData" 
              data-toggle="collapse">Environment</a>
         </h2>
+        <button class="btn btn-sm btn-danger border-dark mx-3"
+                @click="resetScene"
+                title="Reset the Environment, removing the Scene Tracker, all Minions, Lieutenants, Villains, and Challenges">Reset</button>
       </div>
     </div>
     <div id="sceneTrackerData" class="collapse show">
@@ -16,15 +19,24 @@
             <button class="btn btn-sm btn-success border-dark" 
                     data-toggle="modal" 
                     data-target="#sceneTrackerModal" 
-                    title="Create a new Scene Tracker">Create Scene</button>
+                    title="Create a new Scene Tracker">Create</button>
             <button class="btn btn-sm btn-warning border-dark" 
                     @click="scene.clear()" 
-                    title="Clear the Scene Tracker">Clear Scene</button>
-            <button class="btn btn-sm btn-danger border-dark" 
-                    @click="resetScene"
-                    title="Reset the Environment, removing the Scene Tracker and all Minions, Lieutenants, Villains, and Challenges">Reset Scene</button>
+                    title="Clear the Scene Tracker">Clear</button>
+            <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()"
+                    title="Import Scene Tracker data from an xlsx file">Import</button>
+            <button class="btn btn-secondary border-dark"
+                    @click="$store.dispatch('export', {type: 'scene', fileName: scene.name})"
+                    title="Export Scene Tracker data to an xlsx file">Export</button>
           </div>
-          <div v-if="scene.isEmpty">
+          <input type="file"
+                  accept=".xlsx"
+                  class="d-none"
+                  ref="import"
+                  @change="$store.dispatch('import', {files: $event.target.files, filters: ['scene']})">
+          <div v-if="scene.isEmpty"
+               class="empty-data">
             There is no Scene Tracker.
           </div>
           <div v-else>
@@ -428,7 +440,7 @@
       resetScene() {
         this.$dialog.confirm({
           title: 'Are You Sure?',
-          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed.'
+          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed. (Players will not be affected)'
         }, {
           okText: 'Yes',
           cancelText: 'No'

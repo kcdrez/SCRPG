@@ -35,7 +35,7 @@
                    accept=".xlsx"
                    class="d-none"
                    ref="import"
-                   @change="$store.dispatch('import', $event.target.files)">
+                   @change="$store.dispatch('import', {files: $event.target.files})">
             <a class="dropdown-item"
                href="#"
                @click="$store.dispatch('export')">Export</a>

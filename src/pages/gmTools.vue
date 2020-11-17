@@ -81,7 +81,7 @@
     max-width: 90%;
 
     .row {
-      margin-bottom: .5rem;
+      // margin-bottom: .5rem;
     }
     .scene-tracker-header, .baddie-list-header {
       margin-bottom: 1rem;

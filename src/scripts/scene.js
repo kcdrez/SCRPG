@@ -64,8 +64,6 @@ class Scene {
     this.save();
   }
   create(green, yellow, red, name) {
-    this.clear();
-
     for (let i = 0; i < green; i++) {
       this.green.push({checked: false});
     }
@@ -128,7 +126,7 @@ class Scene {
   save() {
     store.dispatch('saveData', 'scene');
   }
-  export() {
+  export(challengeId) {
     return {
       scene: [{
         id: this.id,
@@ -141,23 +139,26 @@ class Scene {
         type: 'scene'
       }],
       locations: this.locations.map(x => x.export()),
-      challenges: this.exportChallenges(),
+      challenges: this.exportChallenges(challengeId),
     }
   }
   exportSceneTracker(arr) {
     const completed = arr.filter(x => x.checked).length;
     return `${completed}-${arr.length}`;
   }
-  exportChallenges() {
+  exportChallenges(id) {
     return this.challenges.reduce((acc, el) => {
-      acc.push(el.export());
-      el.list.forEach(x => {
-        acc.push(x.export(el.id));
-      });
+      if (!id || el.id === id) {
+        acc.push(el.export());
+        el.list.forEach(x => {
+          acc.push(x.export(el.id));
+        });
+      }
       return acc;
     }, []);
   }
   import(data) {
+    this.clear();
     const greens = data.green.split('-');
     const yellows = data.yellow.split('-');
     const reds = data.red.split('-');
