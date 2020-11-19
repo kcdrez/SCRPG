@@ -5,7 +5,7 @@
         <div class="col">
           <hr class="border-dark">
           <h3>Challenges</h3>
-          <div class="btn-group btn-group-sm">
+          <div class="btn-group btn-group-sm w-50">
               <button class="btn btn-success border-dark"
                       title="Add a new Challenge to the Scene"
                       @click="addChallengeModal">Add</button>

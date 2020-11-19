@@ -6,16 +6,30 @@
           <a :href="`#${label}-Data`" 
              data-toggle="collapse">{{label}}</a>
         </h2>
-        <div class="btn-group btn-group-sm">
+        <div class="btn-group btn-group-sm my-auto">
           <button class="btn btn-sm btn-success border-dark" 
                   data-toggle="modal" 
                   :data-target="`#createModal-${label}`">Create</button>
+          <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()"
+                    :title="`Import ${labelSingle} data from an xlsx file`">Import</button>
+          <button class="btn btn-secondary border-dark"
+                    @click="$store.dispatch('export', {type: label.toLowerCase(), fileName: label})"
+                    :title='`Export all ${label} to an xlsx file`'
+                    :disabled="list.length === 0">Export</button>
         </div>
+        <input type="file"
+               accept=".xlsx"
+               class="d-none"
+               ref="import"
+               @change="$store.dispatch('import', {files: $event.target.files, filters: [label.toLowerCase(), 
+                `${label.toLowerCase()} element`,
+                'boost', 'hinder', 'defend']})">
       </div>
     </div>
     <div :id="`${label}-Data`" 
          class="collapse show row">
-      <div class="col" 
+      <div class="col mb-2" 
            v-if="list.length === 0">
         There are no {{label}}.
       </div>
@@ -100,6 +114,11 @@
                           :title="`Remove one ${labelSingle} from this group from the scene`"
                           @click="removeBaddie(baddie, baddieRow)">
                     <icon :icon="['far', 'trash-alt']" />
+                  </button>
+                  <button class="btn btn-secondary border-dark"
+                          @click="$store.dispatch('export', {type: label.toLowerCase(), fileName: label, id: baddie.id})"
+                          :title='`Export this ${labelSingle} to an xlsx file`'>
+                    <icon :icon="['fas', 'file-download']" />
                   </button>
                 </div>
               </td>

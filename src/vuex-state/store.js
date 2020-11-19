@@ -29,10 +29,10 @@ const store = new Vuex.Store({
         state.players = playerData.map(x => new Player(x));
       }
       if (minions) {
-        state.minions = minions.map(x => new Baddie(x, 'minions'));
+        state.minions = minions.map(x => new Baddie(x));
       }
       if (lieutenants) {
-        state.lieutenants = lieutenants.map(x => new Baddie(x, 'lieutenants'));
+        state.lieutenants = lieutenants.map(x => new Baddie(x));
       }
       if (villains) {
         state.villains = villains.map(x => new Villain(x));
@@ -45,12 +45,13 @@ const store = new Vuex.Store({
       if (match && baddie.type !== 'villains') {
         baddie.list.forEach(x => match.addBaddie(x));
       } else {
+        console.log(baddie.type)
         state[baddie.type].push(baddie);
       }
     },
     DELETE_BADDIE(state, {baddieType, index, baddie}) {
       if (baddie !== undefined) {
-        index = state[baddieType].findIndex(x => x.name === baddie.name);
+        index = state[baddieType].findIndex(x => x.id === baddie.id);
       } 
       if (index > -1) {
         state[baddieType].splice(index, 1);
@@ -104,7 +105,7 @@ const store = new Vuex.Store({
     },
     upsertBaddie(ctx, baddieData) {
       let baddie;
-      if (baddieData.type === 'villain') baddie = new Villain(baddieData);
+      if (baddieData.type === 'villains') baddie = new Villain(baddieData);
       else baddie = new Baddie(baddieData);
       ctx.commit('UPSERT_BADDIE', baddie);
       ctx.dispatch('saveData', baddieData.type);
@@ -125,15 +126,17 @@ const store = new Vuex.Store({
     },
     export(ctx, options) {
       const {type, fileName, id} = options || {};
-      const players = ctx.state.players.map(x => x.export());
-      const {scene, challenges, locations} = ctx.state.scene.export(id);
-      const minions = ctx.getters.exportBaddie(ctx.state.minions);
-      const lieutenants = ctx.getters.exportBaddie(ctx.state.lieutenants);
-      const villains = ctx.getters.exportBaddie(ctx.state.villains);
+      const {players, playerMinions} = ctx.state.players.map(x => x.export());
+      const {scene, challenges, locations, envMinions} = ctx.state.scene.export(id);
+      const minions = ctx.getters.exportBaddie(ctx.state.minions, id);
+      const lieutenants = ctx.getters.exportBaddie(ctx.state.lieutenants, id);
+      const villains = ctx.getters.exportBaddie(ctx.state.villains, id);
 
       const sheetData = [
         ...(!type || type === 'players' ? players : []),
+        ...(!type || type === 'players' ? playerMinions : []),
         ...(!type || type === 'scene' ? scene : []),
+        ...(!type || type === 'scene' ? envMinions : []),
         ...(!type || type === 'challenges' ? challenges : []),
         ...(!type || type === 'locations' ? locations : []),
         ...(!type || type === 'minions' ? minions.baddies : []),
@@ -143,6 +146,7 @@ const store = new Vuex.Store({
         ...(!type || type === 'lieutenants' ? lieutenants.list : []),
         ...(!type || type === 'lieutenants' ? lieutenants.modifiers : []),
         ...(!type || type === 'villains' ? villains.baddies : []),
+        ...(!type || type === 'villains' ? villains.list : []),
         ...(!type || type === 'villains' ? villains.modifiers : [])
       ];
       const wb = xlsx.utils.book_new();
@@ -168,7 +172,7 @@ const store = new Vuex.Store({
             break;
           case 'minion':
           case 'minions':
-            ctx.displatch('upsertBaddie', row);
+            ctx.dispatch('upsertBaddie', Object.assign({leaveEmptyList: true}, row));
             break;
           case 'minions element': 
           case 'lieutenants element': {
@@ -180,11 +184,11 @@ const store = new Vuex.Store({
           }
           case 'lieutenant':
           case 'lieutenants':
-            ctx.displatch('upsertBaddie', row);
+            ctx.dispatch('upsertBaddie', row);
             break;
           case 'villain':
           case 'villains':
-            ctx.displatch('upsertBaddie', row);
+            ctx.dispatch('upsertBaddie', row);
             break;
           case 'challenge':
             ctx.state.scene.addChallenge(row, true);
@@ -231,18 +235,24 @@ const store = new Vuex.Store({
       return state.minions.filter(minion => minion.owner && minion.owner.id === id);
     },
     actors: state => {
+      let arr = [];
+      if (state.scene.name) arr.push(state.scene);
+
       const envMinions = state.minions.filter(m => m.owner ? m.owner.id === state.scene.id : false);
-      let arr = [state.scene, ...envMinions];
+      arr.push(...envMinions);
+
       state.players.sort((a, b) => a.name > b.name).forEach(player => {
         arr.push(player);
         const minions = state.minions.filter(m => m.owner ? m.owner.id === player.id : false);
         arr = arr.concat(minions);
       });
+
       state.villains.sort((a, b) => a.name > b.name).forEach(villain => {
         arr.push(villain);
         const minions = state.minions.filter(m => m.owner ? m.owner.id === villain.id : false);
         arr = arr.concat(minions);
       });
+
       const remainingMinions = state.minions.filter(m => {
         const match = arr.find(x => x.id === m.id);
         return !match;
@@ -250,12 +260,12 @@ const store = new Vuex.Store({
 
       return arr.concat(state.lieutenants, remainingMinions);
     },
-    exportBaddie: state => baddieList => {
+    exportBaddie: state => (baddieList, id) => {
       return baddieList.reduce((acc, x) => {
-        const {baddie, list, modifiers} = x.export();
-        acc.baddies.push(baddie);
+        const {baddie, list, modifiers} = x.export(id);
+        if (baddie) acc.baddies.push(baddie);
         if (list) acc.list = acc.list.concat(list);
-        acc.modifiers = acc.modifiers.concat(modifiers);
+        if (modifiers) acc.modifiers = acc.modifiers.concat(modifiers);
         return acc;
       }, { baddies: [], list: [], modifiers: [] });
     }

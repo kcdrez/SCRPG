@@ -6,9 +6,11 @@
           <a href="#sceneTrackerData" 
              data-toggle="collapse">Environment</a>
         </h2>
-        <button class="btn btn-sm btn-danger border-dark mx-3"
-                @click="resetScene"
-                title="Reset the Environment, removing the Scene Tracker, all Minions, Lieutenants, Villains, and Challenges">Reset</button>
+        <div class="btn-group btn-group-sm my-auto">
+          <button class="btn btn-sm btn-danger border-dark"
+                  @click="resetScene"
+                  title="Reset the Environment, removing the Scene Tracker, all Minions, Lieutenants, Villains, and Challenges">Reset</button>
+        </div>
       </div>
     </div>
     <div id="sceneTrackerData" class="collapse show">
@@ -28,7 +30,8 @@
                     title="Import Scene Tracker data from an xlsx file">Import</button>
             <button class="btn btn-secondary border-dark"
                     @click="$store.dispatch('export', {type: 'scene', fileName: scene.name})"
-                    title="Export Scene Tracker data to an xlsx file">Export</button>
+                    title="Export Scene Tracker data to an xlsx file"
+                    :disabled="scene.isEmpty">Export</button>
           </div>
           <input type="file"
                   accept=".xlsx"
@@ -85,7 +88,7 @@
                       @click="clearPlayers">Clear Players</button>
               <button class="btn btn-danger border-dark" 
                       @click="$store.dispatch('resetRound')" 
-                      title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
+                      title="Reset the round, marking all actors as not yet acted">Reset Round Tracker</button>
             </div>
           </div>
           <table class="table table-sm table-bordered table-dark table-stripped" 
@@ -126,14 +129,17 @@
                       <template v-if="typeof item.hp === 'number'">
                         <input type="number"
                                 class="form-control form-control-sm"
-                                v-model.number="item.tempHP" 
+                                v-model.number="item.tempHP"  
                                 v-if="item.editing"
                                 min="0">
                         <template v-else>
-                          {{item.hp}}
+                          <span :class="{'text-success': item.inGreen, 
+                            'text-warning': item.inYellow, 
+                            'text-danger': item.inRed, 
+                            'text-muted': item.incapacitated}">{{item.hp}}</span>
                           <span @click="item.hp++">
-                            <icon :icon="['fas', 'chevron-circle-up']" 
-                                  title="Increase Player HP" 
+                            <icon :icon="['fas', 'chevron-circle-up']"
+                                  title="Increase Player HP"
                                   class="c-pointer" />
                           </span>
                           <span @click="item.hp--">
@@ -361,19 +367,37 @@
             </button>
           </div>
           <div class="modal-body">
-            Add a player to the Scene.
-            <input type="text"
-                   v-model.trim="newPlayer.name"
-                   class="form-control form-control-sm"
-                   @keypress.enter="addPlayer"
-                   ref="newPlayerName">
-            Add the current HP:
-            <input type="number"
-                   v-model.number="newPlayer.hp"
-                   class="form-control form-control-sm"
-                   @keypress.enter="addPlayer"
-                   min="0"
-                   ref="newPlayerHP">
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Name</span>
+              </div>
+              <input type="text"
+                    v-model.trim="newPlayer.name"
+                    class="form-control form-control-sm"
+                    @keypress.enter="addPlayer"
+                    ref="newPlayerName">
+            </div>
+            <div class="input-group input-group-sm mt-2">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Max HP</span>
+              </div>
+              <input type="number"
+                     v-model.number="newPlayer.maxHp"
+                     class="form-control"
+                     @keypress.enter="addPlayer"
+                     min="17"
+                     max="40">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Current HP</span>
+              </div>
+              <input type="number"
+                     v-model.number="newPlayer.hp"
+                     class="form-control"
+                     @keypress.enter="addPlayer"
+                     min="0"
+                     :max="newPlayer.maxHp"
+                     ref="newPlayerHP">
+            </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary"
@@ -426,7 +450,8 @@
         editor: null,
         newPlayer: {
           name: '',
-          hp: 30
+          hp: 30,
+          maxHp: 30
         }
       }
     },
@@ -475,6 +500,11 @@
       ...mapState([
         'scene'
       ])
+    },
+    watch: {
+      'newPlayer.maxHp'(newVal) {
+        if (this.newPlayer.hp > newVal) this.newPlayer.hp = newVal;
+      }
     },
     mounted() {
       $('#sceneTrackerModal').on('shown.bs.modal', e => {

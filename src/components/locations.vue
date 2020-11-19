@@ -5,7 +5,7 @@
         <div class="col">
           <hr class="border-dark">
           <h3>Locations</h3>
-          <div class="btn-group btn-group-sm">
+          <div class="btn-group btn-group-sm w-50">
               <button class="btn btn-success border-dark"
                       title="Add a new Location to the Scene"
                       @click="addLocationModal">Add</button>
@@ -13,11 +13,12 @@
                       title="Remove all Locations from the Scene"
                       @click="scene.resetLocations()">Clear</button>
               <button class="btn btn-primary border-dark"
-                    @click="$refs.import.click()"
-                    title="Import Location data from an xlsx file">Import</button>
+                      @click="$refs.import.click()"
+                      title="Import Location data from an xlsx file">Import</button>
               <button class="btn btn-secondary border-dark"
-                    @click="$store.dispatch('export', {type: 'locations', fileName: scene.name + '_locations'})"
-                    title="Export all Locations to an xlsx file">Export</button>
+                      @click="$store.dispatch('export', {type: 'locations', fileName: scene.name + '_locations'})"
+                      title="Export all Locations to an xlsx file"
+                      :disabled="scene.locations.length === 0">Export</button>
           </div>
           <input type="file"
                   accept=".xlsx"

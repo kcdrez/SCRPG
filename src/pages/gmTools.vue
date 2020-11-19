@@ -6,9 +6,12 @@
         <h1 class="col text-center">GM Management</h1>
       </div>
       <SceneTracker @add-minion="$refs.minions.modal('show', $event)" />
-      <Baddies label="Minions" :allowOwner="true" ref="minions" />
-      <Baddies label="Lieutenants" ref="lieutenants" />
-      <Villains ref="villains" @add-minion="$refs.minions.modal('show', $event)" />
+      <Baddies label="Minions" 
+               :allowOwner="true" ref="minions" />
+      <Baddies label="Lieutenants" 
+               ref="lieutenants" />
+      <Villains ref="villains" 
+                @add-minion="$refs.minions.modal('show', $event)" />
     </div>
     <div id="overcomeChartModal"
         class="modal"
@@ -26,7 +29,9 @@
             </button>
           </div>
           <div class="modal-body">
-            <img src="images/overcome.jpeg" class="img-fluid" data-dismiss="modal">
+            <img src="images/overcome.jpeg"
+                 class="img-fluid"
+                 data-dismiss="modal">
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary"
@@ -36,7 +41,7 @@
         </div>
       </div>
     </div>
-    <div id="boostsChartModal" 
+    <div id="boostsChartModal"
         class="modal"
         tabindex="-1"
         role="dialog">
@@ -52,7 +57,9 @@
             </button>
           </div>
           <div class="modal-body">
-            <img src="images/boosts.jpeg" class="img-fluid" data-dismiss="modal">
+            <img src="images/boosts.jpeg"
+                 class="img-fluid"
+                 data-dismiss="modal">
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary"
@@ -80,12 +87,7 @@
   .admin-page {
     max-width: 90%;
 
-    .row {
-      // margin-bottom: .5rem;
-    }
     .scene-tracker-header, .baddie-list-header {
-      margin-bottom: 1rem;
-
       .col {
         display: flex;
         margin-bottom: 0.5rem;

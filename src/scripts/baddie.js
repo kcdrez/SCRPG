@@ -4,7 +4,7 @@ import {unvue} from './utilities';
 import {v4 as uuid} from 'uuid';
 
 class Baddie {
-  constructor(data, leaveEmptyList) {
+  constructor(data) {
     this.name = data.name || '';
     this.type = data.type || 'minions';
     this.list = [];
@@ -17,7 +17,7 @@ class Baddie {
       });
     } else if (data.list) {
       this.list = data.list;
-    } else if (!leaveEmptyList) {
+    } else if (!data.leaveEmptyList) {
       this.addBaddie({size: data.size, count: data.count});
     }
   }
@@ -46,7 +46,7 @@ class Baddie {
       return JSON.stringify(bonuses) === JSON.stringify(baddie.bonuses) &&
         JSON.stringify(penalties) === JSON.stringify(baddie.penalties) &&
         JSON.stringify(defends) === JSON.stringify(baddie.defends) &&
-        size === baddie.size; 
+        size === baddie.size;
     }
   }
   findChild(id) {
@@ -79,11 +79,14 @@ class Baddie {
     baddie.bonuses = baddie.bonuses || [];
     baddie.penalties = baddie.penalties || [];
     baddie.defends = baddie.defends || [];
-    baddie.id = baddie.id || uuid();
+
     const match = this.match(baddie, false);
-    if (match) {
+    if (match && !baddie.id) {
       match.count += baddie.count;
-    } else {
+    } else if (baddie.id) {
+      this.list.push(baddie);
+    } 
+    else {
       baddie.id = uuid();
       this.list.push(baddie);
       this.refresh();
@@ -276,25 +279,27 @@ class Baddie {
   save() {
     store.dispatch('saveData', this.type);
   }
-  export() {
-    const list = [];
-    let modifiersList = [];
-    this.list.forEach(x => {
-      const {baddie, modifiers} = this.exportBaddie(x);
-      list.push(baddie);
-      modifiersList = modifiersList.concat(modifiers);
-    });
-
-    return {
-      baddie: {
-        id: this.id,
-        owner: this.owner,
-        name: this.name,
-        type: this.type,
-      },
-      list,
-      modifiers: modifiersList
-    }
+  export(id) {
+    if (!id || this.id === id) {
+      const list = [];
+      let modifiersList = [];
+      this.list.forEach(x => {
+        const {baddie, modifiers} = this.exportBaddie(x);
+        list.push(baddie);
+        modifiersList = modifiersList.concat(modifiers);
+      });
+  
+      return {
+        baddie: {
+          id: this.id,
+          owner: this._owner,
+          name: this.name,
+          type: this.type,
+        },
+        list,
+        modifiers: modifiersList
+      }
+    } else return {};
   }
   exportBaddie(baddieData) {
     const id = baddieData.id || uuid();
@@ -459,6 +464,14 @@ class Villain {
     store.dispatch('saveData', this.type);
   }
   export() {
+    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
+      const {baddie, list, modifiers} = minion.export();
+      acc.push(baddie);
+      acc.push(...list);
+      acc.push(...modifiers);
+      return acc;
+    }, []);
+
     return {
       baddie: {
         id: this.id,
@@ -470,7 +483,8 @@ class Villain {
         ...this.bonuses.map(x => exportModifier(x, this.id, 'bonus')),
         ...this.defends.map(x => exportModifier(x, this.id, 'penalty')),
         ...this.penalties.map(x => exportModifier(x, this.id, 'defend'))
-      ]
+      ],
+      list: minions
     }
   }
 }

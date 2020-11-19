@@ -77,15 +77,38 @@ class Scene {
     this.save();
   }
   clear() {
-    this.green = [];
-    this.yellow = [];
-    this.red = [];
-    this.acted = false;
-    this.name = '';
-    this.challenges = [];
-    this.locations = [];
-    this.notes = '';
-    this.save();
+    const minions = store.getters.childMinions(this.id);
+    if (minions.length > 0) {
+      Vue.dialog.confirm({
+        title: 'Warning',
+        body: 'Clearing the scene will remove all the environment\'s minions. Do you want to continue?'
+      },
+      {
+        okText: 'Yes',
+        cancelText: 'No'
+      })
+      .then(() => {
+        clearScene();
+      });
+    } else {
+      clearScene();
+    }
+
+    const clearScene = () => {
+      minions.forEach(minion => {
+        store.commit('DELETE_BADDIE', {baddie: minion, baddieType: minion.type})
+      })
+      this.green = [];
+      this.yellow = [];
+      this.red = [];
+      this.acted = false;
+      this.name = '';
+      this.challenges = [];
+      this.locations = [];
+      this.notes = '';
+      this.save();
+    }
+
   }
   progressScene(element) {
     element.checked = !element.checked;
@@ -127,6 +150,14 @@ class Scene {
     store.dispatch('saveData', 'scene');
   }
   export(challengeId) {
+    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
+      const {baddie, list, modifiers} = minion.export();
+      acc.push(baddie);
+      acc.push(...list);
+      acc.push(...modifiers);
+      return acc;
+    }, []);
+
     return {
       scene: [{
         id: this.id,
@@ -140,6 +171,7 @@ class Scene {
       }],
       locations: this.locations.map(x => x.export()),
       challenges: this.exportChallenges(challengeId),
+      envMinions: minions
     }
   }
   exportSceneTracker(arr) {
