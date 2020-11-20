@@ -22,7 +22,7 @@
                accept=".xlsx"
                class="d-none"
                ref="import"
-               @change="$store.dispatch('import', {files: $event.target.files, filters: ['villains', 'boost', 'hinder', 'defend']})">        
+               @change="$store.dispatch('import', {files: $event.target.files, filters: ['villains', 'bonus', 'penalty', 'defend']})">        
       </div>
     </div>
     <div id="villain-Data" 

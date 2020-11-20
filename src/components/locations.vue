@@ -31,7 +31,7 @@
         <div class="col">
           <div v-if="scene.locations.length === 0"
                class="empty-data">There are no locations.</div>
-          <table class="table table-sm table-stripped table-bordered table-dark mt-3 mb-0" v-else>
+          <table class="table table-sm table-striped table-bordered table-dark mt-3 mb-0" v-else>
             <thead>
               <tr>
                   <th width="30%">Name</th>

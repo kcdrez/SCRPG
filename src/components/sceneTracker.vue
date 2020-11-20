@@ -91,7 +91,7 @@
                       title="Reset the round, marking all actors as not yet acted">Reset Round Tracker</button>
             </div>
           </div>
-          <table class="table table-sm table-bordered table-dark table-stripped" 
+          <table class="table table-sm table-bordered table-dark table-striped" 
                  v-if="actors.length > 0">
             <thead class="text-center">
               <tr>
@@ -117,7 +117,23 @@
                           <icon :icon="['fas', 'check']"
                                 class="text-success" />
                         </span>
-                        {{actor.name}} <template v-if="actor.owner">({{actor.owner.name}})</template>
+                        {{actor.name}}
+                        <template v-if="actor.owner">({{actor.owner.name}})</template>
+                        <sup class="text-success" 
+                             v-if="item.bonuses.length"
+                             :title="`This ${actor.typeLabel} has ${item.bonuses.length} Bonus${item.bonuses.length > 1 ? 'es': ''}`">
+                          {{item.bonuses.length}}
+                        </sup>
+                        <sup class="text-warning" 
+                             v-if="item.penalties.length"
+                             :title="`This ${actor.typeLabel} has ${item.penalties.length} Penalt${item.penalties.length > 1 ? 'ies': 'y'}`">
+                          {{item.penalties.length}}
+                        </sup>
+                        <sup class="text-secondary" 
+                             v-if="item.defends.length"
+                             :title="`This ${actor.typeLabel} has ${item.defends.length} Defend${item.defends.length > 1 ? 's': ''}`">
+                          {{item.defends.length}}
+                        </sup>
                       </div>
                     </td>
                     <td class="text-capitalize c-pointer align-middle"
@@ -196,7 +212,7 @@
               </template>
             </tbody>
           </table>
-          <hr />
+          <hr class="border-dark" />
           <div>
             <h4 class="text-center">Notes</h4>
             <div class="editor">

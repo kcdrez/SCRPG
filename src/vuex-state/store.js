@@ -2,10 +2,11 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Cookies from 'js-cookie';
 import xlsx from 'xlsx';
-import {Baddie, Villain} from '../scripts/baddie';
+import {Baddie, Villain, sameBaddies} from '../scripts/baddie';
 import {Player} from '../scripts/player';
 import {Scene} from '../scripts/scene';
 import {unvue, processXlsxFiles} from '../scripts/utilities';
+import {v4 as uuid} from 'uuid';
 
 Vue.use(Vuex);
 
@@ -29,7 +30,24 @@ const store = new Vuex.Store({
         state.players = playerData.map(x => new Player(x));
       }
       if (minions) {
-        state.minions = minions.map(x => new Baddie(x));
+        minions.forEach(minion => {
+          if (minion.list) {
+            minion.list.forEach(x => {
+              state.minions.push(new Baddie({
+                id: minion.id,
+                acted: x.acted,
+                count: x.count,
+                defends: x.defends,
+                bonuses: x.bonuses,
+                size: x.size,
+                type: minion.type,
+                name: minion.name
+              }))
+            });
+          } else {
+            state.minions.push(new Baddie(minion));
+          }
+        });
       }
       if (lieutenants) {
         state.lieutenants = lieutenants.map(x => new Baddie(x));
@@ -41,18 +59,17 @@ const store = new Vuex.Store({
       state.initialized = true;
     },
     UPSERT_BADDIE(state, baddie) {
-      const match = state[baddie.type].find(x => x.id === baddie.id);
+      const match = state[baddie.type].find(x => sameBaddies(baddie, x));
       if (match && baddie.type !== 'villains') {
-        baddie.list.forEach(x => match.addBaddie(x));
+        match.count++;
       } else {
-        console.log(baddie.type)
         state[baddie.type].push(baddie);
       }
     },
     DELETE_BADDIE(state, {baddieType, index, baddie}) {
       if (baddie !== undefined) {
         index = state[baddieType].findIndex(x => x.id === baddie.id);
-      } 
+      }
       if (index > -1) {
         state[baddieType].splice(index, 1);
         Cookies.set(baddieType, state[baddieType]);
@@ -110,6 +127,36 @@ const store = new Vuex.Store({
       ctx.commit('UPSERT_BADDIE', baddie);
       ctx.dispatch('saveData', baddieData.type);
     },
+    modifyBaddie(ctx, {modifier, type}) {
+      const match = ctx.state[type].find(x => x.id = modifier.target);
+      if (match) {
+        if (modifier.applyTo === 'row') {
+          match.addModifier(modifier);
+        } else if (modifier.applyTo === 'name') {
+          ctx.state[type].forEach(x => {
+            if (x.name === match.name) {
+              x.addModifier(modifier);
+            }
+          })
+        } else {
+          const copy = unvue(match); //use export?
+          copy.count = modifier.applyTo === 'single' ? 1 : match.count;
+          match.count--;
+          copy.id = uuid();
+          const baddie = new Baddie(copy);
+          baddie.addModifier(modifier);
+          ctx.commit('UPSERT_BADDIE', baddie);
+        }
+        ctx.dispatch('saveData', type);
+      }
+    },
+    removeBaddie(ctx, {id, type}) {
+      const index = ctx.state[type].findIndex(x => x.id === id);
+      if (index >= 0) { 
+        ctx.state[type].splice(index, 1)
+        ctx.dispatch('saveData', type);
+      }
+    },
     addPlayer(ctx, playerData) {
       if (!ctx.state.players.find(x => x.id === playerData.id)) {
         ctx.commit('ADD_PLAYER', playerData);
@@ -160,6 +207,7 @@ const store = new Vuex.Store({
       const {files, filters} = data;
       if (!files) return;
       (await processXlsxFiles(files, filters)).forEach(row => {
+        // console.log(row);
         if (!row.type) return;
         switch (row.type.toLowerCase()) {
           case 'player':

@@ -108,7 +108,6 @@ class Scene {
       this.notes = '';
       this.save();
     }
-
   }
   progressScene(element) {
     element.checked = !element.checked;
@@ -135,7 +134,7 @@ class Scene {
   removeChallenge(index) {
     if (index >= 0) {
       this.challenges.splice(index, 1);
-      store.dispatch('saveData', 'scene');
+      this.save();
     }
   }
   resetChallenges() {
@@ -232,6 +231,20 @@ class Challenge {
     if (index >= 0) {
       this.list.splice(index, 1);
       this.save();
+      if (this.list.length === 0) {
+        Vue.dialog.confirm({
+          title: 'No Challenges',
+          body: 'This Challenge has no elements. Do you want to remove it?'
+        },
+        {
+          okText: 'Yes',
+          cancelText: 'No'
+        })
+        .then(() => {
+          const thisIndex = store.state.scene.challenges.findIndex(x => x.id === this.id);
+          store.state.scene.removeChallenge(thisIndex);
+        });
+      }
     }
   }
   save() {

@@ -6,20 +6,25 @@
           <hr class="border-dark">
           <h3>Challenges</h3>
           <div class="btn-group btn-group-sm w-50">
-              <button class="btn btn-success border-dark"
-                      title="Add a new Challenge to the Scene"
-                      @click="addChallengeModal">Add</button>
-              <button class="btn btn-warning border-dark" 
-                      title="Remove all Challenges from the Scene"
-                      @click="scene.resetChallenges()">Clear</button>
-              <button class="btn btn-primary border-dark"
-                      @click="$refs.import.click()"
-                      title="Import Challenges data from an xlsx file">Import</button>
-              <button class="btn btn-secondary border-dark"
-                      @click="$store.dispatch('export', {type: 'challenges', fileName: scene.name + '_challenges'})"
-                      title="Export all Challenges to an xlsx file"
-                      :disabled="scene.challenges.length === 0">Export</button>
+            <button class="btn btn-success border-dark"
+                    title="Add a new Challenge to the Scene"
+                    @click="addChallengeModal">Add</button>
+            <button class="btn btn-warning border-dark" 
+                    title="Remove all Challenges from the Scene"
+                    @click="scene.resetChallenges()">Clear</button>
+            <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()"
+                    title="Import Challenges data from an xlsx file">Import</button>
+            <button class="btn btn-secondary border-dark"
+                    @click="$store.dispatch('export', {type: 'challenges', fileName: scene.name + '_challenges'})"
+                    title="Export all Challenges to an xlsx file"
+                    :disabled="scene.challenges.length === 0">Export</button>
           </div>
+          <input type="file"
+                 accept=".xlsx"
+                 class="d-none"
+                 ref="import"
+                 @change="$store.dispatch('import', {files: $event.target.files, filters: ['challenge', 'challenge element']})">
         </div>
       </div>
       <div class="row"
@@ -30,7 +35,7 @@
            v-for="(challenge, challengeIndex) in scene.challenges" 
            :key="challenge.name">
         <div class="col-12 mb-1">
-          <div class="text-left mb-1">
+          <div class="text-left my-1">
             <h5 class="d-inline align-middle m-0">{{challenge.name}}</h5>
             <div class="btn-group btn-group-sm mx-1">
               <button class="btn btn-sm btn-danger border-dark" 
@@ -45,7 +50,7 @@
           </div>
         </div>
         <div class="col-12">
-          <table class="table table-sm table-stripped table-bordered table-dark mb-0">
+          <table class="table table-sm table-striped table-bordered table-dark mb-0">
             <thead>
               <tr>
                   <th width="20%">Completed?</th>
