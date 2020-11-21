@@ -8,8 +8,7 @@
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button class="btn btn-sm btn-success border-dark" 
-                  data-toggle="modal" 
-                  data-target="#createModal-villain">Create</button>
+                  @click="modal('show')">Create</button>
           <button class="btn btn-primary border-dark"
                     @click="$refs.import.click()"
                     title="Import Villain data from an xlsx file">Import</button>
@@ -72,10 +71,10 @@
                         @click="$emit('add-minion', villain.id)"
                         title="Add a Minion to this Villain">
                   <span class="fa-stack">
-                    <i class="fas fa-dragon" 
-                       data-fa-transform="right-4 down-4"></i>
-                    <i class="fas fa-plus" 
-                       data-fa-transform="shrink-6 left-4 down-4"></i>
+                    <icon :icon="['fas', 'dragon']" 
+                           transform="right-4 down-4" />
+                    <icon :icon="['fas', 'plus']" 
+                           transform="shrink-6 left-4 down-4" />
                   </span>
                 </button>
               </div>
@@ -119,14 +118,15 @@
               <input class="form-control" 
                      v-model.trim="name" 
                      type="text"
-                @keydown.enter="createVillain">
+                     ref="villainName"
+                     @keydown.enter="createVillain()">
             </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary" 
                     type="button" 
-                    data-dismiss="modal" 
-                    @click="createVillain">Create</button>
+                    data-dismiss="modal"
+                    @click="createVillain()">Create</button>
             <button class="btn btn-secondary" 
                     type="button" 
                     data-dismiss="modal">Close</button>
@@ -232,7 +232,7 @@
       createVillain() {
         if (this.name !== '') {
           this.$store.dispatch('upsertBaddie', {name: this.name, type: 'villains'});
-          $(`#createModal-villain`).modal('hide');
+          this.modal('hide');
         }
       },
       modifyVillain(villain, type) {
@@ -255,10 +255,18 @@
           return;
         }
         this.target = villain;
-        $(`#modifierModal-villain`).modal('show');
+        $('#modifierModal-villain').modal('show');
         this.$nextTick(() => {
           this.$refs.modifierName.focus();
         }); 
+      },
+      modal(type) {
+        $('#createModal-villain').modal(type);
+        if (type === 'show') {
+          this.$nextTick(() => {
+            this.$refs.villainName.focus();
+          }); 
+        }
       }
     }
   };

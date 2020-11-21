@@ -22,8 +22,7 @@
                accept=".xlsx"
                class="d-none"
                ref="import"
-               @change="$store.dispatch('import', {files: $event.target.files, filters: [label.toLowerCase(), 
-                `${label.toLowerCase()} element`,
+               @change="$store.dispatch('import', {files: $event.target.files, filters: [label.toLowerCase(),
                 'bonus', 'penalty', 'defend']})">
       </div>
     </div>

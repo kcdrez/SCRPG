@@ -96,119 +96,125 @@
             <thead class="text-center">
               <tr>
                 <th width="30%">Name (Owner)</th>
-                <th width="25%">Type</th>
+                <th width="25%">Type (Count)</th>
                 <th width="20%">HP/Die Size</th>
                 <th width="25%">Actions</th>
               </tr>
             </thead>
             <tbody class="text-center">
               <template v-for="actor in actors">
-                <template v-if="!!actor.name">
-                  <tr v-for="(item, index) in actor.list"
-                      :key="item.id">
-                    <td class="text-capitalize c-pointer align-middle">
-                      <input class="form-control form-control-sm"
-                            v-model="actor.tempName"
-                            v-if="actor.editing">
-                      <div v-else
-                          @click="actor.takenAction(index)"
-                          :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
-                        <span v-if="item.acted">
-                          <icon :icon="['fas', 'check']"
-                                class="text-success" />
-                        </span>
-                        {{actor.name}}
-                        <template v-if="actor.owner">({{actor.owner.name}})</template>
-                        <sup class="text-success" 
-                             v-if="item.bonuses.length"
-                             :title="`This ${actor.typeLabel} has ${item.bonuses.length} Bonus${item.bonuses.length > 1 ? 'es': ''}`">
-                          {{item.bonuses.length}}
-                        </sup>
-                        <sup class="text-warning" 
-                             v-if="item.penalties.length"
-                             :title="`This ${actor.typeLabel} has ${item.penalties.length} Penalt${item.penalties.length > 1 ? 'ies': 'y'}`">
-                          {{item.penalties.length}}
-                        </sup>
-                        <sup class="text-secondary" 
-                             v-if="item.defends.length"
-                             :title="`This ${actor.typeLabel} has ${item.defends.length} Defend${item.defends.length > 1 ? 's': ''}`">
-                          {{item.defends.length}}
-                        </sup>
-                      </div>
-                    </td>
-                    <td class="text-capitalize c-pointer align-middle"
-                        @click="actor.takenAction(index)"
+                <tr v-if="!!actor.name" 
+                    :key="actor.id">
+                  <!-- Name/Owner -->
+                  <td class="text-capitalize c-pointer align-middle">
+                    <input class="form-control form-control-sm"
+                          v-model="actor.tempName"
+                          v-if="actor.editing">
+                    <div v-else
+                        @click="actor.takenAction()"
                         :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
-                      {{actor.typeLabel}}
-                    </td>
-                    <td class="align-middle">
-                      <template v-if="typeof item.hp === 'number'">
-                        <input type="number"
-                                class="form-control form-control-sm"
-                                v-model.number="item.tempHP"  
-                                v-if="item.editing"
-                                min="0">
-                        <template v-else>
-                          <span :class="{'text-success': item.inGreen, 
-                            'text-warning': item.inYellow, 
-                            'text-danger': item.inRed, 
-                            'text-muted': item.incapacitated}">{{item.hp}}</span>
-                          <span @click="item.hp++">
-                            <icon :icon="['fas', 'chevron-circle-up']"
-                                  title="Increase Player HP"
-                                  class="c-pointer" />
-                          </span>
-                          <span @click="item.hp--">
-                            <icon :icon="['fas', 'chevron-circle-down']" 
-                                  title="Decrease Player HP" 
-                                  class="c-pointer" />
-                          </span>
-                        </template>
+                      <span v-if="actor.acted">
+                        <icon :icon="['fas', 'check']"
+                              class="text-success" />
+                      </span>
+                      {{actor.name}}
+                      <template v-if="actor.owner">({{actor.owner.name}})</template>
+                      <sup class="text-success c-help" 
+                            v-if="actor.bonuses.length"
+                            :title="`This ${actor.typeLabel} has ${actor.bonuses.length} Bonus${actor.bonuses.length > 1 ? 'es': ''}`">
+                        {{actor.bonuses.length}}
+                      </sup>
+                      <sup class="text-warning c-help" 
+                            v-if="actor.penalties.length"
+                            :title="`This ${actor.typeLabel} has ${actor.penalties.length} Penalt${actor.penalties.length > 1 ? 'ies': 'y'}`">
+                        {{actor.penalties.length}}
+                      </sup>
+                      <sup class="text-secondary c-help" 
+                            v-if="actor.defends.length"
+                            :title="`This ${actor.typeLabel} has ${actor.defends.length} Defend${actor.defends.length > 1 ? 's': ''}`">
+                        {{actor.defends.length}}
+                      </sup>
+                    </div>
+                  </td>
+                  <!-- Type/Count -->
+                  <td class="text-capitalize c-pointer align-middle"
+                      @click="actor.takenAction()"
+                      :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
+                    {{actor.typeLabel}}
+                    <template v-if="actor.count">({{actor.count}})</template>
+                  </td>
+                  <!-- HP/Die Size -->
+                  <td class="align-middle">
+                    <template v-if="typeof actor.hp === 'number'">
+                      <input type="number"
+                              class="form-control form-control-sm"
+                              v-model.number="actor.tempHP"  
+                              v-if="actor.editing"
+                              min="0">
+                      <template v-else>
+                        <span :class="{'text-success': actor.inGreen, 
+                          'text-warning': actor.inYellow, 
+                          'text-danger': actor.inRed, 
+                          'text-muted': actor.incapacitated}">{{actor.hp}}</span>
+                        <span @click="actor.hp++">
+                          <icon :icon="['fas', 'chevron-circle-up']"
+                                :title="`Increase ${actor.typeLabel} HP`"
+                                class="c-pointer" />
+                        </span>
+                        <span @click="actor.hp--">
+                          <icon :icon="['fas', 'chevron-circle-down']" 
+                                :title="`Decrease ${actor.typeLabel} HP`"
+                                class="c-pointer" />
+                        </span>
                       </template>
-                      <template v-else-if="item.size">
-                        <img :src="`images/d${item.size}.png`"
-                            :title="`This minion uses a d${item.size}`">
-                      </template>
-                    </td>
-                    <td class="align-middle">
-                      <div class="btn-group btn-group-sm">
-                        <button class="btn btn-secondary border-dark"
-                                @click="item.beginEdit()"
-                                title="Edit this player"
-                                v-if="item.allowEdit">
-                          <icon :icon="['far', 'edit']" />
-                        </button>
-                        <button class="btn btn-success border-dark"
-                                @click="item.saveEdit()"
-                                v-if="item.editing"
-                                title="Save edits on this player">
-                          <icon :icon="['far', 'save']" />
-                        </button>
-                        <button class="btn btn-warning border-dark"
-                                @click="item.cancelEdit()"
-                                v-if="item.editing"
-                                title="Cancel edits on this player">
-                          <icon :icon="['fas', 'ban']" />
-                        </button>
-                        <button class="btn btn-primary border-dark add-minion"
-                                title="Add a Minion"
-                                @click="$emit('add-minion', item.id)"
-                                v-if="item.allowAddMinion">
-                          <span class="fa-stack">
-                            <i class="fas fa-dragon" data-fa-transform="right-4 down-4"></i>
-                            <i class="fas fa-plus" data-fa-transform="shrink-6 left-4 down-4"></i>
-                          </span>
-                        </button>
-                        <button class="btn btn-danger border-dark"
-                                @click="$store.dispatch('removePlayer', item.name)" 
-                                title="Remove this Player from the scene"
-                                v-if="item.allowRemove">
-                          <icon :icon="['far', 'trash-alt']" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
+                    </template>
+                    <template v-else-if="actor.size">
+                      <img :src="`images/d${actor.size}.png`"
+                          :title="`This ${actor.typeLabel} uses a d${actor.size}`">
+                    </template>
+                    <template v-else>-</template>
+                  </td>
+                  <!-- Actions -->
+                  <td class="align-middle">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-secondary border-dark"
+                              @click="actor.beginEdit()"
+                              :title="`Edit this ${actor.typeLabel}`"
+                              v-if="actor.allowEdit && !actor.editing">
+                        <icon :icon="['far', 'edit']" />
+                      </button>
+                      <button class="btn btn-success border-dark"
+                              @click="actor.saveEdit()"
+                              v-if="actor.editing"
+                              :title="`Save edits on this ${actor.typeLabel}`">
+                        <icon :icon="['far', 'save']" />
+                      </button>
+                      <button class="btn btn-warning border-dark"
+                              @click="actor.cancelEdit()"
+                              v-if="actor.editing"
+                              :title="`Cancel edits on this ${actor.typeLabel}`">
+                        <icon :icon="['fas', 'ban']" />
+                      </button>
+                      <button class="btn btn-primary border-dark add-minion"
+                              title="Add a Minion"
+                              @click="$emit('add-minion', actor.id)"
+                              v-if="actor.allowAddMinion">
+                        <span class="fa-stack">
+                          <icon :icon="['fas', 'dragon']" 
+                                transform="right-4 down-4" />
+                          <icon :icon="['fas', 'plus']" 
+                                transform="shrink-6 left-4 down-4" />
+                        </span>
+                      </button>
+                      <button class="btn btn-danger border-dark"
+                              @click="actor.remove()" 
+                              :title="`Remove this ${actor.typeLabel} from the scene`"
+                              v-if="actor.allowRemove">
+                        <icon :icon="['far', 'trash-alt']" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               </template>
             </tbody>
           </table>

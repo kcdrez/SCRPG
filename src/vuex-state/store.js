@@ -58,6 +58,9 @@ const store = new Vuex.Store({
       state.scene = new Scene(sceneData || {});
       state.initialized = true;
     },
+    CREATE_BADDIE(state, baddie) {
+      state[baddie.type].push(baddie);
+    },
     UPSERT_BADDIE(state, baddie) {
       const match = state[baddie.type].find(x => sameBaddies(baddie, x));
       if (match && baddie.type !== 'villains') {
@@ -91,8 +94,8 @@ const store = new Vuex.Store({
     ADD_PLAYER(state, playerData) {
       state.players.push(new Player(playerData));
     },
-    REMOVE_PLAYER(state, name) {
-      const index = state.players.findIndex(x => x.name === name);
+    REMOVE_PLAYER(state, id) {
+      const index = state.players.findIndex(x => x.id === id);
       if (index > -1) {
         state.players.splice(index, 1);
       }
@@ -121,10 +124,12 @@ const store = new Vuex.Store({
       ctx.commit('RESET_ROUND');
     },
     upsertBaddie(ctx, baddieData) {
-      let baddie;
-      if (baddieData.type === 'villains') baddie = new Villain(baddieData);
-      else baddie = new Baddie(baddieData);
-      ctx.commit('UPSERT_BADDIE', baddie);
+      const baddie = baddieData.type === 'villains' ? new Villain(baddieData) : new Baddie(baddieData);
+      if (baddieData.forceCreate) {
+        ctx.commit('CREATE_BADDIE', baddie);
+      } else {
+        ctx.commit('UPSERT_BADDIE', baddie);
+      }
       ctx.dispatch('saveData', baddieData.type);
     },
     modifyBaddie(ctx, {modifier, type}) {
@@ -139,7 +144,7 @@ const store = new Vuex.Store({
             }
           })
         } else {
-          const copy = unvue(match); //use export?
+          const copy = match.copy();
           copy.count = modifier.applyTo === 'single' ? 1 : match.count;
           match.count--;
           copy.id = uuid();
@@ -163,8 +168,8 @@ const store = new Vuex.Store({
         ctx.dispatch('saveData', 'players');
       }
     },
-    removePlayer(ctx, name) {
-      ctx.commit('REMOVE_PLAYER', name);
+    removePlayer(ctx, id) {
+      ctx.commit('REMOVE_PLAYER', id);
       ctx.dispatch('saveData', 'players');
     },
     resetPlayers(ctx) {
@@ -220,23 +225,11 @@ const store = new Vuex.Store({
             break;
           case 'minion':
           case 'minions':
-            ctx.dispatch('upsertBaddie', Object.assign({leaveEmptyList: true}, row));
-            break;
-          case 'minions element': 
-          case 'lieutenants element': {
-            const minionMatch = ctx.state.minions.find(x => x.id === row.parent);
-            const lieutenantMatch = ctx.state.lieutenants.find(x => x.id === row.parent);
-            if (minionMatch) minionMatch.addBaddie(row);
-            if (lieutenantMatch) lieutenantMatch.addBaddie(row);
-            break;
-          }
           case 'lieutenant':
           case 'lieutenants':
-            ctx.dispatch('upsertBaddie', row);
-            break;
           case 'villain':
           case 'villains':
-            ctx.dispatch('upsertBaddie', row);
+            ctx.dispatch('upsertBaddie', Object.assign({forceCreate: true}, row));
             break;
           case 'challenge':
             ctx.state.scene.addChallenge(row, true);
@@ -244,6 +237,9 @@ const store = new Vuex.Store({
           case 'challenge element':
             const challenge = ctx.state.scene.challenges.find(x => x.id === row.parent);
             if (challenge) challenge.add(row);
+            else {
+              console.warn('Could not find the challenge parent for: ', row);
+            }
             break;
           case 'location':
             ctx.state.scene.addLocation(row);
@@ -251,24 +247,12 @@ const store = new Vuex.Store({
           case 'bonus': 
           case 'penalty':
           case 'defend': {
-            let baddie = null;
-            let baddieData = null;
-            ctx.state.minions.forEach(x => {
-              baddieData = x.findChild(row.parent);
-              if (baddieData) baddie = x;
-            });
-            if (!baddie) {
-              ctx.state.lieutenants.forEach(x => {
-                baddieData = x.findChild(row.parent);
-                if (baddieData) baddie = x;
-              });
-            }
-            if (!baddie) {
-              baddie = ctx.state.villains.find(x => x.id === row.parent);
-            }
+            const baddie = ctx.getters.byID(row.parent);
             if (baddie) {
-              baddie.addModifier(row, baddieData);
-            } 
+              baddie.addModifier(row);
+            } else {
+              console.warn('Could not find the baddie parent for: ', row);
+            }
             break;
           }
         }
@@ -277,7 +261,12 @@ const store = new Vuex.Store({
   },
   getters: {
     byID: state => id => {
-      return [...state.players, ...state.villains, state.scene].find(entry => entry.id === id);
+      return [
+        ...state.players, 
+        ...state.villains, 
+        ...state.minions,
+        ...state.lieutenants,
+        state.scene].find(entry => entry.id === id);
     },
     childMinions: state => id => {
       return state.minions.filter(minion => minion.owner && minion.owner.id === id);

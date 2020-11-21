@@ -8,15 +8,11 @@ class Player {
     this.tempName = playerData.tempName || playerData.name || '';
     this.id = playerData.id || uuid();
     this.acted = playerData.acted || false;
-    
     this.type = 'player';
     this.editing = playerData.editing || false;
     this.initHp(playerData);
   }
 
-  get list() {
-    return [this];
-  }
   get hp() {
     return this._hp;
   }
@@ -215,6 +211,9 @@ class Player {
       },
       playerMinions: minions
     }
+  }
+  remove() {
+    store.dispatch('removePlayer', this.id)
   }
 }
 

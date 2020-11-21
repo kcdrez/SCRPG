@@ -10,22 +10,11 @@ class Baddie {
     this._owner = data.owner || data._owner || null;
     this.id = data.id || uuid();
     this.size = data.size || 12;
-    this.bonuses = data.bonuses || [];
-    this.penalties = data.penalties || [];
-    this.defends = data.defends || [];
-    this.groupId = data.groupId || uuid();
+    this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
+    this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
+    this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
     this.acted = data.acted || false;
     this._count = data.count || data._count || 1;
-    
-    // if (data.types) {
-    //   Object.entries(data.types).forEach(([size, baddieData]) => {
-    //     baddieData.forEach(x => this.addBaddie(x, size));
-    //   });
-    // } else if (data.list) {
-    //   this.list = data.list;
-    // } else if (!data.leaveEmptyList) {
-    //   this.addBaddie({size: data.size, count: data.count});
-    // }
   }
 
   get owner() {
@@ -50,7 +39,7 @@ class Baddie {
     return this.list.find(x => x.id === id);
   }
   demote() {
-    const copy = unvue(this); //todo: export?
+    const copy = this.copy();
     copy.id = uuid();
     copy.size = this.size - 2;
     copy.count = 1;
@@ -60,13 +49,11 @@ class Baddie {
     }
   }
   promote() {
-    if (this.size >= 12) {
-      return;
-    } else {
-      const copy = unvue(this); //todo: export?
-      copy.id = uuid();
-      copy.size = this.size + 2;
-      copy.count = 1;
+    const copy = this.copy();
+    copy.id = uuid();
+    copy.size = this.size + 2;
+    copy.count = 1;
+    if (copy.size <= 12) {
       this.count--;
       store.dispatch('upsertBaddie', copy);
     }
@@ -89,8 +76,11 @@ class Baddie {
   }
   removeModifier(type, index) {
     const remove = () => {
-      //todo: only remove it from one of these.
-      // this[type].splice(index, 1);
+      const copy = this.copy();
+      copy[type].splice(index, 1);
+      this.count--;
+      console.log(copy);
+      store.dispatch('upsertBaddie', copy);
       this.save();
     }
 
@@ -127,61 +117,55 @@ class Baddie {
   }
   export(id) {
     if (!id || this.id === id) {
-      const list = [];
-      let modifiersList = [];
-      this.list.forEach(x => {
-        const {baddie, modifiers} = this.exportBaddie(x);
-        list.push(baddie);
-        modifiersList = modifiersList.concat(modifiers);
-      });
+      const modifiersList = [
+        ...this.bonuses.map(x => x.export(this.id)),
+        ...this.penalties.map(x => x.export(this.id)),
+        ...this.defends.map(x => x.export(this.id)),
+      ];
   
       return {
         baddie: {
-          id: this.id,
-          owner: this._owner,
           name: this.name,
           type: this.type,
+          owner: this._owner,
+          id: this.id,
+          size: this.size,
+          acted: this.acted,
+          _count: this.count
         },
-        list,
         modifiers: modifiersList
       }
     } else return {};
   }
-  exportBaddie(baddieData) {
-    const id = baddieData.id || uuid();
-    return {
-      baddie: {
-        id,
-        acted: baddieData.acted,
-        count: baddieData.count,
-        size: baddieData.size,
-        parent: this.id,
-        type: `${this.type} element`
-      },
-      modifiers: [
-        ...baddieData.bonuses.map(x => exportModifier(x, id, 'bonus')),
-        ...baddieData.defends.map(x => exportModifier(x, id, 'penalty')),
-        ...baddieData.penalties.map(x => exportModifier(x, id, 'defend'))
-      ]
-    }
+  copy() {
+    return Object.assign({
+      bonuses: this.bonuses.map(x => x.export(this.id)),
+      penalties: this.penalties.map(x => x.export(this.id)),
+      defends: this.defends.map(x => x.export(this.id)),
+    }, this.export().baddie);
   }
 }
 
 class Villain {
   constructor(data) {
     this.name = data.name;
+    this.tempName = data.tempName || data.name || '';
     this.acted = data.acted || false;
-    this.bonuses = data.bonuses || [];
-    this.penalties = data.penalties || [];
-    this.defends = data.defends || [];
+    this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
+    this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
+    this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
     this.type = 'villains';
     this.id = data.id || uuid();
+    this.editing = data.editing || false;
   }
 
-  get list() {
-    return [this];
-  }
   get allowAddMinion() {
+    return true;
+  }
+  get typeLabel() {
+    return 'villain';
+  }
+  get allowEdit() {
     return true;
   }
 
@@ -318,6 +302,17 @@ class Villain {
       ],
       list: minions
     }
+  }
+  beginEdit() {
+    this.editing = true;
+  }
+  cancelEdit() {
+    this.editing = false;
+  }
+  saveEdit() {
+    this.editing = false;
+    this.name = this.tempName;
+    this.save();
   }
 }
 
