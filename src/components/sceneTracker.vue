@@ -120,17 +120,17 @@
                       {{actor.name}}
                       <template v-if="actor.owner">({{actor.owner.name}})</template>
                       <sup class="text-success c-help" 
-                            v-if="actor.bonuses.length"
+                            v-if="actor.bonuses && actor.bonuses.length"
                             :title="`This ${actor.typeLabel} has ${actor.bonuses.length} Bonus${actor.bonuses.length > 1 ? 'es': ''}`">
                         {{actor.bonuses.length}}
                       </sup>
                       <sup class="text-warning c-help" 
-                            v-if="actor.penalties.length"
+                            v-if="actor.penalties && actor.penalties.length"
                             :title="`This ${actor.typeLabel} has ${actor.penalties.length} Penalt${actor.penalties.length > 1 ? 'ies': 'y'}`">
                         {{actor.penalties.length}}
                       </sup>
                       <sup class="text-secondary c-help" 
-                            v-if="actor.defends.length"
+                            v-if="actor.defends && actor.defends.length"
                             :title="`This ${actor.typeLabel} has ${actor.defends.length} Defend${actor.defends.length > 1 ? 's': ''}`">
                         {{actor.defends.length}}
                       </sup>
@@ -159,12 +159,12 @@
                         <span @click="actor.hp++">
                           <icon :icon="['fas', 'chevron-circle-up']"
                                 :title="`Increase ${actor.typeLabel} HP`"
-                                class="c-pointer" />
+                                class="c-pointer change-hp" />
                         </span>
                         <span @click="actor.hp--">
                           <icon :icon="['fas', 'chevron-circle-down']" 
                                 :title="`Decrease ${actor.typeLabel} HP`"
-                                class="c-pointer" />
+                                class="c-pointer change-hp" />
                         </span>
                       </template>
                     </template>
@@ -576,6 +576,9 @@
     img {
       max-width: 20px;
       margin: 0 .25rem;
+    }
+    .change-hp:hover {
+      transform: translate(0px, -1px);
     }
   }
 

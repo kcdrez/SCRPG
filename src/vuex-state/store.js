@@ -142,7 +142,7 @@ const store = new Vuex.Store({
             if (x.name === match.name) {
               x.addModifier(modifier);
             }
-          })
+          });
         } else {
           const copy = match.copy();
           copy.count = modifier.applyTo === 'single' ? 1 : match.count;
@@ -176,33 +176,63 @@ const store = new Vuex.Store({
       ctx.commit('RESET_PLAYERS');
       ctx.dispatch('saveData', 'players'); 
     },
+    reconcile(ctx, type) {
+      for (let i = 0; i < ctx.state[type].length - 1; i++) {
+        if (sameBaddies(ctx.state[type][i], ctx.state[type][i+1])) {
+          ctx.state[type][i].count += ctx.state[type][i+1].count;
+          ctx.state[type][i+1].markForDeath = true;
+        }
+      }
+      ctx.state[type] = ctx.state[type].filter(x => !x.markForDeath);
+    },
     export(ctx, options) {
       const {type, fileName, id} = options || {};
-      const {players, playerMinions} = ctx.state.players.map(x => x.export());
+      const rows = [];
       const {scene, challenges, locations, envMinions} = ctx.state.scene.export(id);
-      const minions = ctx.getters.exportBaddie(ctx.state.minions, id);
-      const lieutenants = ctx.getters.exportBaddie(ctx.state.lieutenants, id);
-      const villains = ctx.getters.exportBaddie(ctx.state.villains, id);
-
-      const sheetData = [
-        ...(!type || type === 'players' ? players : []),
-        ...(!type || type === 'players' ? playerMinions : []),
-        ...(!type || type === 'scene' ? scene : []),
-        ...(!type || type === 'scene' ? envMinions : []),
-        ...(!type || type === 'challenges' ? challenges : []),
-        ...(!type || type === 'locations' ? locations : []),
-        ...(!type || type === 'minions' ? minions.baddies : []),
-        ...(!type || type === 'minions' ? minions.list : []),
-        ...(!type || type === 'minions' ? minions.modifiers : []),
-        ...(!type || type === 'lieutenants' ? lieutenants.baddies : []),
-        ...(!type || type === 'lieutenants' ? lieutenants.list : []),
-        ...(!type || type === 'lieutenants' ? lieutenants.modifiers : []),
-        ...(!type || type === 'villains' ? villains.baddies : []),
-        ...(!type || type === 'villains' ? villains.list : []),
-        ...(!type || type === 'villains' ? villains.modifiers : [])
-      ];
+      if (type === 'scene' || !type) {
+        if (scene) rows.push(scene);
+        rows.push(...envMinions);
+      }
+      if (type === 'challenges' || !type) {
+        rows.push(...challenges);
+      }
+      if (type === 'locations' || !type) {
+        rows.push(...locations);
+      }
+      if (type === 'players' || !type) {
+        ctx.state.players.forEach(x => {
+          const {player, minions} = x.export();
+          rows.push(player, ...minions.filter(minion => {
+            return !rows.find(row => row.id === minion.id);
+          }));
+        });
+      }
+      if (type === 'villains' || !type) {
+        ctx.state.villains.forEach(x => {
+          const {baddie, modifiers, minions} = x.export();
+          rows.push(baddie, ...modifiers, ...minions.filter(minion => {
+            return !rows.find(row => row.id === minion.id);
+          }));
+        });
+      }
+      if (type === 'lieutenants' || !type) {
+        ctx.state.lieutenants.forEach(x => {
+          const {baddie, modifiers} = x.export();
+          rows.push(baddie, ...modifiers);
+        });
+      }
+      if (type === 'minions' || !type) {
+        ctx.state.minions.forEach(minion => {
+          if (!rows.find(row => row.id === minion.id)) {
+            const {baddie, modifiers} = minion.export();
+            rows.push(baddie, ...modifiers);
+          }
+        });
+      }
+      console.log(rows);
+      
       const wb = xlsx.utils.book_new();
-      const sceneWS = xlsx.utils.json_to_sheet(sheetData);
+      const sceneWS = xlsx.utils.json_to_sheet(rows);
 
       xlsx.utils.book_append_sheet(wb, sceneWS, "SCRPG");
 
@@ -296,15 +326,6 @@ const store = new Vuex.Store({
       });
 
       return arr.concat(state.lieutenants, remainingMinions);
-    },
-    exportBaddie: state => (baddieList, id) => {
-      return baddieList.reduce((acc, x) => {
-        const {baddie, list, modifiers} = x.export(id);
-        if (baddie) acc.baddies.push(baddie);
-        if (list) acc.list = acc.list.concat(list);
-        if (modifiers) acc.modifiers = acc.modifiers.concat(modifiers);
-        return acc;
-      }, { baddies: [], list: [], modifiers: [] });
     }
   }
 })

@@ -1,15 +1,10 @@
 import Vue from 'vue';
-import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
+import Actor from './actor';
 
-class Player {
+class Player extends Actor {
   constructor(playerData) {
-    this.name = playerData.name;
-    this.tempName = playerData.tempName || playerData.name || '';
-    this.id = playerData.id || uuid();
-    this.acted = playerData.acted || false;
-    this.type = 'player';
-    this.editing = playerData.editing || false;
+    super(playerData);
     this.initHp(playerData);
   }
 
@@ -22,9 +17,9 @@ class Player {
     this.tempHP = val;
     this.save();
   }
-  get typeLabel() {
-    return this.type;
-  }
+  // get typeLabel() {
+  //   return this.type;
+  // }
   get allowEdit() {
     return !this.editing;
   }
@@ -148,10 +143,7 @@ class Player {
   takenAction() {
     const minions = store.getters.childMinions(this.id);
     const newStatus = !this.acted;
-    const minionNotMatched = minions.some(minion => {
-      const match = minion.list.find(x => x.acted !== newStatus);
-      return !!match;
-    });
+    const minionNotMatched = minions.some(x => x.acted !== newStatus);
     const message = newStatus ? 
       `Some of this player's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
       `Some of this player's minions have already acted. Do you also want to mark their minions as having not acted?`;
@@ -166,37 +158,21 @@ class Player {
       })
       .then(() => {
         minions.forEach(minion => {
-          minion.takenAction(null, newStatus);
+          minion.takenAction(newStatus);
         })
       });
     }
     this.acted = newStatus;
     this.save();
   }
-  save() {
-    store.dispatch('saveData', 'players');
-  }
-  beginEdit() {
-    this.editing = true;
-  }
-  cancelEdit() {
-    this.editing = false;
-  }
   saveEdit() {
-    this.editing = false;
-    this.name = this.tempName;
     this.hp = this.tempHP;
-    this.save();
-  }
-  resetRound() {
-    this.acted = false;
-    this.save();
+    super.saveEdit();
   }
   export() {
     const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
-      const {baddie, list, modifiers} = minion.export();
+      const {baddie, modifiers} = minion.export();
       acc.push(baddie);
-      acc.push(...list);
       acc.push(...modifiers);
       return acc;
     }, []);
@@ -209,7 +185,7 @@ class Player {
         acted: this.acted,
         type: this.type
       },
-      playerMinions: minions
+      minions
     }
   }
   remove() {

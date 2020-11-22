@@ -10,11 +10,13 @@ function roll(dieSize) {
 
 async function processXlsxFiles(files, filterTypes) {
   let arr = [];
-  filterTypes = filterTypes.map(x => x.toLowerCase());
   for (let i = 0; i < files.length; i++) {
     arr = arr.concat(await readFile(files[i]));
   }
-  if (filterTypes) return arr.filter(x => filterTypes.includes(x.type.toLowerCase()))
+  if (filterTypes) {
+    filterTypes = filterTypes.map(x => x.toLowerCase());
+    return arr.filter(x => filterTypes.includes(x.type.toLowerCase()));
+  }
   else return arr;
 }
 

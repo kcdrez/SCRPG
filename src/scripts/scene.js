@@ -1,31 +1,23 @@
 import Vue from 'vue';
 import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
+import Actor from './actor';
 
-class Scene {
+class Scene extends Actor {
   constructor(data) {
+    super(data);
     this.green = data.green || [];
     this.yellow = data.yellow || [];
     this.red = data.red || [];
     this.challenges = (data.challenges || []).map(x => new Challenge(x));
     this.locations = (data.locations || []).map(x => new Location(x));
-    this.name = data.name || '';
-    this.acted = data.acted || false;
     this.notes = data.notes || '';
-    this.id = data.id || uuid();
-    this.type = data.type || 'environment';
   }
 
   get isEmpty() {
     return this.green.length === 0 &&
       this.yellow.length === 0 &&
       this.red.length === 0;
-  }
-  get list () {
-    return [this];
-  }
-  get typeLabel() {
-    return this.type;
   }
   get allowAddMinion() {
     return true;
@@ -34,10 +26,7 @@ class Scene {
   takenAction() {
     const minions = store.getters.childMinions(this.id);
     const newStatus = !this.acted;
-    const minionNotMatched = minions.some(minion => {
-      const match = minion.list.find(x => x.acted !== newStatus);
-      return !!match;
-    });
+    const minionNotMatched = minions.some(x => x.acted !== newStatus);
     const message = newStatus ? 
       `Some of the environment's minions have not acted. Do you also want to mark all of it's minions as having acted too?`:
       `Some of the environment's minions have already acted. Do you also want to mark it's minions as having not acted?`;
@@ -52,15 +41,11 @@ class Scene {
       })
       .then(() => {
         minions.forEach(minion => {
-          minion.takenAction(null, newStatus);
+          minion.takenAction(newStatus);
         })
       });
     }
     this.acted = newStatus;
-    this.save();
-  }
-  resetRound() {
-    this.acted = false;
     this.save();
   }
   create(green, yellow, red, name) {
@@ -77,6 +62,21 @@ class Scene {
     this.save();
   }
   clear() {
+    const clearScene = () => {
+      minions.forEach(minion => {
+        store.commit('DELETE_BADDIE', {baddie: minion, baddieType: minion.type})
+      })
+      this.green = [];
+      this.yellow = [];
+      this.red = [];
+      this.acted = false;
+      this.name = '';
+      this.challenges = [];
+      this.locations = [];
+      this.notes = '';
+      this.save();
+    }
+
     const minions = store.getters.childMinions(this.id);
     if (minions.length > 0) {
       Vue.dialog.confirm({
@@ -92,21 +92,6 @@ class Scene {
       });
     } else {
       clearScene();
-    }
-
-    const clearScene = () => {
-      minions.forEach(minion => {
-        store.commit('DELETE_BADDIE', {baddie: minion, baddieType: minion.type})
-      })
-      this.green = [];
-      this.yellow = [];
-      this.red = [];
-      this.acted = false;
-      this.name = '';
-      this.challenges = [];
-      this.locations = [];
-      this.notes = '';
-      this.save();
     }
   }
   progressScene(element) {
@@ -145,20 +130,16 @@ class Scene {
     this.notes = note;
     this.save();
   }
-  save() {
-    store.dispatch('saveData', 'scene');
-  }
   export(challengeId) {
     const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
-      const {baddie, list, modifiers} = minion.export();
+      const {baddie, modifiers} = minion.export();
       acc.push(baddie);
-      acc.push(...list);
       acc.push(...modifiers);
       return acc;
     }, []);
 
     return {
-      scene: [{
+      scene: this.name ? {
         id: this.id,
         name: this.name,
         acted: this.acted,
@@ -167,7 +148,7 @@ class Scene {
         yellow: this.exportSceneTracker(this.yellow),
         red: this.exportSceneTracker(this.red),
         type: 'scene'
-      }],
+      } : null,
       locations: this.locations.map(x => x.export()),
       challenges: this.exportChallenges(challengeId),
       envMinions: minions

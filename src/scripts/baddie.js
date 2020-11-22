@@ -2,32 +2,22 @@ import Vue from 'vue';
 import store from '../vuex-state/store';
 import {unvue} from './utilities';
 import {v4 as uuid} from 'uuid';
+import Actor from './actor';
 
-class Baddie {
+class Baddie extends Actor {
   constructor(data) {
-    this.name = data.name || '';
-    this.type = data.type || 'minions';
-    this._owner = data.owner || data._owner || null;
-    this.id = data.id || uuid();
+    super(data);
+    this._owner = data.owner || data._owner || data.parent || null;
     this.size = data.size || 12;
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this.acted = data.acted || false;
     this._count = data.count || data._count || 1;
+    this.markForDeath = false;
   }
 
   get owner() {
     return store.getters.byID(this._owner);
-  }
-  get typeLabel() {
-    switch (this.type) {
-      case 'minions':
-      default:
-        return 'minion';
-      case 'lieutenants':
-        return 'lieutenant';
-    }
   }
   get count() { return this._count; }
   set count(val) {
@@ -35,9 +25,6 @@ class Baddie {
     this.save();
   }
 
-  findChild(id) {
-    return this.list.find(x => x.id === id);
-  }
   demote() {
     const copy = this.copy();
     copy.id = uuid();
@@ -78,9 +65,10 @@ class Baddie {
     const remove = () => {
       const copy = this.copy();
       copy[type].splice(index, 1);
+      copy.id = uuid();
+      copy.count = 1;
       this.count--;
-      console.log(copy);
-      store.dispatch('upsertBaddie', copy);
+      if (copy.count > 0) store.dispatch('upsertBaddie', copy);
       this.save();
     }
 
@@ -104,20 +92,16 @@ class Baddie {
     this.acted = status === undefined ? !this.acted : status;
     this.save();
   }
-  resetRound() {
-    this.acted = false;
-    this.save();
-  }
   save() {
     if (this.count <= 0) {
       store.dispatch('removeBaddie', {type: this.type, id: this.id});
     } else {
-      store.dispatch('saveData', this.type);
+      store.dispatch('reconcile', this.type);
     }
   }
   export(id) {
     if (!id || this.id === id) {
-      const modifiersList = [
+      const modifiers = [
         ...this.bonuses.map(x => x.export(this.id)),
         ...this.penalties.map(x => x.export(this.id)),
         ...this.defends.map(x => x.export(this.id)),
@@ -127,13 +111,13 @@ class Baddie {
         baddie: {
           name: this.name,
           type: this.type,
-          owner: this._owner,
+          parent: this._owner,
           id: this.id,
           size: this.size,
           acted: this.acted,
-          _count: this.count
+          count: this.count
         },
-        modifiers: modifiersList
+        modifiers
       }
     } else return {};
   }
@@ -146,24 +130,16 @@ class Baddie {
   }
 }
 
-class Villain {
+class Villain extends Actor{
   constructor(data) {
-    this.name = data.name;
-    this.tempName = data.tempName || data.name || '';
-    this.acted = data.acted || false;
+    super(data);
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this.type = 'villains';
-    this.id = data.id || uuid();
-    this.editing = data.editing || false;
   }
 
   get allowAddMinion() {
     return true;
-  }
-  get typeLabel() {
-    return 'villain';
   }
   get allowEdit() {
     return true;
@@ -247,10 +223,7 @@ class Villain {
   takenAction() {
     const minions = store.getters.childMinions(this.id); 
     const newStatus = !this.acted;
-    const minionNotMatched = minions.some(minion => {
-      const match = minion.list.find(x => x.acted !== newStatus);
-      return !!match;
-    });
+    const minionNotMatched = minions.some(x => x.acted !== newStatus);
     const message = newStatus ? 
       `Some of this villain's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
       `Some of this villain's minions have already acted. Do you also want to mark their minions as having not acted?`;
@@ -265,25 +238,17 @@ class Villain {
       })
       .then(() => {
         minions.forEach(minion => {
-          minion.takenAction(null, newStatus);
+          minion.takenAction(newStatus);
         })
       });
     }
     this.acted = newStatus;
     this.save();
   }
-  resetRound() {
-    this.acted = false;
-    this.save();
-  }
-  save() {
-    store.dispatch('saveData', this.type);
-  }
   export() {
     const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
-      const {baddie, list, modifiers} = minion.export();
+      const {baddie, modifiers} = minion.export();
       acc.push(baddie);
-      acc.push(...list);
       acc.push(...modifiers);
       return acc;
     }, []);
@@ -296,23 +261,12 @@ class Villain {
         acted: this.acted
       },
       modifiers: [
-        ...this.bonuses.map(x => exportModifier(x, this.id, 'bonus')),
-        ...this.defends.map(x => exportModifier(x, this.id, 'penalty')),
-        ...this.penalties.map(x => exportModifier(x, this.id, 'defend'))
+        ...this.bonuses.map(x => x.export(this.id)),
+        ...this.defends.map(x => x.export(this.id)),
+        ...this.penalties.map(x => x.export(this.id))
       ],
-      list: minions
+      minions
     }
-  }
-  beginEdit() {
-    this.editing = true;
-  }
-  cancelEdit() {
-    this.editing = false;
-  }
-  saveEdit() {
-    this.editing = false;
-    this.name = this.tempName;
-    this.save();
   }
 }
 
@@ -336,17 +290,6 @@ class Modifier {
       persistent: this.persistent,
       parent
     }
-  }
-}
-
-function exportModifier(modifier, parent, type) { //todo kill this
-  return {
-    name: modifier.name,
-    amount: modifier.amount,
-    exclusive: modifier.exclusive,
-    persistent: modifier.persistent,
-    parent,
-    type
   }
 }
 
