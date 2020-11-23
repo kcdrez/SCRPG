@@ -5,16 +5,29 @@ import {v4 as uuid} from 'uuid';
 import Actor from './actor';
 
 class Baddie extends Actor {
-  constructor(data) {
-    super(data);
-    this._owner = data.owner || data._owner || data.parent || null;
-    this.size = data.size || 12;
-    this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
-    this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
-    this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this._count = data.count || data._count || 1;
+  constructor({
+    id, name, tempName, acted, editing, type,
+    owner, _owner, parent,
+    size, count, _count,
+    bonuses, penalties, defends
+  }) {
+    super({id, name, tempName, acted, editing, type,});
+    this._owner = owner || _owner || parent || null;
+    this.size = size || 12;
+    this.bonuses = bonuses ? bonuses.map(x => new Modifier(x)) : [];
+    this.penalties = penalties ? penalties.map(x => new Modifier(x)) : [];
+    this.defends = defends ? defends.map(x => new Modifier(x)) : [];
+    this._count = count || _count || 1;
     this.markForDeath = false;
   }
+  private _owner: string | null = null;
+  private _count: number =  1;
+  public size: number = 12;
+  public bonuses: Modifier[] = [];
+  public penalties: Modifier[] = [];
+  public defends: Modifier[] = [];
+  public markForDeath: boolean = false;
+
 
   get owner() {
     return store.getters.byID(this._owner);
@@ -90,7 +103,7 @@ class Baddie extends Actor {
       remove();
     }
   }
-  takenAction(status) {
+  takenAction(status): void {
     this.acted = status === undefined ? !this.acted : status;
     this.save();
   }
@@ -246,6 +259,12 @@ class Modifier {
     this.persistent = data.persistent || false;
     this.type = data.type;
   }
+  public id: string = '';
+  public name: string = '';
+  public amount: number = 1;
+  public exclusive: boolean = false;
+  public persistent: boolean = false;
+  public type: string = '';
 
   export(parent) {
     return {

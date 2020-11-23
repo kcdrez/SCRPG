@@ -1,22 +1,29 @@
 'use strict'
-
+//https://github.com/microsoft/TypeScript-Vue-Starter
+const path = require('path');
 const webpack = require('webpack');
 const jquery = require('jquery');
-const { VueLoaderPlugin } = require('vue-loader');
+const { VueLoaderPlugin } = require('vue-loader'); //ts slightly different?
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
   entry: [
-    './src/app.js'
+    './src/app.ts'
   ],
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    publicPath: '/dist/',
+    filename: 'build.js'
+  },
   resolve: {
+    extensions: ['.ts', '.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js'
     }
   },
-  devServer: {
+  devServer: { //ts different
     hot: true,
     watchOptions: {
       poll: true
@@ -27,6 +34,15 @@ module.exports = {
       {
         test: /\.vue$/,
         use: 'vue-loader'
+        //add ts loaders?
+      },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        options: {
+          appendTsSuffixTo: [/\.vue$/],
+        }
       },
       {
         test: /\.scss$/,
@@ -38,14 +54,14 @@ module.exports = {
       },
       {    
         test: /\.css$/,    
-        use: ['style-loader','css-loader']  
+        use: ['style-loader','css-loader'] //ts slightly different?
       },
       {    
-        test: /\.png$/,    
+        test: /\.(png|jpg|gif|svg)$/,    
         use: {
           loader: "file-loader",
           options: {
-            name: '[path][name].[hash].[ext]'
+            name: '[path][name].[hash].[ext]' //ts slightly different?
           }
         } 
       },

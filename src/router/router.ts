@@ -35,7 +35,7 @@ router.beforeEach((to, from, next) => {
   isInitialized(next);
 })
 
-function isInitialized(next) {
+function isInitialized(next: Function) {
   if (store.state.initialized) next();
   else {
     store.watch(

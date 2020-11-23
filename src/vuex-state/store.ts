@@ -5,7 +5,7 @@ import xlsx from 'xlsx';
 import {Baddie, Villain, sameBaddies} from '../scripts/baddie';
 import {Player} from '../scripts/player';
 import {Scene} from '../scripts/scene';
-import {sortActors} from '../scripts/actor';
+import {Actor, sortActors} from '../scripts/actor';
 import {unvue, processXlsxFiles} from '../scripts/utilities';
 import {v4 as uuid} from 'uuid';
 
@@ -297,7 +297,7 @@ const store = new Vuex.Store({
       return state.minions.filter(minion => minion.owner && minion.owner.id === id);
     },
     actors: state => {
-      let arr = [];
+      let arr: Actor[] = [];
       if (state.scene.name) arr.push(state.scene);
 
       const envMinions = state.minions.filter(m => m.owner ? m.owner.id === state.scene.id : false);

@@ -72,14 +72,19 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import Baddies from '../components/baddie.vue';
   import SceneTracker from '../components/sceneTracker.vue';
   import Villains from '../components/villain.vue';
 
   export default {
     name: 'GMTools',
-    components: { Baddies, SceneTracker, Villains }
+    components: { Baddies, SceneTracker, Villains },
+    created() {
+      function meow(): void {
+        console.log('its happening')
+      }
+    }
   };
 </script>
 

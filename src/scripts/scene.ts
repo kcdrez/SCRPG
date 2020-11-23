@@ -3,18 +3,51 @@ import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
 import Actor from './actor';
 
-class Scene extends Actor {
-  constructor(data) {
-    super(data);
-    this.green = data.green || [];
-    this.yellow = data.yellow || [];
-    this.red = data.red || [];
-    this.challenges = (data.challenges || []).map(x => new Challenge(x));
-    this.locations = (data.locations || []).map(x => new Location(x));
-    this.notes = data.notes || '';
-  }
+interface TrackerColor {
+  checked: boolean;
+}
 
-  get isEmpty() {
+class Scene extends Actor {
+  constructor({
+    id, name, tempName, acted, editing, type,
+    green,
+    yellow,
+    red,
+    challenges,
+    locations,
+    notes
+  }: {
+    id: string,
+    name: string,
+    tempName: string,
+    acted: boolean,
+    editing: boolean,
+    type: string,
+    green: TrackerColor[],
+    yellow: TrackerColor[],
+    red: TrackerColor[],
+    challenges: Challenge[],
+    locations: Location[],
+    notes: string
+  }) {
+    super({
+      id, name, tempName, acted, editing, type
+    });
+    this.green = green || [];
+    this.yellow = yellow || [];
+    this.red = red || [];
+    this.challenges = (challenges || []).map(x => new Challenge(x));
+    this.locations = (locations || []).map(x => new Location(x));
+    this.notes = notes || '';
+  }
+  public green: TrackerColor[] = [];
+  public yellow: TrackerColor[] = [];
+  public red: TrackerColor[] = [];
+  public challenges: Challenge[] = [];
+  public locations: Location[] = [];
+  public notes: string = '';
+
+  public get isEmpty(): boolean {
     return this.green.length === 0 &&
       this.yellow.length === 0 &&
       this.red.length === 0;
@@ -189,12 +222,23 @@ class Scene extends Actor {
 }
 
 class Challenge {
-  constructor(data, skipInitialize) {
-    this.name = data.name || '';
-    this.id = data.id || uuid();
-    this.list = (data.list || []).map(x => new ChallengeEntry(x));
+  constructor({
+    id,
+    name,
+    list
+  }: {
+    id: string,
+    name: string,
+    list: ChallengeEntry[]
+  }, skipInitialize = false) {
+    this.id = id || uuid();
+    this.name = name || '';
+    this.list = (list || []).map(x => new ChallengeEntry(x));
     if (!skipInitialize) this.initialize();
   }
+  public id: string = '';
+  public name: string = '';
+  public list: ChallengeEntry[] = [];
   
   initialize() {
     if (this.list.length === 0) {
@@ -239,13 +283,30 @@ class Challenge {
 }
 
 class ChallengeEntry {
-  constructor(data) {
-    this.completed = data.completed || false;
-    this.editing = data.editing || false;
-    this.label = data.label || data.name || '';
-    this.tempLabel = data.label || data.tempLabel || '';
-    this.id = data.id || uuid();
+  constructor({
+    id,
+    label,
+    tempLabel,
+    editing,
+    completed
+  }: {
+    id: string,
+    label: string,
+    tempLabel: string,
+    editing: boolean,
+    completed: boolean
+  }) {
+    this.id = id || uuid();
+    this.label = label || name || '';
+    this.tempLabel = label || tempLabel || '';
+    this.editing = editing || false;
+    this.completed = completed || false;
   }
+  public id: string = '';
+  public label: string = '';
+  public tempLabel: string = '';
+  public editing: boolean = false;
+  public completed: boolean = false;
 
   complete() {
     this.completed = !this.completed;
@@ -276,14 +337,34 @@ class ChallengeEntry {
 }
 
 class Location {
-  constructor(data) {
-    this.editing = data.editing || false;
-    this.name = data.name || '';
-    this.description = data.description || '';
-    this.tempName = data.tempName || data.name || '';
-    this.tempDescription = data.tempDescription || data.description || '';
-    this.id = data.id || uuid();
+  constructor({
+    id,
+    name,
+    description,
+    editing,
+    tempName,
+    tempDescription
+  }: {
+    id: string,
+    name: string,
+    description: string,
+    editing: boolean,
+    tempName: string,
+    tempDescription: string
+  }) {
+    this.id = id || uuid();
+    this.name = name || '';
+    this.description = description || '';
+    this.editing = editing || false;
+    this.tempName = tempName || name || '';
+    this.tempDescription = tempDescription || description || '';
   }
+  public id: string = '';
+  public name: string = '';
+  public editing: boolean = false;
+  public description: string = '';
+  public tempName: string = '';
+  public tempDescription: string = '';
 
   beginEdit() {
     this.editing = true; 
@@ -305,6 +386,15 @@ class Location {
       type: 'location'
     }
   }
+}
+
+interface LocationData {
+  id: string;
+  name: string;
+  editing: boolean;
+  description: string;
+  tempName: string;
+  tempDescription: string;
 }
 
 export default Scene;

@@ -1,32 +1,32 @@
 import xlsx from 'xlsx';
 
-function unvue(obj) {
+function unvue(obj: any) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function roll(dieSize) {
+function roll(dieSize: number) {
   return Math.floor(Math.random() * dieSize);
 }
 
-async function processXlsxFiles(files, filterTypes) {
-  let arr = [];
+async function processXlsxFiles(files: Blob[], filterTypes: string[]) {
+  let arr: any = [];
   for (let i = 0; i < files.length; i++) {
     arr = arr.concat(await readFile(files[i]));
   }
   if (filterTypes) {
     filterTypes = filterTypes.map(x => x.toLowerCase());
-    return arr.filter(x => filterTypes.includes(x.type.toLowerCase()));
+    return arr.filter((x: Blob) => filterTypes.includes(x.type.toLowerCase()));
   }
   else return arr;
 }
 
-function readFile(file) {
-  let arr = [];
+function readFile(file: Blob): Promise<any> {
+  let arr: any[] = [];
   return new Promise((resolve, reject) => {
-    let reader = new FileReader();
+    const reader: FileReader = new FileReader();
 
     reader.onload = () => {
-      const bytes = new Uint8Array(reader.result);
+      const bytes = new Uint8Array(reader.result as ArrayBuffer);
       let binary = "";
       for (let j = 0; j < bytes.byteLength; j++) {
         binary += String.fromCharCode(bytes[j]);

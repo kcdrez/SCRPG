@@ -1,18 +1,28 @@
 import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
 
-class Actor {
-  constructor(data) {
-    if (this.constructor === Actor) {
-      throw new TypeError('Abstract class "Actor" cannot be instantiated directly.')
-    }
-    this.id = data.id || uuid();
-    this.name = data.name;
-    this.tempName = data.tempName || data.name || '';
-    this.acted = data.acted || false;
-    this.editing = data.editing || false;
-    this.type = data.type;
+abstract class Actor {
+  constructor({id, name, tempName, acted, editing, type}: {
+    id: string,
+    name: string,
+    tempName: string,
+    acted: boolean,
+    editing: boolean,
+    type: string
+  }) {
+    this.id = id || uuid();
+    this.name = name;
+    this.tempName = tempName || name || '';
+    this.acted = acted || false;
+    this.editing = editing || false;
+    this.type = type;
   }
+  public id: string = '';
+  public name: string = '';
+  public tempName: string = '';
+  public acted: boolean = false;
+  public editing: boolean = false;
+  public type: string = '';
 
   get typeLabel() {
     switch (this.type) {
@@ -66,7 +76,7 @@ class Actor {
   }
 }
 
-function sortActors(a, b) {
+function sortActors(a: Actor, b: Actor) {
   if (a.type > b.type) return -1;
   else if (b.type > a.type) return 1;
   else if (a.name > b.name) return -1;

@@ -29,4 +29,4 @@ const app = new Vue({
   created() {
     store.dispatch('initialize');
   }
-})
+});
