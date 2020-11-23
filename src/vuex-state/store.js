@@ -5,6 +5,7 @@ import xlsx from 'xlsx';
 import {Baddie, Villain, sameBaddies} from '../scripts/baddie';
 import {Player} from '../scripts/player';
 import {Scene} from '../scripts/scene';
+import {sortActors} from '../scripts/actor';
 import {unvue, processXlsxFiles} from '../scripts/utilities';
 import {v4 as uuid} from 'uuid';
 
@@ -69,14 +70,8 @@ const store = new Vuex.Store({
         state[baddie.type].push(baddie);
       }
     },
-    DELETE_BADDIE(state, {baddieType, index, baddie}) {
-      if (baddie !== undefined) {
-        index = state[baddieType].findIndex(x => x.id === baddie.id);
-      }
-      if (index > -1) {
-        state[baddieType].splice(index, 1);
-        Cookies.set(baddieType, state[baddieType]);
-      }
+    DELETE_BADDIE(state, {type, index}) {
+      state[type].splice(index, 1);
     },
     RESET_SCENE(state) {
       state.minions = [];
@@ -111,7 +106,7 @@ const store = new Vuex.Store({
       }
     },
     saveData(ctx, dataType) {
-      Cookies.set(dataType, ctx.rootState[dataType]); 
+      Cookies.set(dataType, ctx.rootState[dataType], {sameSite: 'strict'}); 
     },
     resetScene(ctx) {
       ctx.commit('RESET_SCENE');
@@ -158,7 +153,7 @@ const store = new Vuex.Store({
     removeBaddie(ctx, {id, type}) {
       const index = ctx.state[type].findIndex(x => x.id === id);
       if (index >= 0) { 
-        ctx.state[type].splice(index, 1)
+        ctx.commit('DELETE_BADDIE', {type, index});
         ctx.dispatch('saveData', type);
       }
     },
@@ -308,13 +303,13 @@ const store = new Vuex.Store({
       const envMinions = state.minions.filter(m => m.owner ? m.owner.id === state.scene.id : false);
       arr.push(...envMinions);
 
-      state.players.sort((a, b) => a.name > b.name).forEach(player => {
+      state.players.sort(sortActors).forEach(player => {
         arr.push(player);
         const minions = state.minions.filter(m => m.owner ? m.owner.id === player.id : false);
         arr = arr.concat(minions);
       });
 
-      state.villains.sort((a, b) => a.name > b.name).forEach(villain => {
+      state.villains.sort(sortActors).forEach(villain => {
         arr.push(villain);
         const minions = state.minions.filter(m => m.owner ? m.owner.id === villain.id : false);
         arr = arr.concat(minions);

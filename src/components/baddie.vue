@@ -288,6 +288,7 @@
   import {mapState} from 'vuex';
   import Modifier from './modifier.vue';
   import {unvue} from '../scripts/utilities';
+  import {sortActors} from '../scripts/actor';
 
   export default {
     name: 'BaddieList',
@@ -327,15 +328,7 @@
     },
     computed: {
       list() {
-        return this.$store.state[this.label.toLowerCase()].sort((a, b) => {
-          if (a.name > b.name) {
-            return 1;
-          } else if (b.name > a.name) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
+        return this.$store.state[this.label.toLowerCase()].sort(sortActors);
       },
       ...mapState([
         'players',

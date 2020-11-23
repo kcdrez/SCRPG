@@ -63,9 +63,7 @@ class Scene extends Actor {
   }
   clear() {
     const clearScene = () => {
-      minions.forEach(minion => {
-        store.commit('DELETE_BADDIE', {baddie: minion, baddieType: minion.type})
-      })
+      minions.forEach(minion => store.dispatch('removeBaddie', {id: minion.id, type: minion.type}));
       this.green = [];
       this.yellow = [];
       this.red = [];

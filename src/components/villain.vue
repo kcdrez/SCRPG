@@ -31,7 +31,7 @@
         There are no Villains.
       </div>
       <div class="col-6 mb-3" 
-           v-for="(villain, villainIndex) in villains" 
+           v-for="villain in villains" 
            :key="villain.id">
         <div class="card">
           <div class="card-header">
@@ -41,7 +41,7 @@
             </h3>
             <div class="btn-group btn-group-sm float-right">
               <button class="btn btn-danger border-dark" 
-                      @click="$store.commit('DELETE_BADDIE', {index: villainIndex, baddieType: 'villains'})"
+                      @click="$store.dispatch('removeBaddie', {id: villain.id, type: villain.type})"
                       title="Delete this Villain">Remove</button>
               <button class="btn btn-secondary border-dark"
                       title="Export this Villain to an xlsx file"

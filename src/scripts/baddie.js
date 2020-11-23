@@ -51,15 +51,17 @@ class Baddie extends Actor {
     switch (modifierData.type.toLowerCase()) {
       case 'bonus':
         this.bonuses.push(new Modifier(modifierData));
+        this.sortModifiers(this.bonuses);
         break;
       case 'penalty':
         this.penalties.push(new Modifier(modifierData));
+        this.sortModifiers(this.penalties);
         break;
       case 'defend':
         this.defends.push(new Modifier(modifierData));
+        this.sortModifiers(this.defends);
         break;
     }
-    this.save();
   }
   removeModifier(type, index) {
     const remove = () => {
@@ -147,50 +149,15 @@ class Villain extends Actor{
 
   boost(name, amount, persistent, exclusive) {
     this.bonuses.push({name, amount, persistent, exclusive});
-    this.bonuses.sort((a, b) => {
-      if (a.name !== b.name) {
-        return a.name > b.name ? 1: -1;
-      } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? -1: 1;
-      } else if (a.persistent !== b.persistent) {
-        return a.persistent ? -1: 1;
-      } else if (a.exclusive !== b.exclusive) {
-        return a.exclusive ? -1: 1;
-      } else {
-        return 0;
-      }
-    });
-    this.save();
+    this.sortModifiers(this.bonuses);
   }
   hinder(name, amount, persistent, exclusive) {
     this.penalties.push({name, amount, persistent, exclusive});
-    this.penalties.sort((a, b) => {
-      if (a.name !== b.name) {
-        return a.name > b.name ? 1: -1;
-      } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? 1: -1;
-      } else if (a.persistent !== b.persistent) {
-        return a.persistent ? -1: 1;
-      } else if (a.exclusive !== b.exclusive) {
-        return a.exclusive ? -1: 1;
-      } else {
-        return 0;
-      }
-    });
-    this.save();
+    this.sortModifiers(this.penalties);
   }
   defend(name, amount) {
     this.defends.push({name, amount});
-    this.defends.sort((a, b) => {
-      if (a.name !== b.name) {
-        return a.name > b.name ? 1: -1;
-      } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? -1: 1;
-      } else {
-        return 0;
-      }
-    });
-    this.save();
+    this.sortModifiers(this.defends);
   }
   addModifier({name, type, amount, persistent, exclusive}) {
     if (name === '') return;
@@ -297,7 +264,8 @@ function sameBaddies(baddie1, baddie2) {
   return baddie1.name === baddie2.name &&
     JSON.stringify(baddie1.bonuses) === JSON.stringify(baddie2.bonuses) &&
     JSON.stringify(baddie1.penalties) === JSON.stringify(baddie2.penalties) &&
-    JSON.stringify(baddie1.defends) === JSON.stringify(baddie2.defends);
+    JSON.stringify(baddie1.defends) === JSON.stringify(baddie2.defends) &&
+    baddie1.size === baddie2.size;
 }
 
 export {Baddie, Villain, sameBaddies};
