@@ -1,44 +1,16 @@
 import Vue from 'vue';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import store from '../vuex-state/store';
 import Actor from './actor';
-
-interface TrackerColor {
-  checked: boolean;
-}
+import { Baddie, BaddieData, ModifierData } from './baddie';
 
 class Scene extends Actor {
-  constructor({
-    id, name, tempName, acted, editing, type,
-    green,
-    yellow,
-    red,
-    challenges,
-    locations,
-    notes
-  }: {
-    id: string,
-    name: string,
-    tempName: string,
-    acted: boolean,
-    editing: boolean,
-    type: string,
-    green: TrackerColor[],
-    yellow: TrackerColor[],
-    red: TrackerColor[],
-    challenges: Challenge[],
-    locations: Location[],
-    notes: string
-  }) {
-    super({
-      id, name, tempName, acted, editing, type
-    });
-    this.green = green || [];
-    this.yellow = yellow || [];
-    this.red = red || [];
-    this.challenges = (challenges || []).map(x => new Challenge(x));
-    this.locations = (locations || []).map(x => new Location(x));
-    this.notes = notes || '';
+  constructor(sceneData: SceneData) {
+    super(sceneData);
+    this.import(sceneData);
+    this.challenges = (sceneData?.challenges || []).map(x => new Challenge(x));
+    this.locations = (sceneData?.locations || []).map(x => new Location(x));
+    this.notes = sceneData?.notes || '';
   }
   public green: TrackerColor[] = [];
   public yellow: TrackerColor[] = [];
@@ -52,15 +24,15 @@ class Scene extends Actor {
       this.yellow.length === 0 &&
       this.red.length === 0;
   }
-  get allowAddMinion() {
+  public get allowAddMinion(): boolean {
     return true;
   }
 
-  takenAction() {
-    const minions = store.getters.childMinions(this.id);
-    const newStatus = !this.acted;
-    const minionNotMatched = minions.some(x => x.acted !== newStatus);
-    const message = newStatus ? 
+  public takenAction(): void {
+    const minions: Baddie[] = store.getters.childMinions(this.id);
+    const newStatus: boolean = !this.acted;
+    const minionNotMatched: boolean = minions.some((x: Baddie) => x.acted !== newStatus);
+    const message: string = newStatus ? 
       `Some of the environment's minions have not acted. Do you also want to mark all of it's minions as having acted too?`:
       `Some of the environment's minions have already acted. Do you also want to mark it's minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
@@ -81,7 +53,7 @@ class Scene extends Actor {
     this.acted = newStatus;
     this.save();
   }
-  create(green, yellow, red, name) {
+  public create(green: number, yellow: number, red: number, name: string): void {
     for (let i = 0; i < green; i++) {
       this.green.push({checked: false});
     }
@@ -94,8 +66,8 @@ class Scene extends Actor {
     this.name = name;
     this.save();
   }
-  clear() {
-    const clearScene = () => {
+  public clear(): void {
+    const clearScene = (): void => {
       minions.forEach(minion => store.dispatch('removeBaddie', {id: minion.id, type: minion.type}));
       this.green = [];
       this.yellow = [];
@@ -108,7 +80,7 @@ class Scene extends Actor {
       this.save();
     }
 
-    const minions = store.getters.childMinions(this.id);
+    const minions: Baddie[] = store.getters.childMinions(this.id);
     if (minions.length > 0) {
       Vue.dialog.confirm({
         title: 'Warning',
@@ -125,49 +97,50 @@ class Scene extends Actor {
       clearScene();
     }
   }
-  progressScene(element) {
+  public progressScene(element: TrackerColor): void {
     element.checked = !element.checked;
     this.save();
   }
-  addLocation(location) {
+  public addLocation(location: LocationData): void {
     this.locations.push(new Location(location));
     this.save();
   }
-  removeLocation(index) {
+  public removeLocation(index: number): void {
     if (index >= 0) {
       this.locations.splice(index, 1);
       this.save();
     }
   }
-  resetLocations() {
+  public resetLocations(): void {
     this.locations = [];
     store.dispatch('saveData', 'scene');
   }
-  addChallenge(challenge, skipInitialize) {
+  public addChallenge(challenge: ChallengeData, skipInitialize: boolean): void {
     this.challenges.push(new Challenge(challenge, skipInitialize));
     this.save();
   }
-  removeChallenge(index) {
+  public removeChallenge(index: number): void {
     if (index >= 0) {
       this.challenges.splice(index, 1);
       this.save();
     }
   }
-  resetChallenges() {
+  public resetChallenges(): void {
     this.challenges = [];
     store.dispatch('saveData', 'scene');
   }
-  setNote(note) {
+  public setNote(note: string): void {
     this.notes = note;
     this.save();
   }
-  export(challengeId) {
-    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
-      const {baddie, modifiers} = minion.export();
-      acc.push(baddie);
-      acc.push(...modifiers);
-      return acc;
-    }, []);
+  public export(challengeId: string): EnvironmentData {
+    const minions: (BaddieData | ModifierData)[] = store.getters.childMinions(this.id)
+      .reduce((acc: (BaddieData | ModifierData)[], minion: Baddie) => { 
+        const {baddie, modifiers} = minion.export();
+        if (baddie) acc.push(baddie);
+        if (modifiers) acc.push(...modifiers);
+        return acc;
+      }, []);
 
     return {
       scene: this.name ? {
@@ -185,26 +158,26 @@ class Scene extends Actor {
       envMinions: minions
     }
   }
-  exportSceneTracker(arr) {
+  private exportSceneTracker(arr: TrackerColor[]): string {
     const completed = arr.filter(x => x.checked).length;
     return `${completed}-${arr.length}`;
   }
-  exportChallenges(id) {
-    return this.challenges.reduce((acc, el) => {
-      if (!id || el.id === id) {
-        acc.push(el.export());
-        el.list.forEach(x => {
-          acc.push(x.export(el.id));
+  private exportChallenges(id: string | null = null): ChallengeData[] {
+    return this.challenges.reduce((acc: ChallengeData[], challenge: Challenge) => { 
+      if (!id || challenge.id === id) {
+        acc.push(challenge.export());
+        challenge.list.forEach(challengeEntry => {
+          acc.push(challengeEntry.export(challenge.id));
         });
       }
       return acc;
     }, []);
   }
-  import(data) {
+  public import(data: SceneData): void {
     this.clear();
-    const greens = data.green.split('-');
-    const yellows = data.yellow.split('-');
-    const reds = data.red.split('-');
+    const greens = data?.green?.split('-') || [0, 0];
+    const yellows = data?.yellow?.split('-') || [0 ,0];
+    const reds = data?.red?.split('-') || [0, 0];
     this.create(Number(greens[1]), Number(yellows[1]), Number(reds[1]), data.name || 'Default Environment');
     for (let i = 0; i < Number(greens[0]); i++) {
       this.progressScene(this.green[i]);
@@ -226,13 +199,9 @@ class Challenge {
     id,
     name,
     list
-  }: {
-    id: string,
-    name: string,
-    list: ChallengeEntry[]
-  }, skipInitialize = false) {
+  }: ChallengeData, skipInitialize = false) {
     this.id = id || uuid();
-    this.name = name || '';
+    this.name = name;
     this.list = (list || []).map(x => new ChallengeEntry(x));
     if (!skipInitialize) this.initialize();
   }
@@ -240,17 +209,17 @@ class Challenge {
   public name: string = '';
   public list: ChallengeEntry[] = [];
   
-  initialize() {
+  private initialize(): void {
     if (this.list.length === 0) {
       this.add({ label: `Complete ${this.name}` });
     }
   }
-  add(data) {
-    if (!data.label && !data.name) return;
+  public add(data: ChallengeEntryData): void {
+    if (!data.label) return;
     this.list.push(new ChallengeEntry(data));
     this.save();
   }
-  remove(index) {
+  public remove(index: number): void {
     if (index >= 0) {
       this.list.splice(index, 1);
       this.save();
@@ -264,16 +233,16 @@ class Challenge {
           cancelText: 'No'
         })
         .then(() => {
-          const thisIndex = store.state.scene.challenges.findIndex(x => x.id === this.id);
-          store.state.scene.removeChallenge(thisIndex);
+          const thisIndex = store.state.scene?.challenges.findIndex(x => x.id === this.id);
+          store.state.scene?.removeChallenge(thisIndex);
         });
       }
     }
   }
-  save() {
+  public save(): void {
     store.dispatch('saveData', 'scene');
   }
-  export() {
+  public export(): ChallengeData {
     return {
       id: this.id,
       name: this.name,
@@ -289,13 +258,7 @@ class ChallengeEntry {
     tempLabel,
     editing,
     completed
-  }: {
-    id: string,
-    label: string,
-    tempLabel: string,
-    editing: boolean,
-    completed: boolean
-  }) {
+  }: ChallengeEntryData) {
     this.id = id || uuid();
     this.label = label || name || '';
     this.tempLabel = label || tempLabel || '';
@@ -308,25 +271,25 @@ class ChallengeEntry {
   public editing: boolean = false;
   public completed: boolean = false;
 
-  complete() {
+  public complete(): void {
     this.completed = !this.completed;
     this.save();
   }
-  beginEdit() {
+  public beginEdit(): void {
     this.editing = true;
   }
-  edit() {
+  public edit(): void {
     this.editing = false;
     this.label = this.tempLabel;
     this.save();
   }
-  cancel() {
+  public cancel(): void {
     this.editing = false;
   }
-  save() {
+  public save(): void {
     store.dispatch('saveData', 'scene');
   }
-  export(parent) {
+  public export(parent: string): ChallengeEntryData {
     return {
       name: this.label,
       parent,
@@ -344,14 +307,7 @@ class Location {
     editing,
     tempName,
     tempDescription
-  }: {
-    id: string,
-    name: string,
-    description: string,
-    editing: boolean,
-    tempName: string,
-    tempDescription: string
-  }) {
+  }: LocationData) {
     this.id = id || uuid();
     this.name = name || '';
     this.description = description || '';
@@ -366,19 +322,19 @@ class Location {
   public tempName: string = '';
   public tempDescription: string = '';
 
-  beginEdit() {
+  public beginEdit(): void {
     this.editing = true; 
   }
-  edit() {
+  public edit(): void {
     this.editing = false;
     this.name = this.tempName;
     this.description = this.tempDescription;
     this.save();
   }
-  save() {
+  public save(): void {
     store.dispatch('saveData ', 'scene');
   }
-  export() {
+  public export(): LocationData {
     return {
       id: this.id,
       name: this.name,
@@ -388,14 +344,59 @@ class Location {
   }
 }
 
+interface TrackerColor {
+  checked: boolean;
+}
+
+interface SceneData {
+  id: string,
+  name: string | null,
+  tempName?: string,
+  acted?: boolean,
+  editing?: boolean,
+  type?: string,
+  green?: string,
+  yellow?: string,
+  red?: string,
+  challenges?: Challenge[],
+  locations?: Location[],
+  notes?: string
+}
+
 interface LocationData {
-  id: string;
-  name: string;
-  editing: boolean;
-  description: string;
-  tempName: string;
-  tempDescription: string;
+  id: string,
+  name: string,
+  type?: string,
+  editing?: boolean,
+  description: string,
+  tempName?: string,
+  tempDescription?: string
+}
+
+interface ChallengeData {
+  id?: string,
+  name: string,
+  list?: ChallengeEntryData[],
+  type?: string
+}
+
+interface ChallengeEntryData {
+  id?: string,
+  label?: string,
+  name?: string,
+  tempLabel?: string,
+  editing?: boolean,
+  completed?: boolean,
+  parent?: string,
+  type?: string
+}
+
+interface EnvironmentData {
+  scene: SceneData | null, 
+  locations: LocationData[], 
+  challenges: ChallengeData[], 
+  envMinions: (BaddieData | ModifierData)[]
 }
 
 export default Scene;
-export {Scene, Challenge, Location};
+export {Scene, SceneData, Challenge, Location};

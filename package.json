@@ -8,6 +8,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@fortawesome/vue-fontawesome": "^2.0.0",
     "@types/js-cookie": "^2.2.6",
+    "@types/uuid": "^8.3.0",
     "bootstrap": "^4.5.2",
     "deep-diff": "^1.0.2",
     "jquery": "^3.5.1",

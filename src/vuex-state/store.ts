@@ -1,17 +1,17 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { StoreOptions } from 'vuex';
 import Cookies from 'js-cookie';
 import xlsx from 'xlsx';
-import {Baddie, Villain, sameBaddies} from '../scripts/baddie';
-import {Player} from '../scripts/player';
-import {Scene} from '../scripts/scene';
-import {Actor, sortActors} from '../scripts/actor';
-import {unvue, processXlsxFiles} from '../scripts/utilities';
-import {v4 as uuid} from 'uuid';
+import { Baddie, BaddieData, Villain, VillainData, sameBaddies, BaddieParent, ModifierData } from '../scripts/baddie';
+import { Player, PlayerData } from '../scripts/player';
+import { Scene, SceneData} from '../scripts/scene';
+import { Actor, sortActors } from '../scripts/actor';
+import { unvue, processXlsxFiles } from '../scripts/utilities';
+import { v4 as uuid } from 'uuid';
 
 Vue.use(Vuex);
 
-const store = new Vuex.Store({
+const store: StoreOptions<RootState> = {
   state: {
     initialized: false,
     lieutenants: [],
@@ -22,74 +22,61 @@ const store = new Vuex.Store({
   },
   mutations: {
     INIT(state) {
-      const minions = Cookies.getJSON('minions');
-      const lieutenants = Cookies.getJSON('lieutenants');
-      const villains = Cookies.getJSON('villains');
-      const playerData = Cookies.getJSON('players');
-      const sceneData = Cookies.getJSON('scene');
-      if (playerData) {
-        state.players = playerData.map(x => new Player(x));
-      }
-      if (minions) {
-        minions.forEach(minion => {
-          if (minion.list) {
-            minion.list.forEach(x => {
-              state.minions.push(new Baddie({
-                id: minion.id,
-                acted: x.acted,
-                count: x.count,
-                defends: x.defends,
-                bonuses: x.bonuses,
-                size: x.size,
-                type: minion.type,
-                name: minion.name
-              }))
-            });
-          } else {
-            state.minions.push(new Baddie(minion));
-          }
-        });
-      }
-      if (lieutenants) {
-        state.lieutenants = lieutenants.map(x => new Baddie(x));
-      }
-      if (villains) {
-        state.villains = villains.map(x => new Villain(x));
-      }
-      state.scene = new Scene(sceneData || {});
+      const minions: BaddieData[] | null = Cookies.getJSON('minions');
+      const lieutenants: BaddieData[] | null = Cookies.getJSON('lieutenants');
+      const villains: VillainData[] | null = Cookies.getJSON('villains');
+      const playerData: PlayerData[] | null = Cookies.getJSON('players');
+      const sceneData: SceneData | null = Cookies.getJSON('scene');
+      state.players = playerData?.map(x => new Player(x)) || [];
+      state.minions = minions?.map(x => new Baddie(x)) || [];
+      state.lieutenants = lieutenants?.map(x => new Baddie(x)) || [];
+      state.villains = villains?.map(x => new Villain(x)) || [];
+      state.scene = new Scene(sceneData || {id: uuid(), name: null});
       state.initialized = true;
     },
-    CREATE_BADDIE(state, baddie) {
-      state[baddie.type].push(baddie);
-    },
-    UPSERT_BADDIE(state, baddie) {
-      const match = state[baddie.type].find(x => sameBaddies(baddie, x));
-      if (match && baddie.type !== 'villains') {
-        match.count++;
-      } else {
+    CREATE_BADDIE(state, baddie: Baddie) {
+      if (baddie.type === 'minions' || baddie.type === 'lieutenants') {
         state[baddie.type].push(baddie);
       }
     },
-    DELETE_BADDIE(state, {type, index}) {
-      state[type].splice(index, 1);
+    CREATE_Villain(state, villain: Villain) {
+      state.villains.push(villain);
+    },
+    UPSERT_BADDIE(state, baddie: Baddie) {
+      if (baddie.type === 'minions' || baddie.type === 'lieutenants') {
+        const match = state[baddie.type].find(x => sameBaddies(baddie, x));
+        if (match) {
+          match.count++;
+        } else {
+          state[baddie.type].push(baddie);
+        }
+      }
+    },
+    UPSERT_VILLAIN(state, villain: Villain) {
+      state.villains.push(villain);
+    },
+    DELETE_BADDIE(state, {type, index}: { type: string, index: number}) {
+      if (type === 'minions' || type === 'lieutenants' || type === 'villains') {
+        state[type].splice(index, 1);
+      }
     },
     RESET_SCENE(state) {
       state.minions = [];
       state.lieutenants = [];
       state.villains = [];
-      state.scene.clear();
+      state.scene?.clear();
     },
     RESET_ROUND(state) {
       state.minions.forEach(x => x.resetRound());
       state.lieutenants.forEach(x => x.resetRound());
       state.villains.forEach(x => x.resetRound());
       state.players.forEach(x => x.resetRound());
-      state.scene.resetRound();
+      state.scene?.resetRound();
     },
-    ADD_PLAYER(state, playerData) {
+    ADD_PLAYER(state, playerData: PlayerData) {
       state.players.push(new Player(playerData));
     },
-    REMOVE_PLAYER(state, id) {
+    REMOVE_PLAYER(state, id: string) {
       const index = state.players.findIndex(x => x.id === id);
       if (index > -1) {
         state.players.splice(index, 1);
@@ -105,8 +92,18 @@ const store = new Vuex.Store({
         ctx.commit('INIT');
       }
     },
-    saveData(ctx, dataType) {
-      Cookies.set(dataType, ctx.rootState[dataType], {sameSite: 'strict'}); 
+    saveData(ctx, dataType: string) {
+      switch (dataType) {
+        case 'minions':
+        case 'lieutenants':
+        case 'villains':
+        case 'players':
+        case 'scene':
+          Cookies.set(dataType, ctx.rootState[dataType] || {}, {sameSite: 'strict'});
+          break;
+        default:
+          console.warn(`Unable to save the data for ${dataType}.`);
+      }
     },
     resetScene(ctx) {
       ctx.commit('RESET_SCENE');
@@ -118,36 +115,61 @@ const store = new Vuex.Store({
     resetRound(ctx) {
       ctx.commit('RESET_ROUND');
     },
-    upsertBaddie(ctx, baddieData) {
-      const baddie = baddieData.type === 'villains' ? new Villain(baddieData) : new Baddie(baddieData);
-      if (baddieData.forceCreate) {
-        ctx.commit('CREATE_BADDIE', baddie);
+    upsertBaddie(ctx, baddieData: BaddieData | VillainData) {
+      if ('forceCreate' in baddieData && (baddieData.type === 'minions' || baddieData.type === 'lieutenants')) {
+        if (baddieData.forceCreate) {
+          ctx.commit('CREATE_BADDIE', new Baddie(baddieData));
+        } else {
+          ctx.commit('UPSERT_BADDIE', new Baddie(baddieData));
+        }
+      } else if (baddieData.type === 'villains') {
+        ctx.commit('UPSERT_VILLAIN', new Villain(baddieData));
       } else {
-        ctx.commit('UPSERT_BADDIE', baddie);
+        console.warn(`Cannot upsert data of type: ${baddieData.type}`);
       }
       ctx.dispatch('saveData', baddieData.type);
     },
-    modifyBaddie(ctx, {modifier, type}) {
-      const match = ctx.state[type].find(x => x.id = modifier.target);
-      if (match) {
+    modifyBaddie(ctx, {modifier, type}: {modifier: ModifierData, type: string}) {
+      let match: BaddieParent | undefined;
+      if (type === 'minions' ) {
+        match = ctx.state.minions.find(minion => minion.id === modifier.target);
+        if (match) applyMod(match, ctx.state.minions)
+      } else if (type === 'lieutenants') {
+        match = ctx.state.lieutenants.find(lieutenant => lieutenant.id === modifier.target);
+      } else if (type === 'villains') {
+        match = ctx.state.villains.find(villain => villain.id === modifier.target);
+      }
+
+      
+
+      function applyMod(baddie: BaddieParent, list: BaddieParent[]) {
         if (modifier.applyTo === 'row') {
-          match.addModifier(modifier);
+          baddie.addModifier(modifier);
         } else if (modifier.applyTo === 'name') {
-          ctx.state[type].forEach(x => {
-            if (x.name === match.name) {
+          list.forEach(x => {
+            if (x.name === baddie.name) {
               x.addModifier(modifier);
             }
           });
         } else {
-          const copy = match.copy();
-          copy.count = modifier.applyTo === 'single' ? 1 : match.count;
-          match.count--;
+          const copy = baddie.copy();
           copy.id = uuid();
-          const baddie = new Baddie(copy);
-          baddie.addModifier(modifier);
-          ctx.commit('UPSERT_BADDIE', baddie);
+          if (baddie.type === 'minions' || baddie.type === 'lieutenants') {
+            copy.count = modifier.applyTo === 'single' ? 1 : baddie.count;
+            baddie.count--;
+            const newBaddie = new Baddie(copy);
+            newBaddie.addModifier(modifier);
+            ctx.commit('UPSERT_BADDIE', newBaddie);
+          } else if (baddie.type === 'villains') {
+            const newBaddie = new Baddie(copy);
+            newBaddie.addModifier(modifier);
+            ctx.commit('UPSERT_VILLAIN', newBaddie);
+          }
         }
         ctx.dispatch('saveData', type);
+      }
+      
+      if (match) {
       }
     },
     removeBaddie(ctx, {id, type}) {
@@ -298,7 +320,7 @@ const store = new Vuex.Store({
     },
     actors: state => {
       let arr: Actor[] = [];
-      if (state.scene.name) arr.push(state.scene);
+      if (state.scene?.name) arr.push(state.scene);
 
       const envMinions = state.minions.filter(m => m.owner ? m.owner.id === state.scene.id : false);
       arr.push(...envMinions);
@@ -323,6 +345,15 @@ const store = new Vuex.Store({
       return arr.concat(state.lieutenants, remainingMinions);
     }
   }
-})
+};
+
+interface RootState {
+  initialized: boolean,
+  lieutenants: Baddie[],
+  minions: Baddie[],
+  villains: Villain[],
+  players: Player[],
+  scene: null | Scene
+}
 
 export default store;

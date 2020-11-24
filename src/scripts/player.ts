@@ -1,53 +1,58 @@
 import Vue from 'vue';
 import store from '../vuex-state/store';
 import Actor from './actor';
+import { Baddie, BaddieData, ModifierData, sameBaddies } from '../scripts/baddie';
 
 class Player extends Actor {
-  constructor(playerData) {
+  constructor(playerData: PlayerData) {
     super(playerData);
     this.initHp(playerData);
   }
+  private _hp: number = 40;
+  public maxHp: number = 40;
+  public tempHp: number = 40;
+  public status: {green: number, yellow: number} = {
+    green: 30, yellow: 15
+  };
 
-  get hp() {
+
+  public get hp(): number {
     return this._hp;
   }
-  set hp(val) {
+  public set hp(val: number) {
     if (val < 0 || val > this.maxHp) return;
     this._hp = val;
-    this.tempHP = val;
+    this.tempHp = val;
     this.save();
   }
-  // get typeLabel() {
-  //   return this.type;
-  // }
-  get allowEdit() {
+  public get allowEdit(): boolean {
     return !this.editing;
   }
-  get allowAddMinion() {
+  public get allowAddMinion(): boolean {
     return true;
   }
-  get allowRemove() {
+  public get allowRemove(): boolean {
     return true;
   }
-  get inGreen() {
+  public get inGreen(): boolean {
     if (!this.status.green) return false;
     else return this.hp >= this.status.green;
   }
-  get inYellow() {
+  public get inYellow(): boolean {
     if (!this.status.green || !this.status.yellow) return false;
     else return this.hp >= this.status.yellow && this.hp < this.status.green;
   }
-  get inRed() {
+  public get inRed(): boolean {
     if (!this.status.yellow) return false;
     else return this.hp >= 1 && this.hp < this.status.yellow;
   }
-  get incapacitated() {
+  public get incapacitated(): boolean {
     return this.hp <= 0;
   }
 
-  initHp({maxHp, hp, _hp, tempHP}) {
-    let green;
-    let yellow;
+  initHp({maxHp, hp, _hp, tempHp}: PlayerHp): void {
+    let green: number = 0;
+    let yellow: number = 0;
 
     switch (maxHp) {
       case 40:
@@ -137,14 +142,14 @@ class Player extends Actor {
     }
     this.status = {green, yellow};
     this.maxHp = maxHp || 40;
-    this._hp = hp || _hp;
-    this.tempHP = tempHP || this._hp;
+    this._hp = hp || _hp || this.maxHp;
+    this.tempHp = tempHp || this._hp;
   }
-  takenAction() {
-    const minions = store.getters.childMinions(this.id);
-    const newStatus = !this.acted;
-    const minionNotMatched = minions.some(x => x.acted !== newStatus);
-    const message = newStatus ? 
+  public takenAction(): void {
+    const minions: Baddie[] = store.getters.childMinions(this.id);
+    const newStatus: boolean = !this.acted;
+    const minionNotMatched: boolean = minions.some(x => x.acted !== newStatus);
+    const message: string = newStatus ? 
       `Some of this player's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
       `Some of this player's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
@@ -165,15 +170,15 @@ class Player extends Actor {
     this.acted = newStatus;
     this.save();
   }
-  saveEdit() {
-    this.hp = this.tempHP;
+  public saveEdit(): void {
+    this.hp = this.tempHp;
     super.saveEdit();
   }
-  export() {
-    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
+  public export(): {player: PlayerData, minions: (BaddieData | ModifierData)[]} {
+    const minions: (BaddieData | ModifierData)[] = store.getters.childMinions(this.id).reduce((acc: (BaddieData | ModifierData)[], minion: Baddie) => {
       const {baddie, modifiers} = minion.export();
-      acc.push(baddie);
-      acc.push(...modifiers);
+      if (baddie) acc.push(baddie);
+      if (modifiers) acc.push(...modifiers);
       return acc;
     }, []);
 
@@ -183,15 +188,37 @@ class Player extends Actor {
         name: this.name,
         hp: this.hp,
         acted: this.acted,
-        type: this.type
+        type: this.type,
+        maxHp: this.maxHp,
+        tempHp: this.tempHp
       },
       minions
     }
   }
-  remove() {
+  public remove(): void {
     store.dispatch('removePlayer', this.id)
   }
 }
 
+interface PlayerData {
+  id?: string,
+  name: string,
+  tempName?: string,
+  acted?: boolean,
+  editing?: boolean,
+  type: string,
+  maxHp: number, 
+  hp: number, 
+  _hp?: number, 
+  tempHp: number
+}
+
+interface PlayerHp {
+  maxHp: number, 
+  hp: number, 
+  _hp?: number, 
+  tempHp: number
+}
+
 export default Player;
-export {Player};
+export {Player, PlayerData};

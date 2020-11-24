@@ -1,15 +1,9 @@
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import store from '../vuex-state/store';
+import { Modifier } from './baddie';
 
 abstract class Actor {
-  constructor({id, name, tempName, acted, editing, type}: {
-    id: string,
-    name: string,
-    tempName: string,
-    acted: boolean,
-    editing: boolean,
-    type: string
-  }) {
+  constructor({id, name, tempName, acted, editing, type}: ActorData) {
     this.id = id || uuid();
     this.name = name;
     this.tempName = tempName || name || '';
@@ -18,13 +12,13 @@ abstract class Actor {
     this.type = type;
   }
   public id: string = '';
-  public name: string = '';
+  public name: string | null = '';
   public tempName: string = '';
   public acted: boolean = false;
   public editing: boolean = false;
   public type: string = '';
 
-  get typeLabel() {
+  public get typeLabel(): string {
     switch (this.type) {
       case 'minions':
         return 'minion';
@@ -35,30 +29,29 @@ abstract class Actor {
     }
   }
 
-  save() {
+  public save(): void {
     store.dispatch('saveData', this.type);
   }
-  beginEdit() {
+  public beginEdit(): void {
     this.editing = true;
   }
-  cancelEdit() {
+  public cancelEdit(): void {
     this.editing = false;
   }
-  resetRound() {
+  public resetRound(): void {
     this.acted = false;
     this.save();
   }
-  takenAction() {
-    this.acted = !this.acted;
+  public takenAction(status: boolean | null = null): void {
+    this.acted = status === null ? !this.acted : status;
     this.save();
   }
-  saveEdit() {
+  public saveEdit(): void {
     this.editing = false;
     this.name = this.tempName;
     this.save();
   }
-  sortModifiers(list) {
-    console.log('sorting mods')
+  public sortModifiers(list: Modifier[]): void {
     list.sort((a, b) => {
       if (a.name !== b.name) {
         return a.name > b.name ? 1: -1;
@@ -76,7 +69,16 @@ abstract class Actor {
   }
 }
 
-function sortActors(a: Actor, b: Actor) {
+interface ActorData {
+  id?: string,
+  name: string | null,
+  tempName?: string,
+  acted?: boolean,
+  editing?: boolean,
+  type: string
+}
+
+function sortActors(a: Actor, b: Actor): number {
   if (a.type > b.type) return -1;
   else if (b.type > a.type) return 1;
   else if (a.name > b.name) return -1;
