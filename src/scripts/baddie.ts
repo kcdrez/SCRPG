@@ -90,7 +90,7 @@ class Baddie extends Actor {
       }
   
       if (this[type][index].exclusive || this[type][index].persistent) {
-        Vue.dialog.confirm({
+        (Vue as any).dialog.confirm({
           title: 'Are you sure?',
           body: `This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`
         },
@@ -144,7 +144,7 @@ class Baddie extends Actor {
   }
 }
 
-class Villain extends Actor implements BaddieParent {
+class Villain extends Actor {
   constructor(data: VillainData) {
     super(data);
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
@@ -187,7 +187,7 @@ class Villain extends Actor implements BaddieParent {
       }
 
       if (this[type][index].exclusive || this[type][index].persistent) {
-        Vue.dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
+        (Vue as any).dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
         .then(() => {
           remove();
         });
@@ -204,7 +204,7 @@ class Villain extends Actor implements BaddieParent {
       `Some of this villain's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
       `Some of this villain's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      Vue.dialog.confirm({
+      (Vue as any).dialog.confirm({
         title: 'Warning',
         body: message
       },

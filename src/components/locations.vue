@@ -141,7 +141,7 @@
 </template>
 
 <script>
-  import {unvue} from '../scripts/utilities.js';
+  import {unvue} from '../scripts/utilities';
   import {mapState} from 'vuex';
   import {diff} from 'deep-diff';
 

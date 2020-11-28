@@ -12,7 +12,7 @@ abstract class Actor {
     this.type = type;
   }
   public id: string = '';
-  public name: string | null = '';
+  public name: string = '';
   public tempName: string = '';
   public acted: boolean = false;
   public editing: boolean = false;
@@ -71,19 +71,19 @@ abstract class Actor {
 
 interface ActorData {
   id?: string,
-  name: string | null,
+  name: string,
   tempName?: string,
   acted?: boolean,
   editing?: boolean,
   type: string
 }
 
-function sortActors(a: Actor, b: Actor): number {
+function sortActors(a: any, b: any): number { //todo: figure out how to use Actor as a and b type
   if (a.type > b.type) return -1;
   else if (b.type > a.type) return 1;
   else if (a.name > b.name) return -1;
   else if (b.name > a.name) return 1;
-  else if (a.size > b.size) return -1;
+  else if (a?.size > b?.size) return -1;
   else if (b.size > a.size) return 1;
   else if (a.boosts.length > b.boosts.length) return -1;
   else if (b.boosts.length > b.boosts.length) return 1;

@@ -21,7 +21,7 @@ Vue.use(VueDialog);
 const app = new Vue({
   el: '#app',
   template: `<div>
-    <router-view></router-view>
+   <h1>hello world</h1>
   </div>`,
   store,
   router,

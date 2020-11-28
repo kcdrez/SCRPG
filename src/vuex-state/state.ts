@@ -1,6 +1,6 @@
-import { Baddie, BaddieData, Villain, VillainData, sameBaddies, ModifierData } from '../scripts/baddie';
-import { Player, PlayerData } from '../scripts/player';
-import { Scene, SceneData, ChallengeData, ChallengeEntryData, LocationData } from '../scripts/scene';
+import { Baddie, Villain } from '../scripts/baddie';
+import { Player } from '../scripts/player';
+import { Scene } from '../scripts/scene';
 
 interface State {
   initialized: boolean,

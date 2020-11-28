@@ -79,12 +79,7 @@
 
   export default {
     name: 'GMTools',
-    components: { Baddies, SceneTracker, Villains },
-    created() {
-      function meow(): void {
-        console.log('its happening')
-      }
-    }
+    components: { Baddies, SceneTracker, Villains }
   };
 </script>
 

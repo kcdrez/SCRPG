@@ -439,8 +439,8 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import { Baddie, Villain } from '../scripts/baddie.js';
-  import { unvue } from '../scripts/utilities.js';
+  import { Baddie, Villain } from '../scripts/baddie';
+  import { unvue } from '../scripts/utilities';
   import ChallengesTracker from './challenges.vue';
   import Locations from './locations.vue';
   import { mapState, mapGetters } from 'vuex';

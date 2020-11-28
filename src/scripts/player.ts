@@ -153,7 +153,7 @@ class Player extends Actor {
       `Some of this player's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
       `Some of this player's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      Vue.dialog.confirm({
+      (Vue as any).dialog.confirm({
         title: 'Warning',
         body: message
       },

@@ -1,10 +1,9 @@
 import { MutationTree } from 'vuex';
 import { State } from './state';
 
-import { Baddie, BaddieData, Villain, VillainData, sameBaddies, ModifierData } from '../scripts/baddie';
+import { Baddie, BaddieData, Villain, VillainData, sameBaddies } from '../scripts/baddie';
 import { Player, PlayerData } from '../scripts/player';
-import { Scene, SceneData, ChallengeData, ChallengeEntryData, LocationData } from '../scripts/scene';
-import { Actor, sortActors } from '../scripts/actor';
+import { Scene, SceneData } from '../scripts/scene';
 
 const mutations = <MutationTree<State>> {
     INIT(state, payload: {players: PlayerData[], minions: BaddieData[], lieutenants: BaddieData[], villains: VillainData[], scene: SceneData}) {

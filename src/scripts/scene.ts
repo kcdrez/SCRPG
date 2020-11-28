@@ -36,7 +36,7 @@ class Scene extends Actor {
       `Some of the environment's minions have not acted. Do you also want to mark all of it's minions as having acted too?`:
       `Some of the environment's minions have already acted. Do you also want to mark it's minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      Vue.dialog.confirm({
+      (Vue as any).dialog.confirm({
         title: 'Warning',
         body: message
       },
@@ -82,7 +82,7 @@ class Scene extends Actor {
 
     const minions: Baddie[] = store.getters.childMinions(this.id);
     if (minions.length > 0) {
-      Vue.dialog.confirm({
+      (Vue as any).dialog.confirm({
         title: 'Warning',
         body: 'Clearing the scene will remove all the environment\'s minions. Do you want to continue?'
       },
@@ -162,8 +162,8 @@ class Scene extends Actor {
     const completed = arr.filter(x => x.checked).length;
     return `${completed}-${arr.length}`;
   }
-  private exportChallenges(id: string | null = null): ChallengeData[] {
-    return this.challenges.reduce((acc: ChallengeData[], challenge: Challenge) => { 
+  private exportChallenges(id: string | null = null): (ChallengeData | ChallengeEntryData)[] {
+    return this.challenges.reduce((acc: (ChallengeData | ChallengeEntryData)[], challenge: Challenge) => { 
       if (!id || challenge.id === id) {
         acc.push(challenge.export());
         challenge.list.forEach(challengeEntry => {
@@ -224,7 +224,7 @@ class Challenge {
       this.list.splice(index, 1);
       this.save();
       if (this.list.length === 0) {
-        Vue.dialog.confirm({
+        (Vue as any).dialog.confirm({
           title: 'No Challenges',
           body: 'This Challenge has no elements. Do you want to remove it?'
         },
@@ -394,7 +394,7 @@ interface ChallengeEntryData {
 interface EnvironmentData {
   scene: SceneData | null, 
   locations: LocationData[], 
-  challenges: ChallengeData[], 
+  challenges: (ChallengeData | ChallengeEntryData)[],
   envMinions: (BaddieData | ModifierData)[]
 }
 

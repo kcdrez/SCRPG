@@ -14,28 +14,24 @@ const store = new Vuex.Store({
   getters
 });
 
-//Sets up usage for vstore
-declare module "vue/types/vue" {
-  interface Vue {
-    $vstore: Store<State>,
-    dialog: () => {
+//todo: set up type safety for the store
+// declare module "vue/types/vue" {
+//   interface Vue {
+//     $vstore: Store<State>
+//   }
+// }
 
-    }
-  }
-}
-
-//sets up that vstore returns store essentially creating an alias
-const typedStorePlugin = {
-  install(VueInstance: typeof Vue) {
-    Object.defineProperty(VueInstance.prototype, '$vstore', {
-        get() {
-          return this.$store;
-        }
-    });
-  }
-};
+// const typedStorePlugin = {
+//   install(VueInstance: typeof Vue) {
+//     Object.defineProperty(VueInstance.prototype, '$vstore', {
+//         get() {
+//           return this.$store;
+//         }
+//     });
+//   }
+// };
 
 // Vue.use(Vuex);
-Vue.use(typedStorePlugin);
+// Vue.use(typedStorePlugin);
 
 export default store;

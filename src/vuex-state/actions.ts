@@ -5,9 +5,8 @@ import Cookies from 'js-cookie';
 import { v4 as uuid } from 'uuid';
 
 import { Baddie, BaddieData, Villain, VillainData, sameBaddies, ModifierData } from '../scripts/baddie';
-import { Player, PlayerData } from '../scripts/player';
-import { Scene, SceneData, ChallengeData, ChallengeEntryData, LocationData } from '../scripts/scene';
-import { Actor, sortActors } from '../scripts/actor';
+import { PlayerData } from '../scripts/player';
+import { SceneData, ChallengeData, ChallengeEntryData, LocationData } from '../scripts/scene';
 import { processXlsxFiles, ImportData } from '../scripts/xlsx_utils';
 
 
