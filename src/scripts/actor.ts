@@ -96,4 +96,4 @@ function sortActors(a: Actor, b: Actor): number {
   else return 0;
 }
 export default Actor;
-export {Actor, sortActors};
+export {Actor, ActorData, sortActors};

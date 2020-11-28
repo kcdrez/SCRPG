@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import { v4 as uuid } from 'uuid';
 import store from '../vuex-state/store';
-import Actor from './actor';
+import { Actor, ActorData } from './actor';
 import { Baddie, BaddieData, ModifierData } from './baddie';
 
 class Scene extends Actor {
   constructor(sceneData: SceneData) {
-    super(sceneData);
+    super(sceneData as ActorData);
     this.import(sceneData);
     this.challenges = (sceneData?.challenges || []).map(x => new Challenge(x));
     this.locations = (sceneData?.locations || []).map(x => new Location(x));
@@ -233,7 +233,7 @@ class Challenge {
           cancelText: 'No'
         })
         .then(() => {
-          const thisIndex = store.state.scene?.challenges.findIndex(x => x.id === this.id);
+          const thisIndex = store.state.scene?.challenges.findIndex(x => x.id === this.id) || -1;
           store.state.scene?.removeChallenge(thisIndex);
         });
       }
@@ -399,4 +399,4 @@ interface EnvironmentData {
 }
 
 export default Scene;
-export {Scene, SceneData, Challenge, Location};
+export { Scene, SceneData, Challenge, ChallengeData, ChallengeEntryData, Location, LocationData};

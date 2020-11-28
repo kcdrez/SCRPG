@@ -8,7 +8,6 @@ import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 import '@fortawesome/fontawesome-free/js/all.js';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
-
 import store from './vuex-state/store';
 import router from './router/router';
 import navbar from './components/navbar.vue';

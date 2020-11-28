@@ -4,7 +4,7 @@ import { unvue } from './utilities';
 import { v4 as uuid } from 'uuid';
 import Actor from './actor';
 
-class Baddie extends Actor implements BaddieParent {
+class Baddie extends Actor {
   constructor({
     id, name, tempName, acted, editing, type,
     owner, _owner, parent,
@@ -282,13 +282,6 @@ class Modifier {
   }
 }
 
-interface BaddieParent {
-  addModifier: Function,
-  copy: Function,
-  name: string | null,
-  type: string
-}
-
 interface BaddieData {
   id: string, 
   name: string, 
@@ -340,4 +333,4 @@ function sameBaddies(baddie1: Baddie, baddie2: Baddie) {
     baddie1.size === baddie2.size;
 }
 
-export {Baddie, BaddieData, Villain, VillainData, Modifier, ModifierData, BaddieParent, sameBaddies};
+export {Baddie, BaddieData, Villain, VillainData, Modifier, ModifierData, sameBaddies};
