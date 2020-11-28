@@ -6,6 +6,11 @@
           <a href="#sceneTrackerData" 
              data-toggle="collapse">Environment</a>
         </h2>
+        <div class="btn-group btn-group-sm my-auto">
+          <button class="btn btn-sm btn-danger border-dark"
+                  @click="resetScene"
+                  title="Reset the Environment, removing the Scene Tracker, all Minions, Lieutenants, Villains, and Challenges">Reset</button>
+        </div>
       </div>
     </div>
     <div id="sceneTrackerData" class="collapse show">
@@ -16,15 +21,25 @@
             <button class="btn btn-sm btn-success border-dark" 
                     data-toggle="modal" 
                     data-target="#sceneTrackerModal" 
-                    title="Create a new Scene Tracker">Create Scene</button>
+                    title="Create a new Scene Tracker">Create</button>
             <button class="btn btn-sm btn-warning border-dark" 
                     @click="scene.clear()" 
-                    title="Clear the Scene Tracker">Clear Scene</button>
-            <button class="btn btn-sm btn-danger border-dark" 
-                    @click="resetScene"
-                    title="Reset the Environment, removing the Scene Tracker and all Minions, Lieutenants, Villains, and Challenges">Reset Scene</button>
+                    title="Clear the Scene Tracker">Clear</button>
+            <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()"
+                    title="Import Scene Tracker data from an xlsx file">Import</button>
+            <button class="btn btn-secondary border-dark"
+                    @click="$store.dispatch('export', {type: 'scene', fileName: scene.name})"
+                    title="Export Scene Tracker data to an xlsx file"
+                    :disabled="scene.isEmpty">Export</button>
           </div>
-          <div v-if="scene.isEmpty">
+          <input type="file"
+                  accept=".xlsx"
+                  class="d-none"
+                  ref="import"
+                  @change="$store.dispatch('import', {files: $event.target.files, filters: ['scene']})">
+          <div v-if="scene.isEmpty"
+               class="empty-data">
             There is no Scene Tracker.
           </div>
           <div v-else>
@@ -73,112 +88,137 @@
                       @click="clearPlayers">Clear Players</button>
               <button class="btn btn-danger border-dark" 
                       @click="$store.dispatch('resetRound')" 
-                      title="Reset the round, marking all actors to not having acted yet">Reset Round Tracker</button>
+                      title="Reset the round, marking all actors as not yet acted">Reset Round Tracker</button>
             </div>
           </div>
-          <table class="table table-sm table-bordered table-dark table-stripped" 
+          <table class="table table-sm table-bordered table-dark table-striped" 
                  v-if="actors.length > 0">
             <thead class="text-center">
               <tr>
                 <th width="30%">Name (Owner)</th>
-                <th width="25%">Type</th>
+                <th width="25%">Type (Count)</th>
                 <th width="20%">HP/Die Size</th>
                 <th width="25%">Actions</th>
               </tr>
             </thead>
             <tbody class="text-center">
               <template v-for="actor in actors">
-                <template v-if="!!actor.name">
-                  <tr v-for="(item, index) in actor.list"
-                      :key="item.id">
-                    <td class="text-capitalize c-pointer align-middle">
-                      <input class="form-control form-control-sm"
-                            v-model="actor.tempName"
-                            v-if="actor.editing">
-                      <div v-else
-                          @click="actor.takenAction(index)"
-                          :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
-                        <span v-if="item.acted">
-                          <icon :icon="['fas', 'check']"
-                                class="text-success" />
-                        </span>
-                        {{actor.name}} <template v-if="actor.owner">({{actor.owner.name}})</template>
-                      </div>
-                    </td>
-                    <td class="text-capitalize c-pointer align-middle"
-                        @click="actor.takenAction(index)"
+                <tr v-if="!!actor.name" 
+                    :key="actor.id">
+                  <!-- Name/Owner -->
+                  <td class="text-capitalize c-pointer align-middle">
+                    <input class="form-control form-control-sm"
+                          v-model="actor.tempName"
+                          v-if="actor.editing">
+                    <div v-else
+                        @click="actor.takenAction()"
                         :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
-                      {{actor.typeLabel}}
-                    </td>
-                    <td class="align-middle">
-                      <template v-if="typeof item.hp === 'number'">
-                        <input type="number"
-                                class="form-control form-control-sm"
-                                v-model.number="item.tempHP" 
-                                v-if="item.editing"
-                                min="0">
-                        <template v-else>
-                          {{item.hp}}
-                          <span @click="item.hp++">
-                            <icon :icon="['fas', 'chevron-circle-up']" 
-                                  title="Increase Player HP" 
-                                  class="c-pointer" />
-                          </span>
-                          <span @click="item.hp--">
-                            <icon :icon="['fas', 'chevron-circle-down']" 
-                                  title="Decrease Player HP" 
-                                  class="c-pointer" />
-                          </span>
-                        </template>
+                      <span v-if="actor.acted">
+                        <icon :icon="['fas', 'check']"
+                              class="text-success" />
+                      </span>
+                      {{actor.name}}
+                      <template v-if="actor.owner">({{actor.owner.name}})</template>
+                      <sup class="text-success c-help" 
+                            v-if="actor.bonuses && actor.bonuses.length"
+                            :title="`This ${actor.typeLabel} has ${actor.bonuses.length} Bonus${actor.bonuses.length > 1 ? 'es': ''}`">
+                        {{actor.bonuses.length}}
+                      </sup>
+                      <sup class="text-warning c-help" 
+                            v-if="actor.penalties && actor.penalties.length"
+                            :title="`This ${actor.typeLabel} has ${actor.penalties.length} Penalt${actor.penalties.length > 1 ? 'ies': 'y'}`">
+                        {{actor.penalties.length}}
+                      </sup>
+                      <sup class="text-secondary c-help" 
+                            v-if="actor.defends && actor.defends.length"
+                            :title="`This ${actor.typeLabel} has ${actor.defends.length} Defend${actor.defends.length > 1 ? 's': ''}`">
+                        {{actor.defends.length}}
+                      </sup>
+                    </div>
+                  </td>
+                  <!-- Type/Count -->
+                  <td class="text-capitalize c-pointer align-middle"
+                      @click="actor.takenAction()"
+                      :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
+                    {{actor.typeLabel}}
+                    <template v-if="actor.count">({{actor.count}})</template>
+                  </td>
+                  <!-- HP/Die Size -->
+                  <td class="align-middle">
+                    <template v-if="typeof actor.hp === 'number'">
+                      <input type="number"
+                              class="form-control form-control-sm"
+                              v-model.number="actor.tempHP"  
+                              v-if="actor.editing"
+                              min="0">
+                      <template v-else>
+                        <span :class="{'text-success': actor.inGreen, 
+                          'text-warning': actor.inYellow, 
+                          'text-danger': actor.inRed, 
+                          'text-muted': actor.incapacitated}">{{actor.hp}}</span>
+                        <span @click="actor.hp++">
+                          <icon :icon="['fas', 'chevron-circle-up']"
+                                :title="`Increase ${actor.typeLabel} HP`"
+                                class="c-pointer change-hp" />
+                        </span>
+                        <span @click="actor.hp--">
+                          <icon :icon="['fas', 'chevron-circle-down']" 
+                                :title="`Decrease ${actor.typeLabel} HP`"
+                                class="c-pointer change-hp" />
+                        </span>
                       </template>
-                      <template v-else-if="item.size">
-                        <img :src="`images/d${item.size}.png`"
-                            :title="`This minion uses a d${item.size}`">
-                      </template>
-                    </td>
-                    <td class="align-middle">
-                      <div class="btn-group btn-group-sm">
-                        <button class="btn btn-secondary border-dark"
-                                @click="item.beginEdit()"
-                                title="Edit this player"
-                                v-if="item.allowEdit">
-                          <icon :icon="['far', 'edit']" />
-                        </button>
-                        <button class="btn btn-success border-dark"
-                                @click="item.saveEdit()"
-                                v-if="item.editing"
-                                title="Save edits on this player">
-                          <icon :icon="['far', 'save']" />
-                        </button>
-                        <button class="btn btn-warning border-dark"
-                                @click="item.cancelEdit()"
-                                v-if="item.editing"
-                                title="Cancel edits on this player">
-                          <icon :icon="['fas', 'ban']" />
-                        </button>
-                        <button class="btn btn-primary border-dark add-minion"
-                                title="Add a Minion"
-                                @click="$emit('add-minion', item.id)"
-                                v-if="item.allowAddMinion">
-                          <span class="fa-stack">
-                            <i class="fas fa-dragon" data-fa-transform="right-4 down-4"></i>
-                            <i class="fas fa-plus" data-fa-transform="shrink-6 left-4 down-4"></i>
-                          </span>
-                        </button>
-                        <button class="btn btn-danger border-dark"
-                                @click="$store.dispatch('removePlayer', item.name)" 
-                                title="Remove this Player from the scene"
-                                v-if="item.allowRemove">
-                          <icon :icon="['far', 'trash-alt']" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
+                    </template>
+                    <template v-else-if="actor.size">
+                      <img :src="`images/d${actor.size}.png`"
+                          :title="`This ${actor.typeLabel} uses a d${actor.size}`">
+                    </template>
+                    <template v-else>-</template>
+                  </td>
+                  <!-- Actions -->
+                  <td class="align-middle">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-secondary border-dark"
+                              @click="actor.beginEdit()"
+                              :title="`Edit this ${actor.typeLabel}`"
+                              v-if="actor.allowEdit && !actor.editing">
+                        <icon :icon="['far', 'edit']" />
+                      </button>
+                      <button class="btn btn-success border-dark"
+                              @click="actor.saveEdit()"
+                              v-if="actor.editing"
+                              :title="`Save edits on this ${actor.typeLabel}`">
+                        <icon :icon="['far', 'save']" />
+                      </button>
+                      <button class="btn btn-warning border-dark"
+                              @click="actor.cancelEdit()"
+                              v-if="actor.editing"
+                              :title="`Cancel edits on this ${actor.typeLabel}`">
+                        <icon :icon="['fas', 'ban']" />
+                      </button>
+                      <button class="btn btn-primary border-dark add-minion"
+                              title="Add a Minion"
+                              @click="$emit('add-minion', actor.id)"
+                              v-if="actor.allowAddMinion">
+                        <span class="fa-stack">
+                          <icon :icon="['fas', 'dragon']" 
+                                transform="right-4 down-4" />
+                          <icon :icon="['fas', 'plus']" 
+                                transform="shrink-6 left-4 down-4" />
+                        </span>
+                      </button>
+                      <button class="btn btn-danger border-dark"
+                              @click="actor.remove()" 
+                              :title="`Remove this ${actor.typeLabel} from the scene`"
+                              v-if="actor.allowRemove">
+                        <icon :icon="['far', 'trash-alt']" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               </template>
             </tbody>
           </table>
-          <hr />
+          <hr class="border-dark" />
           <div>
             <h4 class="text-center">Notes</h4>
             <div class="editor">
@@ -349,19 +389,37 @@
             </button>
           </div>
           <div class="modal-body">
-            Add a player to the Scene.
-            <input type="text"
-                   v-model.trim="newPlayer.name"
-                   class="form-control form-control-sm"
-                   @keypress.enter="addPlayer"
-                   ref="newPlayerName">
-            Add the current HP:
-            <input type="number"
-                   v-model.number="newPlayer.hp"
-                   class="form-control form-control-sm"
-                   @keypress.enter="addPlayer"
-                   min="0"
-                   ref="newPlayerHP">
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Name</span>
+              </div>
+              <input type="text"
+                    v-model.trim="newPlayer.name"
+                    class="form-control form-control-sm"
+                    @keypress.enter="addPlayer"
+                    ref="newPlayerName">
+            </div>
+            <div class="input-group input-group-sm mt-2">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Max HP</span>
+              </div>
+              <input type="number"
+                     v-model.number="newPlayer.maxHp"
+                     class="form-control"
+                     @keypress.enter="addPlayer"
+                     min="17"
+                     max="40">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Current HP</span>
+              </div>
+              <input type="number"
+                     v-model.number="newPlayer.hp"
+                     class="form-control"
+                     @keypress.enter="addPlayer"
+                     min="0"
+                     :max="newPlayer.maxHp"
+                     ref="newPlayerHP">
+            </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary"
@@ -414,7 +472,8 @@
         editor: null,
         newPlayer: {
           name: '',
-          hp: 30
+          hp: 30,
+          maxHp: 30
         }
       }
     },
@@ -428,7 +487,7 @@
       resetScene() {
         this.$dialog.confirm({
           title: 'Are You Sure?',
-          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed.'
+          body: 'Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed. (Players will not be affected)'
         }, {
           okText: 'Yes',
           cancelText: 'No'
@@ -463,6 +522,11 @@
       ...mapState([
         'scene'
       ])
+    },
+    watch: {
+      'newPlayer.maxHp'(newVal) {
+        if (this.newPlayer.hp > newVal) this.newPlayer.hp = newVal;
+      }
     },
     mounted() {
       $('#sceneTrackerModal').on('shown.bs.modal', e => {
@@ -513,6 +577,9 @@
       max-width: 20px;
       margin: 0 .25rem;
     }
+    .change-hp:hover {
+      transform: translate(0px, -1px);
+    }
   }
 
   .add-minion {
@@ -546,8 +613,13 @@
     padding: 0.25rem .5rem;
     border-radius: 5px;
 
-    /deep/ p {
+    /deep/ .ProseMirror {
       margin: 0 !important;
+      min-height: 100px;
+
+      p {
+        margin: 0;
+      }
     }
 
     hr {

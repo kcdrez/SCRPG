@@ -1,31 +1,23 @@
 import Vue from 'vue';
 import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
+import Actor from './actor';
 
-class Scene {
+class Scene extends Actor {
   constructor(data) {
+    super(data);
     this.green = data.green || [];
     this.yellow = data.yellow || [];
     this.red = data.red || [];
     this.challenges = (data.challenges || []).map(x => new Challenge(x));
     this.locations = (data.locations || []).map(x => new Location(x));
-    this.name = data.name || '';
-    this.acted = data.acted || false;
     this.notes = data.notes || '';
-    this.id = data.id || uuid();
-    this.type = data.type || 'environment';
   }
 
   get isEmpty() {
     return this.green.length === 0 &&
       this.yellow.length === 0 &&
       this.red.length === 0;
-  }
-  get list () {
-    return [this];
-  }
-  get typeLabel() {
-    return this.type;
   }
   get allowAddMinion() {
     return true;
@@ -34,10 +26,7 @@ class Scene {
   takenAction() {
     const minions = store.getters.childMinions(this.id);
     const newStatus = !this.acted;
-    const minionNotMatched = minions.some(minion => {
-      const match = minion.list.find(x => x.acted !== newStatus);
-      return !!match;
-    });
+    const minionNotMatched = minions.some(x => x.acted !== newStatus);
     const message = newStatus ? 
       `Some of the environment's minions have not acted. Do you also want to mark all of it's minions as having acted too?`:
       `Some of the environment's minions have already acted. Do you also want to mark it's minions as having not acted?`;
@@ -52,20 +41,14 @@ class Scene {
       })
       .then(() => {
         minions.forEach(minion => {
-          minion.takenAction(null, newStatus);
+          minion.takenAction(newStatus);
         })
       });
     }
     this.acted = newStatus;
     this.save();
   }
-  resetRound() {
-    this.acted = false;
-    this.save();
-  }
   create(green, yellow, red, name) {
-    this.clear();
-
     for (let i = 0; i < green; i++) {
       this.green.push({checked: false});
     }
@@ -79,15 +62,35 @@ class Scene {
     this.save();
   }
   clear() {
-    this.green = [];
-    this.yellow = [];
-    this.red = [];
-    this.acted = false;
-    this.name = '';
-    this.challenges = [];
-    this.locations = [];
-    this.notes = '';
-    this.save();
+    const clearScene = () => {
+      minions.forEach(minion => store.dispatch('removeBaddie', {id: minion.id, type: minion.type}));
+      this.green = [];
+      this.yellow = [];
+      this.red = [];
+      this.acted = false;
+      this.name = '';
+      this.challenges = [];
+      this.locations = [];
+      this.notes = '';
+      this.save();
+    }
+
+    const minions = store.getters.childMinions(this.id);
+    if (minions.length > 0) {
+      Vue.dialog.confirm({
+        title: 'Warning',
+        body: 'Clearing the scene will remove all the environment\'s minions. Do you want to continue?'
+      },
+      {
+        okText: 'Yes',
+        cancelText: 'No'
+      })
+      .then(() => {
+        clearScene();
+      });
+    } else {
+      clearScene();
+    }
   }
   progressScene(element) {
     element.checked = !element.checked;
@@ -114,7 +117,7 @@ class Scene {
   removeChallenge(index) {
     if (index >= 0) {
       this.challenges.splice(index, 1);
-      store.dispatch('saveData', 'scene');
+      this.save();
     }
   }
   resetChallenges() {
@@ -125,12 +128,16 @@ class Scene {
     this.notes = note;
     this.save();
   }
-  save() {
-    store.dispatch('saveData', 'scene');
-  }
-  export() {
+  export(challengeId) {
+    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
+      const {baddie, modifiers} = minion.export();
+      acc.push(baddie);
+      acc.push(...modifiers);
+      return acc;
+    }, []);
+
     return {
-      scene: [{
+      scene: this.name ? {
         id: this.id,
         name: this.name,
         acted: this.acted,
@@ -139,25 +146,29 @@ class Scene {
         yellow: this.exportSceneTracker(this.yellow),
         red: this.exportSceneTracker(this.red),
         type: 'scene'
-      }],
+      } : null,
       locations: this.locations.map(x => x.export()),
-      challenges: this.exportChallenges(),
+      challenges: this.exportChallenges(challengeId),
+      envMinions: minions
     }
   }
   exportSceneTracker(arr) {
     const completed = arr.filter(x => x.checked).length;
     return `${completed}-${arr.length}`;
   }
-  exportChallenges() {
+  exportChallenges(id) {
     return this.challenges.reduce((acc, el) => {
-      acc.push(el.export());
-      el.list.forEach(x => {
-        acc.push(x.export(el.id));
-      });
+      if (!id || el.id === id) {
+        acc.push(el.export());
+        el.list.forEach(x => {
+          acc.push(x.export(el.id));
+        });
+      }
       return acc;
     }, []);
   }
   import(data) {
+    this.clear();
     const greens = data.green.split('-');
     const yellows = data.yellow.split('-');
     const reds = data.red.split('-');
@@ -199,6 +210,20 @@ class Challenge {
     if (index >= 0) {
       this.list.splice(index, 1);
       this.save();
+      if (this.list.length === 0) {
+        Vue.dialog.confirm({
+          title: 'No Challenges',
+          body: 'This Challenge has no elements. Do you want to remove it?'
+        },
+        {
+          okText: 'Yes',
+          cancelText: 'No'
+        })
+        .then(() => {
+          const thisIndex = store.state.scene.challenges.findIndex(x => x.id === this.id);
+          store.state.scene.removeChallenge(thisIndex);
+        });
+      }
     }
   }
   save() {

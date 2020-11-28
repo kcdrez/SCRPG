@@ -5,20 +5,33 @@
         <div class="col">
           <hr class="border-dark">
           <h3>Locations</h3>
-          <div class="btn-group btn-group-sm">
+          <div class="btn-group btn-group-sm w-50">
               <button class="btn btn-success border-dark"
-                      title="Add a new Challenge to the Scene"
-                      @click="addLocationModal">Add Location</button>
-              <button class="btn btn-danger border-dark" 
+                      title="Add a new Location to the Scene"
+                      @click="addLocationModal">Add</button>
+              <button class="btn btn-warning border-dark" 
                       title="Remove all Locations from the Scene"
-                      @click="scene.resetLocations()">Reset Locations</button>
+                      @click="scene.resetLocations()">Clear</button>
+              <button class="btn btn-primary border-dark"
+                      @click="$refs.import.click()"
+                      title="Import Location data from an xlsx file">Import</button>
+              <button class="btn btn-secondary border-dark"
+                      @click="$store.dispatch('export', {type: 'locations', fileName: scene.name + '_locations'})"
+                      title="Export all Locations to an xlsx file"
+                      :disabled="scene.locations.length === 0">Export</button>
           </div>
+          <input type="file"
+                  accept=".xlsx"
+                  class="d-none"
+                  ref="import"
+                  @change="$store.dispatch('import', {files: $event.target.files, filters: ['location']})">
         </div>
       </div>
       <div class="row" >
         <div class="col">
-          <template v-if="scene.locations.length === 0">There are no locations.</template>
-          <table class="table table-sm table-stripped table-bordered table-dark" v-else>
+          <div v-if="scene.locations.length === 0"
+               class="empty-data">There are no locations.</div>
+          <table class="table table-sm table-striped table-bordered table-dark mt-3 mb-0" v-else>
             <thead>
               <tr>
                   <th width="30%">Name</th>

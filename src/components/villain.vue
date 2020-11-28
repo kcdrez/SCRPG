@@ -6,21 +6,32 @@
           <a href="#villain-Data" 
              data-toggle="collapse">Villains</a>
         </h2>
-        <div class="btn-group btn-group-sm">
+        <div class="btn-group btn-group-sm my-auto">
           <button class="btn btn-sm btn-success border-dark" 
-                  data-toggle="modal" 
-                  data-target="#createModal-villain">Create</button>
+                  @click="modal('show')">Create</button>
+          <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()"
+                    title="Import Villain data from an xlsx file">Import</button>
+          <button class="btn btn-secondary border-dark"
+                    @click="$store.dispatch('export', {type: 'villains', fileName: 'villains'})"
+                    title='Export all Villains to an xlsx file'
+                    :disabled="villains.length === 0">Export</button>
         </div>
+        <input type="file"
+               accept=".xlsx"
+               class="d-none"
+               ref="import"
+               @change="$store.dispatch('import', {files: $event.target.files, filters: ['villains', 'bonus', 'penalty', 'defend']})">        
       </div>
     </div>
     <div id="villain-Data" 
          class="collapse show row">
-      <div class="col" 
+      <div class="col mb-2" 
            v-if="villains.length === 0">
         There are no Villains.
       </div>
       <div class="col-6 mb-3" 
-           v-for="(villain, villainIndex) in villains" 
+           v-for="villain in villains" 
            :key="villain.id">
         <div class="card">
           <div class="card-header">
@@ -28,9 +39,13 @@
               <a :href="`#villain-${villain.id}`" 
                  data-toggle="collapse">{{villain.name}}</a>
             </h3>
-            <div class="btn-group btn-group-sm float-right w-25">
+            <div class="btn-group btn-group-sm float-right">
               <button class="btn btn-danger border-dark" 
-                      @click="$store.commit('DELETE_BADDIE', {index: villainIndex, baddieType: 'villains'})">Remove</button>
+                      @click="$store.dispatch('removeBaddie', {id: villain.id, type: villain.type})"
+                      title="Delete this Villain">Remove</button>
+              <button class="btn btn-secondary border-dark"
+                      title="Export this Villain to an xlsx file"
+                      @click="$store.dispatch('export', {type: 'villains', fileName: 'villains', id: villain.id})">Export</button>
             </div>
           </div>
           <div :id="`villain-${villain.id}`" 
@@ -38,102 +53,44 @@
             <div class="text-center">
               <div class="btn-group btn-group-sm w-50">
                 <button class="btn btn-success border-dark" 
-                        @click="modifyVillain(villain, 'boost')">Boost</button>
+                        @click="modifyVillain(villain, 'boost')"
+                        title="Add a Bonus to this Villain">
+                  <img src="images/boost.png">
+                </button>
                 <button class="btn btn-warning border-dark" 
-                        @click="modifyVillain(villain, 'hinder')">Hinder</button>
+                        @click="modifyVillain(villain, 'hinder')"
+                        title="Add a Penalty to this Villain">
+                  <img src="images/hinder.png">
+                </button>
                 <button class="btn btn-secondary border-dark" 
-                        @click="modifyVillain(villain, 'defend')">Defend</button>
-                <button class="btn btn-secondary border-dark" 
-                        @click="$emit('add-minion', villain.id)">Add Minion</button>
+                        @click="modifyVillain(villain, 'defend')"
+                        title="Add a Defend to this Villain">
+                  <img src="images/defend.png">
+                </button>
+                <button class="btn btn-primary border-dark" 
+                        @click="$emit('add-minion', villain.id)"
+                        title="Add a Minion to this Villain">
+                  <span class="fa-stack">
+                    <icon :icon="['fas', 'dragon']" 
+                           transform="right-4 down-4" />
+                    <icon :icon="['fas', 'plus']" 
+                           transform="shrink-6 left-4 down-4" />
+                  </span>
+                </button>
               </div>
             </div>
-            <template v-if="villain.bonuses.length > 0">
-              <h3>Bonuses</h3>
-              <table class="table table-sm table-striped table-bordered">
-                <thead class="text-center">
-                  <tr>
-                    <th width="25%">Name</th>
-                    <th width="25%">Amount</th>
-                    <th width="35%">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(bonus, modIndex) in villain.bonuses" :key="villain.id + 'bonus' + modIndex">
-                    <td class="text-center">{{bonus.name}}</td>
-                    <td class="text-center">
-                      +{{bonus.amount}}
-                      <div v-if="bonus.persistent" 
-                           class="font-italic">Persistent</div>
-                      <div v-if="bonus.exclusive" 
-                           class="font-italic">Exclusive</div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="btn-group btn-group-sm w-100">
-                        <button class="btn btn-danger border-dark" 
-                                @click="villain.removeModifier('bonuses', modIndex)">Remove</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </template>
-            <template v-if="villain.penalties.length > 0">
-              <h3>Penalties</h3>
-              <table class="table table-sm table-striped table-bordered">
-                <thead class="text-center">
-                  <tr>
-                    <th width="25%">Name</th>
-                    <th width="25%">Amount</th>
-                    <th width="35%">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(penalty, modIndex) in villain.penalties" 
-                     :key="villain.id + 'penalties' + modIndex">
-                    <td class="text-center">{{penalty.name}}</td>
-                    <td class="text-center">
-                      {{penalty.amount}}
-                      <div v-if="penalty.persistent" 
-                           class="font-italic">Persistent</div>
-                      <div v-if="penalty.exclusive" 
-                           class="font-italic">Exclusive</div>
-                    </td>
-                    <td class="align-middle">
-                      <div class="btn-group btn-group-sm w-100">
-                        <button class="btn btn-danger border-dark" 
-                                @click="villain.removeModifier('penalties', modIndex)">Remove</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </template>
-            <template v-if="villain.defends.length > 0">
-              <h3>Defends</h3>
-              <table class="table table-sm table-striped table-bordered">
-                <thead class="text-center">
-                  <tr>
-                    <th width="25%">Name</th>
-                    <th width="25%">Amount</th>
-                    <th width="35%">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(defend, modIndex) in villain.defends" :key="villain.id + 'defends' + modIndex">
-                    <td class="text-center">{{defend.name}}</td>
-                    <td class="text-center">
-                      {{defend.amount}}
-                    </td>
-                    <td class="align-middle">
-                      <div class="btn-group btn-group-sm w-100">
-                        <button class="btn btn-danger border-dark" 
-                          @click="villain.removeModifier('defends', modIndex)">Remove</button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </template>            
+            <Modifier label="bonus"
+                      labelPlural="bonuses"
+                      :list="villain.bonuses"
+                      @remove="villain.removeModifier('bonuses', $event)"></Modifier>
+            <Modifier label="penalty"
+                      labelPlural="penalties"
+                      :list="villain.penalties"
+                      @remove="villain.removeModifier('penalties', $event)"></Modifier>
+            <Modifier label="defend"
+                      labelPlural="defends"
+                      :list="villain.defends"
+                      @remove="villain.removeModifier('defends', $event)"></Modifier>          
           </div>
         </div>
       </div>
@@ -161,14 +118,15 @@
               <input class="form-control" 
                      v-model.trim="name" 
                      type="text"
-                @keydown.enter="createVillain">
+                     ref="villainName"
+                     @keydown.enter="createVillain()">
             </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary" 
                     type="button" 
-                    data-dismiss="modal" 
-                    @click="createVillain">Create</button>
+                    data-dismiss="modal"
+                    @click="createVillain()">Create</button>
             <button class="btn btn-secondary" 
                     type="button" 
                     data-dismiss="modal">Close</button>
@@ -244,9 +202,13 @@
 <script>
   import {Villain} from '../scripts/baddie';
   import {mapState} from 'vuex';
+  import Modifier from './modifier.vue';
 
   export default {
     name: 'Villains',
+    components: {
+      Modifier
+    },
     data() {
       return {
         name: '',
@@ -270,6 +232,7 @@
       createVillain() {
         if (this.name !== '') {
           this.$store.dispatch('upsertBaddie', {name: this.name, type: 'villains'});
+          this.modal('hide');
         }
       },
       modifyVillain(villain, type) {
@@ -292,10 +255,18 @@
           return;
         }
         this.target = villain;
-        $(`#modifierModal-villain`).modal('show');
+        $('#modifierModal-villain').modal('show');
         this.$nextTick(() => {
           this.$refs.modifierName.focus();
         }); 
+      },
+      modal(type) {
+        $('#createModal-villain').modal(type);
+        if (type === 'show') {
+          this.$nextTick(() => {
+            this.$refs.villainName.focus();
+          }); 
+        }
       }
     }
   };

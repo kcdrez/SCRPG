@@ -6,16 +6,29 @@
           <a :href="`#${label}-Data`" 
              data-toggle="collapse">{{label}}</a>
         </h2>
-        <div class="btn-group btn-group-sm">
+        <div class="btn-group btn-group-sm my-auto">
           <button class="btn btn-sm btn-success border-dark" 
                   data-toggle="modal" 
                   :data-target="`#createModal-${label}`">Create</button>
+          <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()"
+                    :title="`Import ${labelSingle} data from an xlsx file`">Import</button>
+          <button class="btn btn-secondary border-dark"
+                    @click="$store.dispatch('export', {type: label.toLowerCase(), fileName: label})"
+                    :title='`Export all ${label} to an xlsx file`'
+                    :disabled="list.length === 0">Export</button>
         </div>
+        <input type="file"
+               accept=".xlsx"
+               class="d-none"
+               ref="import"
+               @change="$store.dispatch('import', {files: $event.target.files, filters: [label.toLowerCase(),
+                'bonus', 'penalty', 'defend']})">
       </div>
     </div>
     <div :id="`${label}-Data`" 
          class="collapse show row">
-      <div class="col" 
+      <div class="col mb-2" 
            v-if="list.length === 0">
         There are no {{label}}.
       </div>
@@ -32,74 +45,78 @@
         </thead>
         <tbody>
           <template v-for="baddie in list">
-            <tr v-for="(baddieRow, index) in baddie.list" 
-                :key="baddie.name + '-' + index">
+            <tr :key="baddie.id">
               <td class="text-center align-middle text-capitalize">
                 <div>{{baddie.name}}</div>
                 <div v-if="baddie.owner">({{baddie.owner.name}})</div>
-                </td>
-              <td class="text-center align-middle">
-                <img :src="`images/d${baddieRow.size}.png`" 
-                     :title="`This minion uses a d${baddieRow.size}`">
               </td>
               <td class="text-center align-middle">
-                {{baddieRow.count}}
+                <img :src="`images/d${baddie.size}.png`" 
+                     :title="`This minion uses a d${baddie.size}`">
+              </td>
+              <td class="text-center align-middle">
+                {{baddie.count}}
               </td>
               <td>
-                <Modifier label="bonus" 
-                      labelPlural="bonuses" 
-                      :list="baddieRow.bonuses"
-                      @remove="baddie.removeModifier(baddieRow, 'bonuses', $event)"></Modifier>
-                <Modifier label="penalty" 
-                      labelPlural="penalties" 
-                      :list="baddieRow.penalties"
-                      @remove="baddie.removeModifier(baddieRow, 'penalties', $event)"></Modifier>
+                <Modifier label="bonus"
+                      labelPlural="bonuses"
+                      :list="baddie.bonuses"
+                      @remove="baddie.removeModifier('bonuses', $event)"></Modifier>
+                <Modifier label="penalty"
+                      labelPlural="penalties"
+                      :list="baddie.penalties"
+                      @remove="baddie.removeModifier('penalties', $event)"></Modifier>
                 <Modifier label="defend" 
                       labelPlural="defends" 
-                      :list="baddieRow.defends"
-                      @remove="baddie.removeModifier(baddieRow, 'defends', $event)"></Modifier>                      
+                      :list="baddie.defends"
+                      @remove="baddie.removeModifier('defends', $event)"></Modifier>                      
               </td>
               <td class="align-middle">
-                <div class="btn-group btn-group-sm w-100 mb-2 actions" 
+                <div class="btn-group btn-group-sm w-100 mb-2 actions"
                      role="group">
-                  <button class="btn btn-success border-dark" 
+                  <button class="btn btn-success border-dark"
                           :title="`Add a Bonus to this ${labelSingle}`"
-                          @click="modifyBaddie(baddieRow.size, 'boost', baddie, baddieRow)">
+                          @click="modifyBaddie('boost', baddie.id)">
                     <img src="images/boost.png">
                   </button>
                   <button class="btn btn-warning border-dark" 
                           :title="`Add a Penalty to this ${labelSingle}`"
-                          @click="modifyBaddie(baddieRow.size, 'hinder', baddie, baddieRow)">
+                          @click="modifyBaddie('hinder', baddie.id)">
                     <img src="images/hinder.png">
                   </button>
                   <button class="btn btn-secondary border-dark" 
                          :title="`Add a Defend to this ${labelSingle}`"
-                         @click="modifyBaddie(baddieRow.size, 'defend', baddie, baddieRow)">
+                         @click="modifyBaddie('defend', baddie.id)">
                     <img src="images/defend.png">
                   </button>
                 </div>
                 <div class="btn-group btn-group-sm w-100 actions">
                   <button class="btn btn-warning border-dark text-dark" 
                           :title="`Demote this ${labelSingle} one die size (min 4)`"
-                          @click="demoteBaddie(baddie, baddieRow)" 
-                          :disabled="baddieRow.size <= 4">
+                          @click="baddie.demote()" 
+                          :disabled="baddie.size <= 4">
                     <icon :icon="['fas', 'level-down-alt']" />
                   </button>
                   <button class="btn btn-success border-dark text-dark" 
                           :title="`Promote this ${labelSingle} one die size (max 12)`"
-                          @click="promoteBaddie(baddie, baddieRow)" 
-                          :disabled="baddieRow.size >= 12">
+                          @click="baddie.promote()" 
+                          :disabled="baddie.size >= 12">
                     <icon :icon="['fas', 'level-up-alt']" />
                   </button>
                   <button class="btn btn-info border-dark text-dark" 
                           :title="`Add another ${labelSingle} to this row`"
-                          @click="createBaddie(baddieRow)">
+                          @click="baddie.count++">
                     <icon :icon="['far', 'plus-square']" />
                   </button>
                   <button class="btn btn-danger border-dark text-dark"
                           :title="`Remove one ${labelSingle} from this group from the scene`"
-                          @click="removeBaddie(baddie, baddieRow)">
+                          @click="baddie.count--">
                     <icon :icon="['far', 'trash-alt']" />
+                  </button>
+                  <button class="btn btn-secondary border-dark"
+                          @click="$store.dispatch('export', {type: label.toLowerCase(), fileName: label, id: baddie.id})"
+                          :title='`Export this ${labelSingle} to an xlsx file`'>
+                    <icon :icon="['fas', 'file-download']" />
                   </button>
                 </div>
               </td>
@@ -271,6 +288,7 @@
   import {mapState} from 'vuex';
   import Modifier from './modifier.vue';
   import {unvue} from '../scripts/utilities';
+  import {sortActors} from '../scripts/actor';
 
   export default {
     name: 'BaddieList',
@@ -300,9 +318,7 @@
             max: 0,
             min: 0,
             type: '',
-            size: 0,
             target: null,
-            parent: null,
             persistent: false,
             exclusive: false,
             applyTo: 'single'
@@ -312,15 +328,7 @@
     },
     computed: {
       list() {
-        return this.$store.state[this.label.toLowerCase()].sort((a, b) => {
-          if (a.name > b.name) {
-            return 1;
-          } else if (b.name > a.name) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
+        return this.$store.state[this.label.toLowerCase()].sort(sortActors);
       },
       ...mapState([
         'players',
@@ -338,19 +346,15 @@
       }
     },
     methods: {
-      createBaddie(baddieRow) {
-        if (!!baddieRow) {
-          baddieRow.count++;
-        } else {
-          this.$store.dispatch('upsertBaddie', Object.assign({type: this.label.toLowerCase()}, this.baddieData));
-          $(`#createModal-${this.label}`).modal('hide');
-        }
+      createBaddie(baddie) {
+        this.$store.dispatch('upsertBaddie', Object.assign({type: this.label.toLowerCase()}, this.baddieData));
+        $(`#createModal-${this.label}`).modal('hide');
       },
       addBaddie(name) {
         this.baddieData.name = name;
         $(`#createModal-${this.label}`).modal('show');
       },
-      modifyBaddie(size, type, parent, target) {
+      modifyBaddie(type, id) {
         if (type === 'boost') {
           this.baddieData.modifier.max = 4;
           this.baddieData.modifier.min = 1;
@@ -371,27 +375,12 @@
         } else {
           return;
         }
-        this.baddieData.modifier.size = size;
-        this.baddieData.modifier.parent = parent;
-        this.baddieData.modifier.target = target;
-        this.$store.dispatch('saveData', this.label.toLowerCase());
+        this.baddieData.modifier.target = id;
         $(`#modifierModal-${this.label}`).modal('show');
-      },
-      demoteBaddie(parent, target) {
-        parent.demote(target);
-        this.$store.dispatch('saveData', this.label.toLowerCase());
-      },
-      promoteBaddie(parent, target) {
-        parent.promote(target);
-        this.$store.dispatch('saveData', this.label.toLowerCase());
-      },
-      removeBaddie(parent, target) {
-        parent.remove(target);
-        this.$store.dispatch('saveData', this.label.toLowerCase());
       },
       addModifier() {
         if (this.baddieData.modifier.name !== '') {
-          this.baddieData.modifier.parent.addModifier(this.baddieData.modifier, this.baddieData.modifier.target);
+          this.$store.dispatch('modifyBaddie', {type: this.label.toLowerCase(), modifier: this.baddieData.modifier});
           $(`#modifierModal-${this.label}`).modal('hide');
         }
       },
