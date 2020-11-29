@@ -128,9 +128,9 @@ const store = new Vuex.Store({
       ctx.dispatch('saveData', baddieData.type);
     },
     modifyBaddie(ctx, {modifier, type}) {
-      const match = ctx.state[type].find(x => x.id = modifier.target);
+      const match = ctx.state[type].find(x => x.id === modifier.target);
       if (match) {
-        if (modifier.applyTo === 'row') {
+        if (modifier.applyTo === 'row' || match.count === 1) {
           match.addModifier(modifier);
         } else if (modifier.applyTo === 'name') {
           ctx.state[type].forEach(x => {
@@ -169,7 +169,7 @@ const store = new Vuex.Store({
     },
     resetPlayers(ctx) {
       ctx.commit('RESET_PLAYERS');
-      ctx.dispatch('saveData', 'players'); 
+      ctx.dispatch('saveData', 'players');
     },
     reconcile(ctx, type) {
       for (let i = 0; i < ctx.state[type].length - 1; i++) {
@@ -179,6 +179,7 @@ const store = new Vuex.Store({
         }
       }
       ctx.state[type] = ctx.state[type].filter(x => !x.markForDeath);
+      ctx.dispatch('saveData', type);
     },
     export(ctx, options) {
       const {type, fileName, id} = options || {};
@@ -224,7 +225,6 @@ const store = new Vuex.Store({
           }
         });
       }
-      console.log(rows);
       
       const wb = xlsx.utils.book_new();
       const sceneWS = xlsx.utils.json_to_sheet(rows);

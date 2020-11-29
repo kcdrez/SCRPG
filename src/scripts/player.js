@@ -6,6 +6,7 @@ class Player extends Actor {
   constructor(playerData) {
     super(playerData);
     this.initHp(playerData);
+    this.type = 'player';
   }
 
   get hp() {
@@ -17,9 +18,6 @@ class Player extends Actor {
     this.tempHP = val;
     this.save();
   }
-  // get typeLabel() {
-  //   return this.type;
-  // }
   get allowEdit() {
     return !this.editing;
   }

@@ -35,11 +35,26 @@
            :key="villain.id">
         <div class="card">
           <div class="card-header">
-            <h3 class="d-inline">
-              <a :href="`#villain-${villain.id}`" 
-                 data-toggle="collapse">{{villain.name}}</a>
-            </h3>
+            <input type="text"
+                   v-model.trim="villain.tempName"
+                   class="form-control form-control-sm d-inline w-50"
+                   @keypress.enter="villain.saveEdit()"
+                   v-if="villain.editing">
+            <h3 class="d-inline"
+                v-else>{{villain.name}}</h3>
             <div class="btn-group btn-group-sm float-right">
+              <button class="btn btn-secondary border-dark"
+                      title="Edit this Villain"
+                      @click="villain.beginEdit()"
+                      v-if="!villain.editing">Edit</button>
+              <button class="btn btn-success border-dark"
+                      title="Save edits on this Villain"
+                      @click="villain.saveEdit()"
+                      v-if="villain.editing">Save</button>
+              <button class="btn btn-warning border-dark"
+                      title="Cancel edits on this Villain"
+                      @click="villain.cancelEdit()"
+                      v-if="villain.editing">Cancel</button>
               <button class="btn btn-danger border-dark" 
                       @click="$store.dispatch('removeBaddie', {id: villain.id, type: villain.type})"
                       title="Delete this Villain">Remove</button>
@@ -82,14 +97,17 @@
             <Modifier label="bonus"
                       labelPlural="bonuses"
                       :list="villain.bonuses"
+                      :editing="villain.editing"
                       @remove="villain.removeModifier('bonuses', $event)"></Modifier>
             <Modifier label="penalty"
                       labelPlural="penalties"
                       :list="villain.penalties"
+                      :editing="villain.editing"
                       @remove="villain.removeModifier('penalties', $event)"></Modifier>
             <Modifier label="defend"
                       labelPlural="defends"
                       :list="villain.defends"
+                      :editing="villain.editing"
                       @remove="villain.removeModifier('defends', $event)"></Modifier>          
           </div>
         </div>
@@ -173,15 +191,19 @@
             </div>
             <div class="d-inline" 
                  v-if="modifier.type !== 'Defend'">
-              <label>Persistent?</label>
+              <label for="mod-villain-persistent" 
+                     class="c-pointer">Persistent?</label>
               <input type="checkbox" 
-                     v-model="modifier.persistent">
+                     v-model="modifier.persistent"
+                     id="mod-villain-persistent">
             </div>
             <div class="d-inline mx-3" 
                  v-if="modifier.type !== 'Defend'">
-              <label>Exclusive?</label>
+              <label for="mod-villain-exclusive"
+                     class="c-pointer">Exclusive?</label>
               <input type="checkbox" 
-                     v-model="modifier.exclusive">
+                     v-model="modifier.exclusive"
+                     id="mod-villain-exclusive">
             </div>
           </div>
           <div class="modal-footer">

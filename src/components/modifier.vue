@@ -11,17 +11,64 @@
          v-for="(modifier, index) in list" 
          :key="label + index">
       <div class="remove-modifier"
-        :title="`Remove this ${label}`"
-        @click="$emit('remove', index)">&times;</div>
-      <div><b>Name: </b>{{modifier.name}}</div>
-      <div>
-        <b>Amount: </b>
-        {{ amountText(modifier.amount) }}
+           :title="`Remove this ${label}`"
+           @click="$emit('remove', index)"
+           v-if="!editing">&times;</div>
+      <div v-if="editing"
+           class="m-1">
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Name</div>
+          </div>
+          <input class="form-control" 
+                  v-model.trim="modifier.tempName" 
+                  type="text"
+                  @keydown.enter="$emit('save-edit')">
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Amount</div>
+          </div>
+          <input class="form-control" 
+                  v-model.number="modifier.tempAmount" 
+                  type="number" 
+                  :max="modifier.max"
+                  :min="modifier.min"
+                  @keydown.enter="$emit('save-edit')">
+        </div>
+        <div class="d-inline" 
+              v-if="modifier.type !== 'Defend'">
+          <label :for="`mod-persistent-${modifier.id}`"
+                 class="c-pointer">Persistent?</label>          
+          <input type="checkbox" 
+                  v-model="modifier.tempPersistent"
+                  @keydown.enter="$emit('save-edit')"
+                  :id="`mod-persistent-${modifier.id}`">
+        </div>
+        <div class="d-inline mx-3" 
+              v-if="modifier.type !== 'Defend'">
+          <label :for="`mod-exclusive-${modifier.id}`"
+                 class="c-pointer">Exclusive?</label>
+          <input type="checkbox" 
+                 v-model="modifier.tempExclusive"
+                 @keydown.enter="$emit('save-edit')"
+                 :id="`mod-exclusive-${modifier.id}`">
+        </div>
       </div>
-      <div v-if="modifier.persistent" 
-           class="font-italic">Persistent</div>
-      <div v-if="modifier.exclusive" 
-           class="font-italic">Exclusive</div>
+      <template v-else>
+        <div>
+          <b>Name: </b>
+          {{ modifier.name }}
+        </div>
+        <div>
+          <b>Amount: </b>
+          {{ amountText(modifier.amount) }}
+        </div>
+        <div v-if="modifier.persistent" 
+            class="font-italic">Persistent</div>
+        <div v-if="modifier.exclusive" 
+            class="font-italic">Exclusive</div>
+      </template>
     </div>
   </div>
 </template>
@@ -41,6 +88,10 @@
       list: {
         type: Array,
         required: true
+      },
+      editing: {
+        type: Boolean,
+        default: false
       }
     },
     methods: {
