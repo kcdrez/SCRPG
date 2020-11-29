@@ -47,75 +47,142 @@
           <template v-for="baddie in list">
             <tr :key="baddie.id">
               <td class="text-center align-middle text-capitalize">
-                <div>{{baddie.name}}</div>
-                <div v-if="baddie.owner">({{baddie.owner.name}})</div>
+                <template v-if="baddie.editing">
+                  <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Name</div>
+                    </div>
+                    <input class="form-control" 
+                           v-model.trim="baddie.tempName" 
+                           type="text"
+                           @keydown.enter="baddie.saveEdit()">
+                  </div>
+                  <div class="input-group input-group-sm mb-3">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Owner</div>
+                    </div>
+                    <select class="form-control"
+                            @keydown.enter="baddie.saveEdit()"
+                            v-model="baddie.tempOwner">
+                      <option :value="null">-</option>
+                      <option v-for="player in players"
+                              :key="player.id"
+                              :value="player.id">{{player.name}}</option>
+                      <option v-for="villain in villains"
+                              :key="villain.id"
+                              :value="villain.id">{{villain.name}}</option>
+                      <option v-if="scene.name" :value="scene.id">{{scene.name}}</option>
+                    </select>
+                  </div>
+                </template>
+                <template v-else>
+                  <div>{{baddie.name}}</div>
+                  <div v-if="baddie.owner">({{baddie.owner.name}})</div>
+                </template>
               </td>
               <td class="text-center align-middle">
+                <input type="number"
+                       class="form-control form-control-sm"
+                       v-model="baddie.tempSize"
+                       v-if="baddie.editing"
+                       min="4"
+                       max="12"
+                       step="2">
                 <img :src="`images/d${baddie.size}.png`" 
-                     :title="`This minion uses a d${baddie.size}`">
+                     :title="`This minion uses a d${baddie.size}`"
+                     v-else>
               </td>
               <td class="text-center align-middle">
-                {{baddie.count}}
+                <input type="number"
+                       class="form-control form-control-sm"
+                       v-model="baddie.tempCount"
+                       v-if="baddie.editing"
+                       min="1">
+                <template v-else>{{baddie.count}}</template>
               </td>
               <td>
                 <Modifier label="bonus"
-                      labelPlural="bonuses"
-                      :list="baddie.bonuses"
-                      @remove="baddie.removeModifier('bonuses', $event)"></Modifier>
+                          labelPlural="bonuses"
+                          :list="baddie.bonuses"
+                          :editing="baddie.editing"
+                          @remove="baddie.removeModifier('bonuses', $event)"
+                          @save-edit="baddie.saveEdit()"></Modifier>
                 <Modifier label="penalty"
-                      labelPlural="penalties"
-                      :list="baddie.penalties"
-                      @remove="baddie.removeModifier('penalties', $event)"></Modifier>
+                          labelPlural="penalties"
+                          :list="baddie.penalties"
+                          :editing="baddie.editing"
+                          @remove="baddie.removeModifier('penalties', $event)"
+                          @save-edit="baddie.saveEdit()"></Modifier>
                 <Modifier label="defend" 
-                      labelPlural="defends" 
-                      :list="baddie.defends"
-                      @remove="baddie.removeModifier('defends', $event)"></Modifier>                      
+                          labelPlural="defends" 
+                          :list="baddie.defends"
+                          :editing="baddie.editing"
+                          @remove="baddie.removeModifier('defends', $event)"
+                          @save-edit="baddie.saveEdit()"></Modifier>                      
               </td>
               <td class="align-middle">
                 <div class="btn-group btn-group-sm w-100 mb-2 actions"
                      role="group">
                   <button class="btn btn-success border-dark"
-                          :title="`Add a Bonus to this ${labelSingle}`"
+                          :title="`Add a Bonus to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('boost', baddie.id)">
                     <img src="images/boost.png">
                   </button>
                   <button class="btn btn-warning border-dark" 
-                          :title="`Add a Penalty to this ${labelSingle}`"
+                          :title="`Add a Penalty to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('hinder', baddie.id)">
                     <img src="images/hinder.png">
                   </button>
                   <button class="btn btn-secondary border-dark" 
-                         :title="`Add a Defend to this ${labelSingle}`"
+                         :title="`Add a Defend to this ${baddie.typeLabel}`"
                          @click="modifyBaddie('defend', baddie.id)">
                     <img src="images/defend.png">
                   </button>
                 </div>
                 <div class="btn-group btn-group-sm w-100 actions">
                   <button class="btn btn-warning border-dark text-dark" 
-                          :title="`Demote this ${labelSingle} one die size (min 4)`"
+                          :title="`Demote this ${baddie.typeLabel} one die size (min 4)`"
                           @click="baddie.demote()" 
                           :disabled="baddie.size <= 4">
                     <icon :icon="['fas', 'level-down-alt']" />
                   </button>
                   <button class="btn btn-success border-dark text-dark" 
-                          :title="`Promote this ${labelSingle} one die size (max 12)`"
+                          :title="`Promote this ${baddie.typeLabel} one die size (max 12)`"
                           @click="baddie.promote()" 
                           :disabled="baddie.size >= 12">
                     <icon :icon="['fas', 'level-up-alt']" />
                   </button>
                   <button class="btn btn-info border-dark text-dark" 
-                          :title="`Add another ${labelSingle} to this row`"
+                          :title="`Add another ${baddie.typeLabel} to this row`"
                           @click="baddie.count++">
                     <icon :icon="['far', 'plus-square']" />
                   </button>
                   <button class="btn btn-danger border-dark text-dark"
-                          :title="`Remove one ${labelSingle} from this group from the scene`"
+                          :title="`Remove one ${baddie.typeLabel} from this group from the scene`"
                           @click="baddie.count--">
                     <icon :icon="['far', 'trash-alt']" />
                   </button>
+                  <button class="btn btn-secondary border-dark text-light" 
+                          :title="`Edit this ${baddie.typeLabel}`"
+                          @click="baddie.beginEdit()"
+                          v-if="baddie.allowEdit && !baddie.editing">
+                    <icon :icon="['far', 'edit']" />
+                  </button>
+                  <button class="btn btn-success border-dark text-light" 
+                          :title="`Save edits on this ${baddie.typeLabel}`"
+                          @click="baddie.saveEdit()"
+                          v-if="baddie.editing">
+                    <icon :icon="['far', 'save']" />
+                  </button>
+                  <button class="btn btn-warning border-dark"
+                          @click="baddie.cancelEdit()"
+                          v-if="baddie.editing"
+                          :title="`Cancel edits on this ${baddie.typeLabel}`">
+                    <icon :icon="['fas', 'ban']" />
+                  </button>
                   <button class="btn btn-secondary border-dark"
                           @click="$store.dispatch('export', {type: label.toLowerCase(), fileName: label, id: baddie.id})"
-                          :title='`Export this ${labelSingle} to an xlsx file`'>
+                          :title='`Export this ${baddie.typeLabel} to an xlsx file`'>
                     <icon :icon="['fas', 'file-download']" />
                   </button>
                 </div>
@@ -254,17 +321,21 @@
             </div>
             <div class="d-inline" 
                  v-if="baddieData.modifier.type !== 'Defend'">
-              <label>Persistent?</label>
-              <input type="checkbox" 
+              <label :for="`persistent-${labelSingle}`"
+                     class="c-pointer">Persistent?</label>
+              <input type="checkbox"
                      v-model="baddieData.modifier.persistent"
-                     @keydown="addModifier">
+                     @keydown.enter="addModifier"
+                     :id="`persistent-${labelSingle}`">
             </div>
             <div class="d-inline mx-3" 
                  v-if="baddieData.modifier.type !== 'Defend'">
-              <label>Exclusive?</label>
+              <label :for="`exclusive-${labelSingle}`"
+                     class="c-pointer">Exclusive?</label>
               <input type="checkbox" 
                      v-model="baddieData.modifier.exclusive"
-                     @keydown="addModifier">
+                     @keydown.enter="addModifier"
+                     :id="`exclusive-${labelSingle}`">
             </div>
           </div>
           <div class="modal-footer">

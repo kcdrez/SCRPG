@@ -137,11 +137,22 @@
                     </div>
                   </td>
                   <!-- Type/Count -->
-                  <td class="text-capitalize c-pointer align-middle"
-                      @click="actor.takenAction()"
-                      :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
-                    {{actor.typeLabel}}
-                    <template v-if="actor.count">({{actor.count}})</template>
+                  <td class="text-capitalize c-pointer align-middle">
+                    <div v-if="!actor.editing"
+                         @click="actor.takenAction()"
+                         :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
+                      {{actor.typeLabel}}
+                      <template v-if="actor.count">
+                        ({{actor.count}})
+                      </template>
+                    </div>
+                    <input type="number"
+                            class="form-control form-control-sm"
+                            v-model="actor.tempCount"
+                            v-if="actor.count && actor.editing"
+                            min="1"
+                            max="100"
+                            @keydown.enter="actor.saveEdit()">
                   </td>
                   <!-- HP/Die Size -->
                   <td class="align-middle">
@@ -169,8 +180,17 @@
                       </template>
                     </template>
                     <template v-else-if="actor.size">
+                      <input type="number"
+                             class="form-control form-control-sm"
+                             v-model="actor.tempSize"
+                             v-if="actor.editing"
+                             min="4"
+                             max="12"
+                             step="2"
+                             @keydown.enter="actor.saveEdit()">
                       <img :src="`images/d${actor.size}.png`"
-                          :title="`This ${actor.typeLabel} uses a d${actor.size}`">
+                           :title="`This ${actor.typeLabel} uses a d${actor.size}`"
+                           v-else>
                     </template>
                     <template v-else>-</template>
                   </td>

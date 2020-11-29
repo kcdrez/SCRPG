@@ -20,6 +20,8 @@ class Actor {
         return 'minion';
       case 'lieutenants':
         return 'lieutenant';
+      case 'villains':
+        return 'villain';
       default:
         return this.type;
     }
@@ -34,6 +36,11 @@ class Actor {
   cancelEdit() {
     this.editing = false;
   }
+  saveEdit() {
+    this.editing = false;
+    this.name = this.tempName;
+    this.save();
+  }
   resetRound() {
     this.acted = false;
     this.save();
@@ -42,13 +49,7 @@ class Actor {
     this.acted = !this.acted;
     this.save();
   }
-  saveEdit() {
-    this.editing = false;
-    this.name = this.tempName;
-    this.save();
-  }
   sortModifiers(list) {
-    console.log('sorting mods')
     list.sort((a, b) => {
       if (a.name !== b.name) {
         return a.name > b.name ? 1: -1;
@@ -67,14 +68,14 @@ class Actor {
 }
 
 function sortActors(a, b) {
-  if (a.type > b.type) return -1;
-  else if (b.type > a.type) return 1;
-  else if (a.name > b.name) return -1;
-  else if (b.name > a.name) return 1;
-  else if (a.size > b.size) return -1;
-  else if (b.size > a.size) return 1;
-  else if (a.boosts.length > b.boosts.length) return -1;
-  else if (b.boosts.length > b.boosts.length) return 1;
+  if (a.type > b.type) return 1;
+  else if (b.type > a.type) return -1;
+  else if (a.name > b.name) return 1;
+  else if (b.name > a.name) return -1;
+  else if (a.size > b.size) return 1;
+  else if (b.size > a.size) return -1;
+  else if (a.bonuses.length > b.bonuses.length) return -1;
+  else if (b.bonuses.length > b.bonuses.length) return 1;
   else if (a.penalties.length > b.penalties.length) return -1;
   else if (b.penalties.length > b.penalties.length) return 1;
   else if (a.defends.length > b.defends.length) return -1;

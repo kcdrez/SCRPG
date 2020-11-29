@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import store from '../vuex-state/store';
-import {unvue} from './utilities';
 import {v4 as uuid} from 'uuid';
 import Actor from './actor';
 
@@ -8,11 +7,14 @@ class Baddie extends Actor {
   constructor(data) {
     super(data);
     this._owner = data.owner || data._owner || data.parent || null;
+    this.tempOwner = this._owner;
     this.size = data.size || 12;
+    this.tempSize = this.size;
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
     this._count = data.count || data._count || 1;
+    this.tempCount = this._count;
     this.markForDeath = false;
   }
 
@@ -23,6 +25,9 @@ class Baddie extends Actor {
   set count(val) {
     this._count = val;
     this.save();
+  }
+  get allowEdit() {
+    return !this.editing;
   }
 
   demote() {
@@ -130,6 +135,15 @@ class Baddie extends Actor {
       defends: this.defends.map(x => x.export(this.id)),
     }, this.export().baddie);
   }
+  saveEdit() {
+    this._owner = this.tempOwner;
+    this.size = this.tempSize;
+    this._count = this.tempCount;
+    this.bonuses.forEach(b => b.saveEdit());
+    this.penalties.forEach(p => p.saveEdit());
+    this.defends.forEach(d => d.saveEdit());
+    super.saveEdit();
+  }
 }
 
 class Villain extends Actor{
@@ -147,29 +161,21 @@ class Villain extends Actor{
     return true;
   }
 
-  boost(name, amount, persistent, exclusive) {
-    this.bonuses.push({name, amount, persistent, exclusive});
-    this.sortModifiers(this.bonuses);
-  }
-  hinder(name, amount, persistent, exclusive) {
-    this.penalties.push({name, amount, persistent, exclusive});
-    this.sortModifiers(this.penalties);
-  }
-  defend(name, amount) {
-    this.defends.push({name, amount});
-    this.sortModifiers(this.defends);
-  }
-  addModifier({name, type, amount, persistent, exclusive}) {
-    if (name === '') return;
-    switch (type.toLowerCase()) {
+  addModifier(modifierData) {
+    if (!modifierData.name) return;
+
+    switch (modifierData.type.toLowerCase()) {
       case 'bonus':
-        this.boost(name, amount, persistent, exclusive);
+        this.bonuses.push(new Modifier(modifierData));
+        this.sortModifiers(this.bonuses);
         break;
       case 'penalty':
-        this.hinder(name, amount, persistent, exclusive);
+        this.penalties.push(new Modifier(modifierData));
+        this.sortModifiers(this.penalties);
         break;
       case 'defend':
-        this.defend(name, amount);
+        this.defends.push(new Modifier(modifierData));
+        this.sortModifiers(this.defends);
         break;
     }
   }
@@ -235,16 +241,53 @@ class Villain extends Actor{
       minions
     }
   }
+  saveEdit() {
+    this.bonuses.forEach(b => b.saveEdit());
+    this.penalties.forEach(p => p.saveEdit());
+    this.defends.forEach(d => d.saveEdit());
+    super.saveEdit();
+  }
 }
 
 class Modifier {
   constructor(data) {
     this.id = data.id || uuid();
     this.name = data.name;
+    this.tempName = this.name;
     this.amount = data.amount;
+    this.tempAmount = this.amount;
     this.exclusive = data.exclusive || false;
+    this.tempExclusive = this.exclusive;
     this.persistent = data.persistent || false;
+    this.tempPersistent = this.persistent;
     this.type = data.type;
+  }
+
+  get min() {
+    switch (this.type.toLowerCase()) {
+      case 'bonus':
+        return 1;
+      case 'hinder':
+        return -4;
+      case 'defend':
+        return 100;
+      default:
+        console.warning('Unknown modifier type', this.type);
+        return 100;
+    }
+  }
+  get max() {
+    switch (this.type.toLowerCase()) {
+      case 'bonus':
+        return 4;
+      case 'hinder':
+        return -1;
+      case 'defend':
+        return 1;
+      default:
+        console.warning('Unknown modifier type', this.type);
+        return 1;
+    }
   }
 
   export(parent) {
@@ -257,6 +300,12 @@ class Modifier {
       persistent: this.persistent,
       parent
     }
+  }
+  saveEdit() {
+    this.name = this.tempName;
+    this.amount = this.tempAmount;
+    this.persistent = this.tempPersistent;
+    this.exclusive = this.tempExclusive;
   }
 }
 
