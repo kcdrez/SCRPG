@@ -29,7 +29,7 @@
       </div>
       <div class="row"
             v-if="scene.challenges.length === 0">
-        <div class="col empty-data">There are no challenges.</div>
+        <div class="col mt-2">There are no challenges.</div>
       </div>
       <div class="row" 
            v-for="(challenge, challengeIndex) in scene.challenges" 

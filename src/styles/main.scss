@@ -6,8 +6,16 @@
 }
 
 body {
-  background-color: #fffee6;
-  color: #262626;
+  background-color: $background-dark;
+  color: $text-light;
+
+  a {
+    color: $primary-300;
+
+    &:hover {
+      color: $primary-200;
+    }
+  }
 
   table {
     thead {
@@ -27,8 +35,4 @@ body {
 }
 .c-help {
   cursor: help;
-}
-
-.empty-data {
-  margin-top: .5rem;
 }

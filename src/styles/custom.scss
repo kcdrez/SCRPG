@@ -1,4 +1,40 @@
-// $warning: #e6ac00;
+@import './variables.scss';
 
-
+//Variable overwrites go above this line
 @import 'bootstrap';
+//class overwrites go below this line
+
+.btn-primary {
+  color: $primary-text;
+}
+
+.btn-secondary {
+  color: $secondary-text;
+}
+
+.btn-success {
+  color: $success-text;
+}
+
+.btn-danger {
+  color: $danger-text;
+}
+
+.btn-warning {
+  color: $warning-text;
+}
+
+.card {
+  .card-header {
+    background-color: $background-highlight-100;
+    color: $text-dark;
+  }
+  .card-body {
+    background-color: $background-highlight-200;
+    color: $text-dark;
+  }
+}
+
+nav.navbar-light {
+  background-color: $background-highlight-400;
+}

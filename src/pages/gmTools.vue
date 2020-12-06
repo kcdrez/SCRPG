@@ -5,7 +5,7 @@
       <div class="row">
         <h1 class="col text-center">GM Management</h1>
       </div>
-      <SceneTracker @add-minion="$refs.minions.modal('show', $event)" />
+      <Environment @add-minion="$refs.minions.modal('show', $event)" />
       <Baddies label="Minions" 
                :allowOwner="true" ref="minions" />
       <Baddies label="Lieutenants" 
@@ -74,12 +74,12 @@
 
 <script>
   import Baddies from '../components/baddie.vue';
-  import SceneTracker from '../components/sceneTracker.vue';
+  import Environment from '../components/environment.vue';
   import Villains from '../components/villain.vue';
 
   export default {
     name: 'GMTools',
-    components: { Baddies, SceneTracker, Villains }
+    components: { Baddies, Environment, Villains }
   };
 </script>
 

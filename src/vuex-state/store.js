@@ -23,7 +23,7 @@ const store = new Vuex.Store({
   mutations: {
     INIT(state, {players, minions, lieutenants, villains, scene}) {
       if (players) {
-        state.players = playerData.map(x => new Player(x));
+        state.players = players.map(x => new Player(x));
       }
       if (minions) {
         minions.forEach(minion => {
@@ -53,7 +53,7 @@ const store = new Vuex.Store({
     DELETE_BADDIE(state, {type, index}) {
       state[type].splice(index, 1);
     },
-    RESET_SCENE(state) {
+    RESET_ENVIRONMENT(state) {
       state.minions = [];
       state.lieutenants = [];
       state.villains = [];
@@ -93,8 +93,8 @@ const store = new Vuex.Store({
     saveData(ctx, dataType) {
       Cookies.set(dataType, ctx.rootState[dataType], {sameSite: 'strict'}); 
     },
-    resetScene(ctx) {
-      ctx.commit('RESET_SCENE');
+    resetEnvironment(ctx) {
+      ctx.commit('RESET_ENVIRONMENT');
       ctx.dispatch('saveData', 'minions');
       ctx.dispatch('saveData', 'lieutenants');
       ctx.dispatch('saveData', 'villains');
