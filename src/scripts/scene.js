@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import {v4 as uuid} from 'uuid';
 import store from '../vuex-state/store';
-import Actor from './actor';
+import { Actor, GenericObject } from './actor';
 
 class Scene extends Actor {
   constructor(data) {
@@ -108,7 +108,7 @@ class Scene extends Actor {
   }
   resetLocations() {
     this.locations = [];
-    store.dispatch('saveData', 'scene');
+    this.save();
   }
   addChallenge(challenge, skipInitialize) {
     this.challenges.push(new Challenge(challenge, skipInitialize));
@@ -122,7 +122,7 @@ class Scene extends Actor {
   }
   resetChallenges() {
     this.challenges = [];
-    store.dispatch('saveData', 'scene');
+    this.save();
   }
   setNote(note) {
     this.notes = note;
@@ -188,13 +188,14 @@ class Scene extends Actor {
   }
 }
 
-class Challenge {
+class Challenge extends GenericObject {
   constructor(data, skipInitialize) {
-    this.name = data.name || '';
-    this.id = data.id || uuid();
+    super(data);
     this.list = (data.list || []).map(x => new ChallengeEntry(x));
+    this.description = data.description || '';
+    this.tempDescription = data.tempDescription || this.description;
     if (!skipInitialize) this.initialize();
-  }
+  } 
   
   initialize() {
     if (this.list.length === 0) {
@@ -229,38 +230,29 @@ class Challenge {
   save() {
     store.dispatch('saveData', 'scene');
   }
+  saveEdit() {
+    this.description = this.tempDescription;
+    super.saveEdit();
+  }
   export() {
     return {
       id: this.id,
       name: this.name,
-      type: 'challenge'
+      type: 'challenge',
+      description: this.description
     }
   }
 }
 
-class ChallengeEntry {
+class ChallengeEntry extends GenericObject {
   constructor(data) {
+    super(data);
     this.completed = data.completed || false;
-    this.editing = data.editing || false;
-    this.label = data.label || data.name || '';
-    this.tempLabel = data.label || data.tempLabel || '';
-    this.id = data.id || uuid();
   }
 
   complete() {
     this.completed = !this.completed;
     this.save();
-  }
-  beginEdit() {
-    this.editing = true;
-  }
-  edit() {
-    this.editing = false;
-    this.label = this.tempLabel;
-    this.save();
-  }
-  cancel() {
-    this.editing = false;
   }
   save() {
     store.dispatch('saveData', 'scene');

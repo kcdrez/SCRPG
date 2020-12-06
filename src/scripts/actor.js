@@ -1,30 +1,17 @@
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import store from '../vuex-state/store';
 
-class Actor {
+
+class GenericObject {
   constructor(data) {
-    if (this.constructor === Actor) {
-      throw new TypeError('Abstract class "Actor" cannot be instantiated directly.')
+    if (this.constructor === GenericObject) {
+      throw new TypeError('Abstract class "GenericObject" cannot be instantiated directly.')
     }
     this.id = data.id || uuid();
     this.name = data.name;
     this.tempName = data.tempName || data.name || '';
-    this.acted = data.acted || false;
     this.editing = data.editing || false;
     this.type = data.type;
-  }
-
-  get typeLabel() {
-    switch (this.type) {
-      case 'minions':
-        return 'minion';
-      case 'lieutenants':
-        return 'lieutenant';
-      case 'villains':
-        return 'villain';
-      default:
-        return this.type;
-    }
   }
 
   save() {
@@ -41,6 +28,30 @@ class Actor {
     this.name = this.tempName;
     this.save();
   }
+}
+
+class Actor extends GenericObject {
+  constructor(data) {
+    super(data);
+    if (this.constructor === Actor) {
+      throw new TypeError('Abstract class "Actor" cannot be instantiated directly.')
+    }
+    this.acted = data.acted || false;
+  }
+
+  get typeLabel() {
+    switch (this.type) {
+      case 'minions':
+        return 'minion';
+      case 'lieutenants':
+        return 'lieutenant';
+      case 'villains':
+        return 'villain';
+      default:
+        return this.type;
+    }
+  }
+
   resetRound() {
     this.acted = false;
     this.save();
@@ -84,5 +95,6 @@ function sortActors(a, b) {
   else if (b.count > a.count) return 1;
   else return 0;
 }
+
 export default Actor;
-export {Actor, sortActors};
+export { Actor, GenericObject, sortActors };

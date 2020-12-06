@@ -18,36 +18,16 @@ const store = new Vuex.Store({
     minions: [],
     villains: [],
     players: [],
-    scene: null
+    scene: new Scene({})
   },
   mutations: {
-    INIT(state) {
-      const minions = Cookies.getJSON('minions');
-      const lieutenants = Cookies.getJSON('lieutenants');
-      const villains = Cookies.getJSON('villains');
-      const playerData = Cookies.getJSON('players');
-      const sceneData = Cookies.getJSON('scene');
-      if (playerData) {
+    INIT(state, {players, minions, lieutenants, villains, scene}) {
+      if (players) {
         state.players = playerData.map(x => new Player(x));
       }
       if (minions) {
         minions.forEach(minion => {
-          if (minion.list) {
-            minion.list.forEach(x => {
-              state.minions.push(new Baddie({
-                id: minion.id,
-                acted: x.acted,
-                count: x.count,
-                defends: x.defends,
-                bonuses: x.bonuses,
-                size: x.size,
-                type: minion.type,
-                name: minion.name
-              }))
-            });
-          } else {
-            state.minions.push(new Baddie(minion));
-          }
+          state.minions.push(new Baddie(minion));
         });
       }
       if (lieutenants) {
@@ -56,7 +36,7 @@ const store = new Vuex.Store({
       if (villains) {
         state.villains = villains.map(x => new Villain(x));
       }
-      state.scene = new Scene(sceneData || {});
+      state.scene = new Scene(scene || {});
       state.initialized = true;
     },
     CREATE_BADDIE(state, baddie) {
@@ -102,7 +82,12 @@ const store = new Vuex.Store({
   actions: {
     async initialize(ctx) {
       if (!ctx.state.initialized) {
-        ctx.commit('INIT');
+        const minions = Cookies.getJSON('minions');
+        const lieutenants = Cookies.getJSON('lieutenants');
+        const villains = Cookies.getJSON('villains');
+        const players = Cookies.getJSON('players');
+        const scene = Cookies.getJSON('scene');
+        ctx.commit('INIT', {minions, lieutenants, villains, players, scene});
       }
     },
     saveData(ctx, dataType) {
@@ -173,18 +158,18 @@ const store = new Vuex.Store({
     },
     reconcile(ctx, type) {
       for (let i = 0; i < ctx.state[type].length - 1; i++) {
-        if (sameBaddies(ctx.state[type][i], ctx.state[type][i+1])) {
+        if (sameBaddies(ctx.state[type][i], ctx.state[type][i + 1])) {
           ctx.state[type][i].count += ctx.state[type][i+1].count;
-          ctx.state[type][i+1].markForDeath = true;
+          ctx.state[type][i + 1].markForDeath = true;
         }
       }
       ctx.state[type] = ctx.state[type].filter(x => !x.markForDeath);
       ctx.dispatch('saveData', type);
     },
     export(ctx, options) {
-      const {type, fileName, id} = options || {};
+      const { type, fileName, id } = options || {};
       const rows = [];
-      const {scene, challenges, locations, envMinions} = ctx.state.scene.export(id);
+      const { scene, challenges, locations, envMinions } = ctx.state.scene.export(id);
       if (type === 'scene' || !type) {
         if (scene) rows.push(scene);
         rows.push(...envMinions);
@@ -323,6 +308,6 @@ const store = new Vuex.Store({
       return arr.concat(state.lieutenants, remainingMinions);
     }
   }
-})
+});
 
 export default store;

@@ -355,11 +355,11 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import {Baddie} from '../scripts/baddie';
-  import {mapState} from 'vuex';
+  import { Baddie } from '../scripts/baddie';
+  import { mapState } from 'vuex';
   import Modifier from './modifier.vue';
-  import {unvue} from '../scripts/utilities';
-  import {sortActors} from '../scripts/actor';
+  import { unvue } from '../scripts/utilities';
+  import { sortActors } from '../scripts/actor';
 
   export default {
     name: 'BaddieList',
