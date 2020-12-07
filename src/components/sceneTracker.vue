@@ -83,7 +83,7 @@
                 <div class="input-group-text">Name</div>
               </div>
               <input class="form-control"
-                     v-model.trim="text"
+                     v-model.trim="name"
                      type="text"
                      ref="scene"
                      @keypress.enter="createScene">
@@ -120,11 +120,12 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary"
+            <button class="btn btn-success"
                     type="button"
                     data-dismiss="modal"
                     @click="createScene"
-                    :disabled="scene.text === ''">Create</button>
+                    :disabled="name === ''"
+                    :title="!name ? 'Enter a name to create the Scene Tracker' : ''">Create</button>
             <button class="btn btn-secondary"
                     type="button"
                     data-dismiss="modal">Close</button>
@@ -144,7 +145,7 @@
         green: 2,
         yellow: 4,
         red: 2,
-        text: '',
+        name: '',
       }
     },
     computed: {
@@ -154,8 +155,8 @@
     },
     methods: {
       createScene() {
-        if (this.text !== '') {
-          this.scene.create(this.green, this.yellow, this.red, this.text);
+        if (this.name !== '') {
+          this.scene.create(this.green, this.yellow, this.red, this.name);
           $('#sceneTrackerModal').modal('hide');
         }
       }    

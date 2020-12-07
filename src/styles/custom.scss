@@ -4,37 +4,77 @@
 @import 'bootstrap';
 //class overwrites go below this line
 
+
+//Buttons
 .btn-primary {
-  color: $primary-text;
+  color: $primary-text-light;
+
+  &:disabled {
+    color: $primary-light-2;
+  }
 }
 
 .btn-secondary {
-  color: $secondary-text;
+  color: $secondary-text-light;
+
+  &:disabled {
+    color: $secondary-text-light;
+  }
 }
 
 .btn-success {
-  color: $success-text;
+  color: $success-text-light;
+
+  &:disabled {
+    color: $success-light-2;
+  }
 }
 
 .btn-danger {
-  color: $danger-text;
+  color: $danger-text-light;
+
+  &:disabled {
+    color: $danger-light-2;
+  }
 }
 
 .btn-warning {
-  color: $warning-text;
+  color: $warning-text-light;
+
+  &:disabled {
+    color: $warning-light-2;
+  }
 }
 
+//Cards
 .card {
   .card-header {
-    background-color: $background-highlight-100;
-    color: $text-dark;
+    background-color: $background-light-3;
+    color: $dark;
   }
   .card-body {
-    background-color: $background-highlight-200;
-    color: $text-dark;
+    background-color: $background-light-4;
+    color: $dark;
   }
 }
 
+//Navbar
 nav.navbar-light {
-  background-color: $background-highlight-400;
+  background-color: $background-light-3;
+}
+
+//Modal
+.modal-content {
+  .modal-header, .modal-footer {
+    background-color: $background-light-1;
+    color: $light;
+  }
+  .modal-body {
+    background-color: $background-light-2;
+    color: $dark;
+  }
+}
+
+.form-control {
+  background-color: $background-light-4;
 }

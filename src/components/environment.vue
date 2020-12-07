@@ -18,7 +18,7 @@
       <div class="row">
         <div class="col-7 text-center environment">
           <SceneTracker />
-          <Locations />
+          <Locations class="my-3" />
           <ChallengesTracker />
         </div>
         <div class="col-5 round-tracker">
