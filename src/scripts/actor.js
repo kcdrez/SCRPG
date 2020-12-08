@@ -14,8 +14,8 @@ class GenericObject {
     this.type = data.type;
   }
 
-  save() {
-    store.dispatch('saveData', this.type);
+  save(type, data) {
+    store.dispatch('saveData', { type: type || this.type, data });
   }
   beginEdit() {
     this.editing = true;

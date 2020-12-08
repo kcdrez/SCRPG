@@ -1,10 +1,11 @@
 import Vue from 'vue';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import store from '../vuex-state/store';
 import { Actor, GenericObject } from './actor';
 
 class Scene extends Actor {
   constructor(data) {
+    data.type = data.type || 'scene';
     super(data);
     this.green = data.green || [];
     this.yellow = data.yellow || [];
@@ -145,7 +146,7 @@ class Scene extends Actor {
         green: this.exportSceneTracker(this.green),
         yellow: this.exportSceneTracker(this.yellow),
         red: this.exportSceneTracker(this.red),
-        type: 'scene'
+        type: this.type
       } : null,
       locations: this.locations.map(x => x.export()),
       challenges: this.exportChallenges(challengeId),
@@ -199,7 +200,7 @@ class Challenge extends GenericObject {
   
   initialize() {
     if (this.list.length === 0) {
-      this.add({ label: `Complete ${this.name}` });
+      this.add({ name: `Complete ${this.name}` });
     }
   }
   add(data) {
@@ -228,7 +229,7 @@ class Challenge extends GenericObject {
     }
   }
   save() {
-    store.dispatch('saveData', 'scene');
+    super.save('scene');
   }
   saveEdit() {
     this.description = this.tempDescription;
@@ -255,11 +256,11 @@ class ChallengeEntry extends GenericObject {
     this.save();
   }
   save() {
-    store.dispatch('saveData', 'scene');
+    super.save('scene');
   }
   export(parent) {
     return {
-      name: this.label,
+      name: this.name,
       parent,
       completed: this.completed,
       type: 'challenge element'
@@ -267,27 +268,19 @@ class ChallengeEntry extends GenericObject {
   }
 }
 
-class Location {
+class Location extends GenericObject {
   constructor(data) {
-    this.editing = data.editing || false;
-    this.name = data.name || '';
+    super(data);
     this.description = data.description || '';
-    this.tempName = data.tempName || data.name || '';
     this.tempDescription = data.tempDescription || data.description || '';
-    this.id = data.id || uuid();
   }
 
-  beginEdit() {
-    this.editing = true; 
-  }
-  edit() {
-    this.editing = false;
-    this.name = this.tempName;
+  saveEdit() {
     this.description = this.tempDescription;
-    this.save();
+    super.saveEdit();
   }
   save() {
-    store.dispatch('saveData ', 'scene');
+    super.save('scene');
   }
   export() {
     return {
@@ -300,4 +293,4 @@ class Location {
 }
 
 export default Scene;
-export {Scene, Challenge, Location};
+export { Scene, Challenge, Location };

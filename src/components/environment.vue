@@ -1,7 +1,7 @@
 <template>
   <div class="environment-component">
-    <div class="row environment-header">
-      <div class="col">
+    <div class="row">
+      <div class="col environment-header">
         <h2>
           <a href="#environmentData" 
              data-toggle="collapse">Environment</a>
@@ -16,95 +16,14 @@
     <div id="environmentData"
          class="collapse show">
       <div class="row">
-        <div class="col-7 text-center environment">
-          <SceneTracker />
-          <Locations class="my-3" />
-          <ChallengesTracker />
+        <div class="col-7">
+          <SceneTracker class="mb-3" />
+          <Locations class="mb-3" />
+          <ChallengesTracker class="mb-3" />
         </div>
-        <div class="col-5 round-tracker">
-          <RoundTracker />
-          <hr class="border-dark" />
-          <div>
-            <h4 class="text-center">Notes</h4>
-            <div class="editor">
-              <editor-menu-bar :editor="editor"
-                                v-slot="{ commands, isActive }">
-                <div class="menubar">
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.bold() }"
-                          @click="commands.bold"
-                          title="Bold">
-                    <icon :icon="['fas', 'bold']" />
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.italic() }"
-                          @click="commands.italic"
-                          title="Italic">
-                    <icon :icon="['fas', 'italic']" />
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.strike() }"
-                          @click="commands.strike"
-                          title="Strikethrough">
-                    <icon :icon="['fas', 'strikethrough']" />
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.underline() }"
-                          @click="commands.underline"
-                          title="Underline">
-                    <icon :icon="['fas', 'underline']" />
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.heading({ level: 1 }) }"
-                          @click="commands.heading({ level: 1 })"
-                          title="Heading 1">
-                    <icon :icon="['fas', 'heading']" />1
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.heading({ level: 2 }) }"
-                          @click="commands.heading({ level: 2 })"
-                          title="Heading 2">
-                    <icon :icon="['fas', 'heading']" />2
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.heading({ level: 3 }) }"
-                          @click="commands.heading({ level: 3 })"
-                          title="Heading 3">
-                    <icon :icon="['fas', 'heading']" />3
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.bullet_list() }"
-                          @click="commands.bullet_list"
-                          title="Unordered List">
-                    <icon :icon="['fas', 'list-ul']" />
-                  </button>
-                  <button class="menubar__button"
-                          :class="{ 'is-active': isActive.ordered_list() }"
-                          @click="commands.ordered_list"
-                          title="Ordered List">
-                    <icon :icon="['fas', 'list-ol']" />
-                  </button>
-                  <button class="menubar__button"
-                          @click="commands.horizontal_rule"
-                          title="Horizonal Line">
-                    <icon :icon="['fas', 'grip-lines']" />
-                  </button>
-                  <button class="menubar__button"
-                          @click="commands.undo"
-                          title="Undo">
-                    <icon :icon="['fas', 'undo']" />
-                  </button>
-                  <button class="menubar__button"
-                          @click="commands.redo"
-                          title="Redo">
-                    <icon :icon="['fas', 'redo']" />
-                  </button>
-                </div>
-              </editor-menu-bar>
-              <editor-content class="editor-container"
-                              :editor="editor" />
-            </div>
-          </div>
+        <div class="col-5">
+          <RoundTracker class="mb-3" />
+          <EnvironmentNotes class="mb-3" />
         </div>
       </div>
     </div>
@@ -119,31 +38,13 @@
   import Locations from './locations.vue';
   import SceneTracker from './sceneTracker.vue';
   import RoundTracker from './roundTracker.vue';
+  import EnvironmentNotes from './environment-notes.vue';
   import { mapState } from 'vuex';
   import { diff } from 'deep-diff';
-  import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
-  import {
-    HardBreak,
-    Heading,
-    HorizontalRule,
-    OrderedList,
-    BulletList,
-    ListItem,
-    Bold,
-    Italic,
-    Strike,
-    Underline,
-    History
-  } from 'tiptap-extensions';
 
   export default {
     name: 'Environment',
-    components: { SceneTracker, ChallengesTracker, Locations, RoundTracker, EditorContent, EditorMenuBar },
-    data() {
-      return {
-        editor: null,
-      }
-    },
+    components: { SceneTracker, ChallengesTracker, Locations, RoundTracker, EnvironmentNotes },
     methods: {
       resetEnvironment() {
         this.$dialog.confirm({
@@ -162,69 +63,18 @@
       ...mapState([
         'scene'
       ])
-    },
-    mounted() {
-      this.editor = new Editor({
-        content: this.scene.notes,
-        extensions: [
-          new BulletList(),
-          new HardBreak(),
-          new Heading({ levels: [1, 2, 3] }),
-          new HorizontalRule(),
-          new ListItem(),
-          new OrderedList(),
-          new Bold(),
-          new Italic(),
-          new Strike(),
-          new Underline(),
-          new History()
-        ],
-        onUpdate: (e) => {
-          this.scene.setNote(e.getHTML());
-        }
-      })
-    },
-    beforeDestroy() {
-      this.editor.destroy();
     }
   };
 </script>
 
 <style lang="scss" scoped>
-  .menubar__button {
-    font-weight: 700;
-    display: -webkit-inline-box;
-    display: inline-flex;
-    background: transparent;
-    border: 0;
-    color: #000;
-    padding: .2rem .5rem;
-    margin-right: .2rem;
-    border-radius: 3px;
-    cursor: pointer;
+  .environment-header {
+    display: flex;
+    margin-bottom: 0.5rem;
 
-    &.is-active {
-      background-color: rgba(0,0,0,.1);
-    }
-  }
-  .editor-container {
-    color: #495057;
-    border: 1px solid #ced4da;
-    background-color: #fff;
-    padding: 0.25rem .5rem;
-    border-radius: 5px;
-
-    /deep/ .ProseMirror {
-      margin: 0 !important;
-      min-height: 100px;
-
-      p {
-        margin: 0;
-      }
-    }
-
-    hr {
-      background-color: black;
+    .btn-group {
+      width: 15%;
+      margin: .5rem;
     }
   }
 </style>

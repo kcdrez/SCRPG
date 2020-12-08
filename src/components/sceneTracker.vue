@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="card">
-      <div class="card-header">
+      <div class="card-header text-center">
         <h3>Scene Tracker</h3>
         <div class="btn-group btn-group-sm w-50">
           <button class="btn btn-sm btn-success border-dark" 
@@ -25,9 +25,8 @@
                 ref="import"
               @change="$store.dispatch('import', { files: $event.target.files, filters: ['scene'] })">
       </div>
-      <div class="card-body">
-        <div v-if="scene.isEmpty"
-            class="mt-2">
+      <div class="card-body text-center">
+        <div v-if="scene.isEmpty">
           There is no Scene Tracker.
         </div>
         <div v-else>
@@ -120,13 +119,13 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-success"
+            <button class="btn btn-success border-dark"
                     type="button"
                     data-dismiss="modal"
                     @click="createScene"
                     :disabled="name === ''"
                     :title="!name ? 'Enter a name to create the Scene Tracker' : ''">Create</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary border-dark"
                     type="button"
                     data-dismiss="modal">Close</button>
           </div>

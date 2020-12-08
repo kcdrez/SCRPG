@@ -8,14 +8,14 @@ $primary-light-2: lighten($primary, 20%);
 $primary-text-light: lighten($primary, 50%);
 $primary-text-dark: darken($primary, 10%);
 
-$secondary: #5c4e41;
+$secondary: #999999;
 $secondary-dark-1: darken($secondary, 5%);
 $secondary-light-1: lighten($secondary, 10%);
 $secondary-light-2: lighten($secondary, 20%);
 $secondary-text-light: lighten($secondary, 50%);
 $secondary-text-dark: darken($secondary, 10%);
 
-$success: #00cc9c;
+$success: #009975;
 $success-dark-1: darken($success, 10%);
 $success-light-1: lighten($success, 10%);
 $success-light-2: lighten($success, 20%);
@@ -40,9 +40,9 @@ $background: #7d744f;
 $background-dark-1: darken($background, 5%);
 $background-light-1: lighten($background, 10%);
 $background-light-2: lighten($background, 20%);
-
 $background-light-3: lighten($background, 35%);
 $background-light-4: lighten($background, 50%);
+$background-light-5: lighten($background, 58%);
 
 // .debug-1 {
 //   background-color: $background;

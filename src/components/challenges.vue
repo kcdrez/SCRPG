@@ -1,7 +1,7 @@
 <template>
   <div class="challenges-component">
     <div class="card">
-      <div class="card-header">
+      <div class="card-header text-center">
         <h3>Challenges</h3>
         <div class="btn-group btn-group-sm w-50">
           <button class="btn btn-success border-dark"
@@ -25,8 +25,9 @@
                 @change="$store.dispatch('import', {files: $event.target.files, filters: ['challenge', 'challenge element']})">
       </div>
       <div class="card-body">
-        <div v-if="scene.challenges.length === 0">
-          <div class="mt-2">There are no challenges.</div>
+        <div v-if="scene.challenges.length === 0"
+             class="text-center">
+          There are no challenges in the scene.
         </div>
         <div v-for="(challenge, challengeIndex) in scene.challenges" 
             :key="challenge.name">
@@ -37,7 +38,8 @@
               <div :class="challenge.editing ? 'input-group input-group-sm mb-2' : 'd-inline float-right'">
                 <input type="text"
                       class="form-control form-control-sm"
-                      v-model="challenge.tempName"
+                      placeholder="Challenge Name"
+                      v-model.trim="challenge.tempName"
                       v-if="challenge.editing">
                 <div :class="challenge.editing ? 'input-group-append' : 'btn-group btn-group-sm'">
                   <button class="btn btn-sm btn-primary border-dark"
@@ -47,6 +49,7 @@
                   <button class="btn btn-sm btn-success border-dark"
                           title="Save this Challenge"
                           @click="challenge.saveEdit()"
+                          :disabled="challenge.tempName === ''"
                           v-if="challenge.editing">Save</button>
                   <button class="btn btn-sm btn-warning border-dark"
                           title="Cancel edits on this Challenge"
@@ -56,85 +59,88 @@
                           title="Remove this Challenge from the Scene" 
                           @click="scene.removeChallenge(challengeIndex)">Remove</button>
                   <button class="btn btn-secondary border-dark"
-                          @click="$store.dispatch('export', {type: 'challenges', 
+                          @click="$store.dispatch('export', { type: 'challenges', 
                             fileName: challenge.name + '_challenges',
-                            id: challenge.id})"
+                            id: challenge.id })"
                           title="Export this Challenge to an xlsx file">Export</button>
                 </div>
               </div>
               <div v-if="!challenge.editing">{{challenge.description}}</div>
               <textarea class="form-control form-control-sm"
-                        v-model="challenge.tempDescription"
+                        v-model.trim="challenge.tempDescription"
+                        placeholder="Challenge Description"
                         v-else>
               </textarea>
             </div>
           </div>
           <div>
-            <table class="table table-sm table-striped table-bordered table-dark mb-0">
+            <table class="table table-sm table-striped table-bordered table-dark text-center mb-0">
               <thead>
                 <tr>
-                    <th width="20%">Completed?</th>
-                    <th>Description</th>
-                    <th>Actions</th>
+                  <th width="20%">Completed?</th>
+                  <th>Challenge Entry Name</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(challengeEntry, itemIndex) in challenge.list" 
                     :key="challengeEntry.name">
-                    <td @click="challengeEntry.complete()" 
-                        class="h4">
-                      <icon :icon="['far', 'check-square']" 
-                            v-if="challengeEntry.completed" 
-                            class="c-pointer text-success" />
-                      <icon :icon="['far', 'square']" 
-                            v-else 
-                            class="c-pointer text-danger" />
-                    </td>
-                    <td>
-                      <input type="text" 
-                              v-model.trim="challengeEntry.tempName" 
-                              v-if="challengeEntry.editing" 
-                              class="form-control form-control-sm"
-                              @keypress.enter="challengeEntry.saveEdit()"
-                              :ref="challengeEntry.id">
-                      <template v-else>{{challengeEntry.name}}</template>
-                    </td>
-                    <td>
-                      <div class="btn-group btn-group-sm">
-                          <button class="btn btn-primary border-dark"
-                                  @click="editChallengeEntry(challengeEntry)"
-                                  v-if="!challengeEntry.editing"
-                                  title="Edit this Challenge Entry">
-                            <icon :icon="['far', 'edit']" />
-                          </button>
-                          <template v-else>
-                          <button class="btn btn-success border-dark" 
-                                  @click="challengeEntry.saveEdit()"
-                                  title="Save this Challenge Entry">
-                            <icon :icon="['far', 'save']" />
-                          </button>
-                          <button class="btn btn-warning border-dark" 
-                                  @click="challengeEntry.cancelEdit()"
-                                  title="Cancel Editing">
-                            <icon :icon="['fas', 'ban']" />
-                          </button>
-                          </template>
-                          <button class="btn btn-danger border-dark" 
-                                  @click="challenge.remove(itemIndex)"
-                                  title="Remove this Challenge Entry">
-                            <icon :icon="['far', 'trash-alt']" />
-                          </button>
-                      </div>
-                    </td>
+                  <td @click="challengeEntry.complete()" 
+                      class="h4">
+                    <icon :icon="['far', 'check-square']" 
+                          v-if="challengeEntry.completed" 
+                          class="c-pointer text-success" />
+                    <icon :icon="['far', 'square']" 
+                          v-else 
+                          class="c-pointer text-danger" />
+                  </td>
+                  <td>
+                    <input type="text" 
+                           v-model.trim="challengeEntry.tempName" 
+                           v-if="challengeEntry.editing" 
+                           class="form-control form-control-sm"
+                           placeholder="Challenge Entry Name"
+                           @keypress.enter="challengeEntry.saveEdit()"
+                           :ref="challengeEntry.id">
+                    <template v-else>{{challengeEntry.name}}</template>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-primary border-dark"
+                              @click="editChallengeEntry(challengeEntry)"
+                              v-if="!challengeEntry.editing"
+                              title="Edit this Challenge Entry">
+                        <icon :icon="['far', 'edit']" />
+                      </button>
+                      <template v-else>
+                        <button class="btn btn-success border-dark" 
+                                @click="challengeEntry.saveEdit()"
+                                title="Save this Challenge Entry"
+                                :disabled="challengeEntry.tempName === ''">
+                          <icon :icon="['far', 'save']" />
+                        </button>
+                        <button class="btn btn-warning border-dark" 
+                                @click="challengeEntry.cancelEdit()"
+                                title="Cancel Editing">
+                          <icon :icon="['fas', 'ban']" />
+                        </button>
+                      </template>
+                      <button class="btn btn-danger border-dark" 
+                              @click="challenge.remove(itemIndex)"
+                              title="Remove this Challenge Entry">
+                        <icon :icon="['far', 'trash-alt']" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td colspan="3">
                     <div class="input-group input-group-sm mx-auto my-1 w-50">
                       <input type="text" 
-                              class="form-control border-dark" 
-                              placeholder="New Challenge Entry" 
-                              v-model.trim="newChallenge.name" 
-                              @keypress.enter="challenge.add(newChallenge)">
+                             class="form-control border-dark" 
+                             placeholder="New Challenge Entry" 
+                             v-model.trim="newChallenge.name" 
+                             @keypress.enter="challenge.add(newChallenge)">
                       <div class="input-group-append">
                         <button class="btn btn-success border-dark" 
                                 type="button"  
@@ -221,12 +227,12 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-success" 
+            <button class="btn btn-success border-dark" 
                     type="button"
                     data-dismiss="modal"
                     @click="addChallenge()"
                     :disabled="newChallenge.name === ''">Save</button>
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary border-dark"
                     type="button"
                     data-dismiss="modal">Close</button>
           </div>

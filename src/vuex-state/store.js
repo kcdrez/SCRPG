@@ -2,12 +2,12 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Cookies from 'js-cookie';
 import xlsx from 'xlsx';
-import {Baddie, Villain, sameBaddies} from '../scripts/baddie';
-import {Player} from '../scripts/player';
-import {Scene} from '../scripts/scene';
-import {sortActors} from '../scripts/actor';
-import {unvue, processXlsxFiles} from '../scripts/utilities';
-import {v4 as uuid} from 'uuid';
+import { Baddie, Villain, sameBaddies} from '../scripts/baddie';
+import { Player } from '../scripts/player';
+import { Scene } from '../scripts/scene';
+import { sortActors } from '../scripts/actor';
+import { unvue, processXlsxFiles } from '../scripts/utilities';
+import { v4 as uuid } from 'uuid';
 
 Vue.use(Vuex);
 
@@ -90,8 +90,20 @@ const store = new Vuex.Store({
         ctx.commit('INIT', {minions, lieutenants, villains, players, scene});
       }
     },
-    saveData(ctx, dataType) {
-      Cookies.set(dataType, ctx.rootState[dataType], {sameSite: 'strict'}); 
+    saveData(ctx, { type, data }) {
+      if (!type) return;
+      else if (type in ctx.rootState) {
+        const dataToSave = ctx.rootState[type];
+        if (data && data.id) {
+          for (let i = 0; i < dataToSave.length; i++) {
+            if (x.id === data.id) {
+              x = data;
+              break;
+            }
+          }
+        }
+        Cookies.set(type, dataToSave, { sameSite: 'strict' });
+      }
     },
     resetEnvironment(ctx) {
       ctx.commit('RESET_ENVIRONMENT');

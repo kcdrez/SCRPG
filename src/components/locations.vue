@@ -1,7 +1,7 @@
 <template>
   <div class="locations-component">
     <div class="card">
-      <div class="card-header">
+      <div class="card-header text-center">
         <h3>Locations</h3>
         <div class="btn-group btn-group-sm w-50">
             <button class="btn btn-success border-dark"
@@ -26,46 +26,47 @@
       </div>
       <div class="card-body">
         <div v-if="scene.locations.length === 0"
-              class="mt-2">There are no locations.</div>
-        <table class="table table-sm table-striped table-bordered table-dark mt-3 mb-0" v-else>
+              class="text-center">There are no locations.</div>
+        <table class="table table-sm table-striped table-bordered table-dark text-center mt-3 mb-0" v-else>
           <thead>
             <tr>
-                <th width="30%">Name</th>
-                <th width="50%">Description</th>
-                <th width="20%">Actions</th>
+              <th width="30%">Name</th>
+              <th width="50%">Description</th>
+              <th width="20%">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(location, index) in scene.locations" :key="'location' + location.id">
               <td width="30%">
                 <input type="text" 
-                        v-model.trim="location.tempName" 
-                        v-if="location.editing" 
-                        class="form-control form-control-sm"
-                        @keypress.enter="location.edit()"
-                        :ref="location.id + 'locationName'">
+                       v-model.trim="location.tempName" 
+                       v-if="location.editing" 
+                       class="form-control form-control-sm"
+                       @keypress.enter="location.edit()"
+                       :ref="location.id + 'locationName'">
                 <template v-else>{{location.name || '-'}}</template>
               </td>
               <td width="50%">
                 <textarea v-model.trim="location.tempDescription" 
-                        v-if="location.editing" 
-                        class="form-control form-control-sm"
-                        @keypress.enter="location.edit()"
-                        :ref="location.id + 'locationDescription'">
+                          v-if="location.editing" 
+                          class="form-control form-control-sm"
+                          @keypress.enter="location.edit()"
+                          :ref="location.id + 'locationDescription'">
                 </textarea>
                 <template v-else>{{location.description || '-'}}</template>
               </td>
               <td width="20%">
                 <div class="btn-group btn-group-sm">
-                    <button class="btn btn-primary border-dark"
-                            @click="editLocationElement(location, index)"
-                            v-if="!location.editing"
-                            title="Edit this Location">
-                      <icon :icon="['far', 'edit']" />
-                    </button>
-                    <template v-else>
+                  <button class="btn btn-primary border-dark"
+                          @click="editLocationElement(location, index)"
+                          v-if="!location.editing"
+                          title="Edit this Location">
+                    <icon :icon="['far', 'edit']" />
+                  </button>
+                  <template v-else>
                     <button class="btn btn-success border-dark" 
-                            @click="location.edit()"
+                            @click="location.saveEdit()"
+                            :disabled="location.tempName === ''"
                             title="Save changes on this Location">
                       <icon :icon="['far', 'save']" />
                     </button>
@@ -74,12 +75,12 @@
                             title="Cancel Editing">
                       <icon :icon="['fas', 'ban']" />
                     </button>
-                    </template>
-                    <button class="btn btn-danger border-dark" 
-                            @click="scene.removeLocation(index)"
-                            title="Remove this Location">
-                      <icon :icon="['far', 'trash-alt']" />
-                    </button>
+                  </template>
+                  <button class="btn btn-danger border-dark" 
+                          @click="scene.removeLocation(index)"
+                          title="Remove this Location">
+                    <icon :icon="['far', 'trash-alt']" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -120,12 +121,12 @@
             </textarea>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-success" 
+            <button class="btn btn-success border-dark" 
                     type="button" 
                     data-dismiss="modal" 
                     @click="addLocation()" 
                     :disabled="newLocation.name === ''">Save</button>
-            <button class="btn btn-secondary" 
+            <button class="btn btn-secondary border-dark" 
                     type="button" 
                     data-dismiss="modal">Close</button>
           </div>

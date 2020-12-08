@@ -32,7 +32,7 @@
            v-if="list.length === 0">
         There are no {{label}}.
       </div>
-      <table class="table table-sm table-striped table-bordered col" 
+      <table class="table table-sm table-striped table-bordered table-dark col" 
              v-else>
         <thead class="text-center">
           <tr>

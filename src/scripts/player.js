@@ -3,9 +3,9 @@ import store from '../vuex-state/store';
 import Actor from './actor';
 
 class Player extends Actor {
-  constructor(playerData) {
-    super(playerData);
-    this.initHp(playerData);
+  constructor(data) {
+    super(data);
+    this.initHp(data);
     this.type = 'player';
   }
 
@@ -16,7 +16,7 @@ class Player extends Actor {
     if (val < 0 || val > this.maxHp) return;
     this._hp = val;
     this.tempHP = val;
-    this.save();
+    this.save('players', this.export().player);
   }
   get allowEdit() {
     return !this.editing;
@@ -41,6 +41,13 @@ class Player extends Actor {
   }
   get incapacitated() {
     return this.hp <= 0;
+  }
+  get zone() {
+    if (this.inGreen) return 'green'
+    else if (this.inYellow) return 'yellow'
+    else if (this.inRed) return 'red';
+    else if (this.incapacitated) return 'incapacitated';
+    else return '';
   }
 
   initHp({maxHp, hp, _hp, tempHP}) {
