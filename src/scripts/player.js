@@ -4,9 +4,9 @@ import Actor from './actor';
 
 class Player extends Actor {
   constructor(data) {
+    data.type = data.type || 'player';
     super(data);
     this.initHp(data);
-    this.type = 'player';
   }
 
   get hp() {
@@ -16,7 +16,7 @@ class Player extends Actor {
     if (val < 0 || val > this.maxHp) return;
     this._hp = val;
     this.tempHP = val;
-    this.save('players', this.export().player);
+    this.save();
   }
   get allowEdit() {
     return !this.editing;
@@ -140,7 +140,7 @@ class Player extends Actor {
         yellow = 7;
         break;
     }
-    this.status = {green, yellow};
+    this.status = { green, yellow };
     this.maxHp = maxHp || 40;
     this._hp = hp || _hp;
     this.tempHP = tempHP || this._hp;
@@ -174,6 +174,9 @@ class Player extends Actor {
     this.hp = this.tempHP;
     super.saveEdit();
   }
+  save() {
+    super.save('players', this.export().player);
+  }
   export() {
     const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
       const {baddie, modifiers} = minion.export();
@@ -187,6 +190,7 @@ class Player extends Actor {
         id: this.id,
         name: this.name,
         hp: this.hp,
+        maxHp: this.maxHp,
         acted: this.acted,
         type: this.type
       },
@@ -194,7 +198,17 @@ class Player extends Actor {
     }
   }
   remove() {
-    store.dispatch('removePlayer', this.id)
+    Vue.dialog.confirm({
+      title: 'Are You Sure?',
+      body: 'Are you sure you want to remove this player from the scene?'
+    },
+    {
+      okText: 'Yes',
+      cancelText: 'No'
+    })
+    .then(() => {
+      store.dispatch('removePlayer', this.id);
+    });
   }
 }
 

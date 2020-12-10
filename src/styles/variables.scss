@@ -1,6 +1,3 @@
-// background-color: lighten(#000, 50%);
-
-
 $primary: #2378a9;
 $primary-dark-1: darken($primary, 5%);
 $primary-light-1: lighten($primary, 10%);
@@ -8,7 +5,7 @@ $primary-light-2: lighten($primary, 20%);
 $primary-text-light: lighten($primary, 50%);
 $primary-text-dark: darken($primary, 10%);
 
-$secondary: #999999;
+$secondary: #0BC9CD;
 $secondary-dark-1: darken($secondary, 5%);
 $secondary-light-1: lighten($secondary, 10%);
 $secondary-light-2: lighten($secondary, 20%);
@@ -36,32 +33,13 @@ $warning-light-2: lighten($warning, 20%);
 $warning-text-light: lighten($warning, 50%);
 $warning-text-dark: darken($warning, 30%);
 
-$background: #7d744f;
+$background: #808080;
 $background-dark-1: darken($background, 5%);
 $background-light-1: lighten($background, 10%);
 $background-light-2: lighten($background, 20%);
 $background-light-3: lighten($background, 35%);
-$background-light-4: lighten($background, 50%);
+$background-light-4: lighten($background, 45%);
 $background-light-5: lighten($background, 58%);
-
-// .debug-1 {
-//   background-color: $background;
-// }
-// .debug-2 {
-//   background-color: $background-dark-1;
-// }
-// .debug-3 {
-//   background-color: $background-light-1;
-// }
-// .debug-4 {
-//   background-color: $background-light-2;
-// }
-// .debug-5 {
-//   background-color: $background-light-3;
-// }
-// .debug-6 {
-//   background-color: $background-light-4;
-// }
 
 $dark: #262626;
 $light: #f2f2f2;

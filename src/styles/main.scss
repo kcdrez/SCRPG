@@ -1,4 +1,5 @@
 @import './custom.scss';
+@import './mixins.scss';
 
 @font-face {
   font-family: 'Komica';
@@ -10,7 +11,7 @@ body {
   color: $light;
 
   a {
-    color: $primary-light-2;
+    color: $primary-light-1;
 
     &:hover {
       color: $primary-light-1;
@@ -28,6 +29,9 @@ body {
     font-family: 'Komica';
     font-size-adjust: 0.8;
   }
+  .section-header {
+    @include shadow-dark();
+  }
 }
 
 .c-pointer {
@@ -37,8 +41,16 @@ body {
   cursor: help;
 }
 
-.debug {
-  height: 100px;
-  width: 100px;
-  display: inline-block;
+button:disabled {
+  cursor: not-allowed;
+}
+
+.card-header {
+  h3 {
+    @include shadow-light();
+  }
+}
+
+.modal-title {
+  @include shadow-dark();
 }

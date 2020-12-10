@@ -13,6 +13,13 @@
       <Villains ref="villains" 
                 @add-minion="$refs.minions.modal('show', $event)" />
     </div>
+    <div class="scroll-to-top" 
+         @click="scrollToTop()"
+         title="Scroll to the top of the page"
+         :class="showScrollWidget ? 'd-block': 'd-none'">
+      <icon :icon="['fas', 'arrow-up']"></icon>
+      TOP
+    </div>
     <div id="overcomeChartModal"
         class="modal"
         tabindex="-1"
@@ -21,7 +28,7 @@
           role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Overcome Chart</h5>
+            <h3 class="modal-title">Overcome Chart</h3>
             <button type="button"
                     class="close"
                     data-dismiss="modal">
@@ -34,7 +41,7 @@
                  data-dismiss="modal">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary border-dark"
                     type="button"
                     data-dismiss="modal">Close</button>
           </div>
@@ -49,7 +56,7 @@
           role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Boost/Hinder Chart</h5>
+            <h3 class="modal-title">Boost/Hinder Chart</h3>
             <button type="button"
                     class="close"
                     data-dismiss="modal">
@@ -62,7 +69,7 @@
                  data-dismiss="modal">
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary"
+            <button class="btn btn-secondary border-dark"
                     type="button"
                     data-dismiss="modal">Close</button>
           </div>
@@ -76,17 +83,45 @@
   import Baddies from '../components/baddie.vue';
   import Environment from '../components/environment.vue';
   import Villains from '../components/villain.vue';
+  import _ from 'lodash';
 
   export default {
     name: 'GMTools',
-    components: { Baddies, Environment, Villains }
+    components: { Baddies, Environment, Villains },
+    data() {
+      return {
+        showScrollWidget: false
+      }
+    },
+    methods: {
+      scrollToTop() {
+        $('html').animate({
+          scrollTop: 0
+        }, 300);
+      },
+      scrolling: _.debounce(function() { //lodash doesnt like arrow functions for some reason
+        this.showScrollWidget = window.scrollY >= 75;
+      }, 500)
+    },
+    created() {
+      window.addEventListener('scroll', this.scrolling);
+      this.scrolling();
+    },
+    destroyed() {
+      window.removeEventListener('scroll', this.scrolling);
+    }
   };
 </script>
 
 <style lang="scss">
+  @import '../styles/mixins';
+
   .admin-page {
     max-width: 90%;
 
+    h1 {
+      @include shadow-dark();
+    }
     .scene-tracker-header, .baddie-list-header {
       .col {
         display: flex;
@@ -102,5 +137,19 @@
         }
       }
     }
+  }
+
+  .scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 100;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    border: black solid 1px;
+    background-color: white;
+    color: black;
+    opacity: 0.6;
+    cursor: pointer;
   }
 </style>

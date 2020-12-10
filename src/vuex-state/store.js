@@ -90,17 +90,18 @@ const store = new Vuex.Store({
         ctx.commit('INIT', {minions, lieutenants, villains, players, scene});
       }
     },
-    saveData(ctx, { type, data }) {
+    saveData(ctx, saveData) {
+      const type = typeof saveData === 'string' ? saveData : saveData.type;
+      const data = typeof saveData === 'string' ? null : saveData.data;
       if (!type) return;
       else if (type in ctx.rootState) {
         const dataToSave = ctx.rootState[type];
         if (data && data.id) {
-          for (let i = 0; i < dataToSave.length; i++) {
+          dataToSave.forEach(x => {
             if (x.id === data.id) {
               x = data;
-              break;
             }
-          }
+          });
         }
         Cookies.set(type, dataToSave, { sameSite: 'strict' });
       }

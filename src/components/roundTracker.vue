@@ -21,10 +21,10 @@
               v-if="actors.length > 0">
           <thead class="text-center">
             <tr>
-              <th width="30%">Name (Owner)</th>
-              <th width="25%">Type (Count)</th>
+              <th width="28%">Name (Owner)</th>
+              <th width="22%">Type (Count)</th>
               <th width="20%">HP/Die Size</th>
-              <th width="25%">Actions</th>
+              <th width="30%">Actions</th>
             </tr>
           </thead>
           <tbody class="text-center">
@@ -37,14 +37,21 @@
                         v-model="actor.tempName"
                         v-if="actor.editing">
                   <div v-else
-                      @click="actor.takenAction()"
-                      :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
+                       @click="actor.takenAction()"
+                       :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
                     <span v-if="actor.acted">
                       <icon :icon="['fas', 'check']"
                             class="text-success" />
                     </span>
                     {{actor.name}}
-                    <template v-if="actor.owner">({{actor.owner.name}})</template>
+                    <sup v-if="actor.owner"
+                         :title="`This ${actor.typeLabel} belongs to ${actor.owner.name}`"
+                         class="c-help"
+                         :class="{'text-success': actor.owner.type === 'player', 
+                          'text-warning': actor.owner.type === 'scene', 
+                          'text-danger': actor.owner.type === 'villains' }">
+                      <icon :icon="['fas', 'user']"></icon>
+                    </sup>
                     <sup class="text-success c-help" 
                           v-if="actor.bonuses && actor.bonuses.length"
                           :title="`This ${actor.typeLabel} has ${actor.bonuses.length} Bonus${actor.bonuses.length > 1 ? 'es': ''}`">
@@ -64,7 +71,7 @@
                 </td>
                 <!-- Type/Count -->
                 <td class="text-capitalize c-pointer align-middle">
-                  <div v-if="!actor.editing"
+                  <div v-if="!actor.count || (!actor.editing && actor.count)"
                         @click="actor.takenAction()"
                         :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
                     {{actor.typeLabel}}
@@ -87,7 +94,8 @@
                            class="form-control form-control-sm"
                            v-model.number="actor.tempHP"  
                            v-if="actor.editing"
-                           min="0">
+                           min="0"
+                           :max="actor.maxHp">
                     <template v-else>
                       <span :class="'hp-' + actor.zone">{{actor.hp}}</span>
                       <span @click="actor.hp++">
@@ -154,6 +162,13 @@
                             :title="`Remove this ${actor.typeLabel} from the scene`"
                             v-if="actor.allowRemove">
                       <icon :icon="['far', 'trash-alt']" />
+                    </button>
+                    <button class="btn btn-secondary border-dark"
+                            @click="scroll(actor)"
+                            title="See Details"
+                            v-if="actor.viewDetails">
+                      <icon :icon="['fas', 'eye']"
+                            title="View Details"></icon>
                     </button>
                   </div>
                 </td>
@@ -267,7 +282,14 @@
         .then(r => {
           this.$store.dispatch('resetPlayers');
         });
-      },      
+      },
+      scroll(actor) {
+        $('html, body').animate({
+          scrollTop: $(`#${actor.type}${actor.id}`).offset().top
+        }, 800, () => {
+          window.location.hash = actor.id;
+        });
+      }
     },
     mounted() {
       $('#addPlayerModal').on('shown.bs.modal', e => {

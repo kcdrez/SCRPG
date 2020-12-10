@@ -197,7 +197,7 @@
               </textarea>
             </div>
             <div>
-              <h6>Add some challenge entries (optional)</h6>
+              <h6 class="text-light">Add some challenge entries (optional)</h6>
               <div class="input-group input-group-sm mb-3">
                 <input type="text"
                        class="form-control border-dark"

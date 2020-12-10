@@ -30,7 +30,7 @@
           There is no Scene Tracker.
         </div>
         <div v-else>
-          <h4>{{ scene.name }}</h4>
+          <h4 class="scene-name">{{ scene.name }}</h4>
           <div v-for="(item, index) in scene.green" 
                 class="d-inline" 
                 @click="scene.progressScene(item)" 
@@ -169,11 +169,17 @@
 </script>
 
 <style lang="scss" scoped>
+  @import '../styles/mixins';
+  
   img {
     cursor: pointer;
 
     &:hover {
       transform: translate(0px, -3px);
     }
+  }
+
+  .scene-name {
+    @include shadow-light();
   }
 </style>

@@ -2,7 +2,7 @@
   <div class="environment-component">
     <div class="row">
       <div class="col environment-header">
-        <h2>
+        <h2 class="section-header">
           <a href="#environmentData" 
              data-toggle="collapse">Environment</a>
         </h2>
@@ -22,7 +22,7 @@
           <ChallengesTracker class="mb-3" />
         </div>
         <div class="col-5">
-          <RoundTracker class="mb-3" />
+          <RoundTracker class="mb-3" @add-minion="$emit('add-minion', $event)" />
           <EnvironmentNotes class="mb-3" />
         </div>
       </div>

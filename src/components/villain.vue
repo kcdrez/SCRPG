@@ -2,7 +2,7 @@
   <div class="villain-list">
     <div class="row baddie-list-header">
       <div class="col">
-        <h2>
+        <h2 class="section-header">
           <a href="#villain-Data" 
              data-toggle="collapse">Villains</a>
         </h2>
@@ -21,7 +21,7 @@
                accept=".xlsx"
                class="d-none"
                ref="import"
-               @change="$store.dispatch('import', {files: $event.target.files, filters: ['villains', 'bonus', 'penalty', 'defend']})">        
+               @change="$store.dispatch('import', { files: $event.target.files, filters: ['villains', 'bonus', 'penalty', 'defend'] })">        
       </div>
     </div>
     <div id="villain-Data" 
@@ -32,7 +32,8 @@
       </div>
       <div class="col-6 mb-3" 
            v-for="villain in villains" 
-           :key="villain.id">
+           :key="villain.id"
+           :id="villain.type + villain.id">
         <div class="card">
           <div class="card-header">
             <input type="text"
@@ -40,7 +41,7 @@
                    class="form-control form-control-sm d-inline w-50"
                    @keypress.enter="villain.saveEdit()"
                    v-if="villain.editing">
-            <h3 class="d-inline"
+            <h3 class="villain-name"
                 v-else>{{villain.name}}</h3>
             <div class="btn-group btn-group-sm float-right">
               <button class="btn btn-secondary border-dark"
@@ -141,11 +142,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" 
+            <button class="btn btn-primary border-dark" 
                     type="button" 
                     data-dismiss="modal"
                     @click="createVillain()">Create</button>
-            <button class="btn btn-secondary" 
+            <button class="btn btn-secondary border-dark" 
                     type="button" 
                     data-dismiss="modal">Close</button>
           </div>
@@ -208,11 +209,11 @@
           </div>
           <div class="modal-footer">
             <button type="button" 
-                    class="btn btn-primary" 
+                    class="btn btn-primary border-dark" 
                     @click="target.addModifier(modifier)" 
                     data-dismiss="modal">Add</button>
             <button type="button" 
-                    class="btn btn-secondary" 
+                    class="btn btn-secondary border-dark" 
                     data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -295,5 +296,8 @@
 </script>
 
 <style lang="scss" scoped>
-  
+  .villain-name {
+    text-transform: capitalize;
+    display: inline;
+  }
 </style>
