@@ -3,17 +3,30 @@
     <div class="card">
       <div class="card-header text-center">
         <h3>Round Tracker</h3>
-        <div class="btn-group btn-group-sm w-75">
-          <button class="btn btn-success border-dark" 
-                  data-toggle="modal" 
-                  data-target="#addPlayerModal" 
-                  title="Add a new player to the scene">Add Player</button>
-          <button class="btn btn-warning border-dark" 
-                  title="Clear all players from the scene" 
-                  @click="clearPlayers">Clear Players</button>
-          <button class="btn btn-danger border-dark" 
-                  @click="$store.dispatch('resetRound')" 
-                  title="Reset the round, marking all actors as not yet acted">Reset Round Tracker</button>
+        <button class="btn btn-sm btn-danger border-dark mb-2"
+                @click="$store.dispatch('resetRound')"
+                title="Reset the round, marking all actors as not yet acted">Reset Round Tracker</button>
+        <div class="w-auto">
+          <span class="mr-1">Players:</span>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-success border-dark"
+                    data-toggle="modal"
+                    data-target="#addPlayerModal"
+                    title="Add a new player to the scene">Add</button>
+            <button class="btn btn-warning border-dark"
+                    title="Remove all players from the scene"
+                    @click="clearPlayers">Clear</button>
+            <button class="btn btn-primary border-dark"
+                    @click="$refs.import.click()">Import</button>
+            <button class="btn btn-secondary border-dark"
+                    title="Export the player data to an xlsx file"
+                    @click="$store.dispatch('export', { type: 'players', fileName: 'players' })">Export</button>
+          </div>
+          <input type="file"
+                 accept=".xlsx"
+                 class="d-none"
+                 ref="import"
+                 @change="$store.dispatch('import', { files: $event.target.files, filters: ['player', 'minions', 'bonus', 'penalty', 'defend'] })">
         </div>
       </div>
       <div class="card-body">

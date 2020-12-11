@@ -15,14 +15,14 @@
                   @click="$refs.import.click()"
                   title="Import Scene Tracker data from an xlsx file">Import</button>
           <button class="btn btn-secondary border-dark"
-                  @click="$store.dispatch('export', {type: 'scene', fileName: scene.name})"
+                  @click="$store.dispatch('export', { type: 'scene', fileName: scene.name })"
                   title="Export Scene Tracker data to an xlsx file"
                   :disabled="scene.isEmpty">Export</button>
         </div>
         <input type="file"
-                accept=".xlsx"
-                class="d-none"
-                ref="import"
+               accept=".xlsx"
+               class="d-none"
+               ref="import"
               @change="$store.dispatch('import', { files: $event.target.files, filters: ['scene'] })">
       </div>
       <div class="card-body text-center">
@@ -95,6 +95,7 @@
                      v-model.number="green"
                      type="number"
                      ref="green"
+                     min="0"
                      @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm mb-3">
@@ -105,6 +106,7 @@
                      v-model.number="yellow"
                      type="number"
                      ref="yellow"
+                     min="0"
                      @keypress.enter="createScene">
             </div>
             <div class="input-group input-group-sm">
@@ -115,6 +117,7 @@
                      v-model.number="red" 
                      type="number"
                      ref="red"
+                     min="0"
                      @keypress.enter="createScene">
             </div>
           </div>
