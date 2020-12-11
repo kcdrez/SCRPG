@@ -29,6 +29,9 @@ class Baddie extends Actor {
   get allowEdit() {
     return !this.editing;
   }
+  get viewDetails() {
+    return true;
+  }
 
   demote() {
     const copy = this.copy();
@@ -158,6 +161,9 @@ class Villain extends Actor{
     return true;
   }
   get allowEdit() {
+    return true;
+  }
+  get viewDetails() {
     return true;
   }
 

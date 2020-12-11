@@ -1,10 +1,11 @@
 import Vue from 'vue';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import store from '../vuex-state/store';
-import Actor from './actor';
+import { Actor, GenericObject } from './actor';
 
 class Scene extends Actor {
   constructor(data) {
+    data.type = data.type || 'scene';
     super(data);
     this.green = data.green || [];
     this.yellow = data.yellow || [];
@@ -108,7 +109,7 @@ class Scene extends Actor {
   }
   resetLocations() {
     this.locations = [];
-    store.dispatch('saveData', 'scene');
+    this.save();
   }
   addChallenge(challenge, skipInitialize) {
     this.challenges.push(new Challenge(challenge, skipInitialize));
@@ -122,7 +123,7 @@ class Scene extends Actor {
   }
   resetChallenges() {
     this.challenges = [];
-    store.dispatch('saveData', 'scene');
+    this.save();
   }
   setNote(note) {
     this.notes = note;
@@ -145,7 +146,7 @@ class Scene extends Actor {
         green: this.exportSceneTracker(this.green),
         yellow: this.exportSceneTracker(this.yellow),
         red: this.exportSceneTracker(this.red),
-        type: 'scene'
+        type: this.type
       } : null,
       locations: this.locations.map(x => x.export()),
       challenges: this.exportChallenges(challengeId),
@@ -188,17 +189,18 @@ class Scene extends Actor {
   }
 }
 
-class Challenge {
+class Challenge extends GenericObject {
   constructor(data, skipInitialize) {
-    this.name = data.name || '';
-    this.id = data.id || uuid();
+    super(data);
     this.list = (data.list || []).map(x => new ChallengeEntry(x));
+    this.description = data.description || '';
+    this.tempDescription = data.tempDescription || this.description;
     if (!skipInitialize) this.initialize();
-  }
+  } 
   
   initialize() {
     if (this.list.length === 0) {
-      this.add({ label: `Complete ${this.name}` });
+      this.add({ name: `Complete ${this.name}` });
     }
   }
   add(data) {
@@ -227,47 +229,38 @@ class Challenge {
     }
   }
   save() {
-    store.dispatch('saveData', 'scene');
+    super.save('scene');
+  }
+  saveEdit() {
+    this.description = this.tempDescription;
+    super.saveEdit();
   }
   export() {
     return {
       id: this.id,
       name: this.name,
-      type: 'challenge'
+      type: 'challenge',
+      description: this.description
     }
   }
 }
 
-class ChallengeEntry {
+class ChallengeEntry extends GenericObject {
   constructor(data) {
+    super(data);
     this.completed = data.completed || false;
-    this.editing = data.editing || false;
-    this.label = data.label || data.name || '';
-    this.tempLabel = data.label || data.tempLabel || '';
-    this.id = data.id || uuid();
   }
 
   complete() {
     this.completed = !this.completed;
     this.save();
   }
-  beginEdit() {
-    this.editing = true;
-  }
-  edit() {
-    this.editing = false;
-    this.label = this.tempLabel;
-    this.save();
-  }
-  cancel() {
-    this.editing = false;
-  }
   save() {
-    store.dispatch('saveData', 'scene');
+    super.save('scene');
   }
   export(parent) {
     return {
-      name: this.label,
+      name: this.name,
       parent,
       completed: this.completed,
       type: 'challenge element'
@@ -275,27 +268,19 @@ class ChallengeEntry {
   }
 }
 
-class Location {
+class Location extends GenericObject {
   constructor(data) {
-    this.editing = data.editing || false;
-    this.name = data.name || '';
+    super(data);
     this.description = data.description || '';
-    this.tempName = data.tempName || data.name || '';
     this.tempDescription = data.tempDescription || data.description || '';
-    this.id = data.id || uuid();
   }
 
-  beginEdit() {
-    this.editing = true; 
-  }
-  edit() {
-    this.editing = false;
-    this.name = this.tempName;
+  saveEdit() {
     this.description = this.tempDescription;
-    this.save();
+    super.saveEdit();
   }
   save() {
-    store.dispatch('saveData ', 'scene');
+    super.save('scene');
   }
   export() {
     return {
@@ -308,4 +293,4 @@ class Location {
 }
 
 export default Scene;
-export {Scene, Challenge, Location};
+export { Scene, Challenge, Location };

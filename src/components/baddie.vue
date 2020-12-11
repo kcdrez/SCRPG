@@ -2,7 +2,7 @@
   <div class="baddie-list">
     <div class="row baddie-list-header">
       <div class="col">
-        <h2>
+        <h2 class="section-header">
           <a :href="`#${label}-Data`" 
              data-toggle="collapse">{{label}}</a>
         </h2>
@@ -32,7 +32,7 @@
            v-if="list.length === 0">
         There are no {{label}}.
       </div>
-      <table class="table table-sm table-striped table-bordered col" 
+      <table class="table table-sm table-striped table-bordered table-dark col" 
              v-else>
         <thead class="text-center">
           <tr>
@@ -45,7 +45,8 @@
         </thead>
         <tbody>
           <template v-for="baddie in list">
-            <tr :key="baddie.id">
+            <tr :key="baddie.id"
+                :id="baddie.type + baddie.id">
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
@@ -133,7 +134,7 @@
                           @click="modifyBaddie('hinder', baddie.id)">
                     <img src="images/hinder.png">
                   </button>
-                  <button class="btn btn-secondary border-dark" 
+                  <button class="btn btn-success border-dark" 
                          :title="`Add a Defend to this ${baddie.typeLabel}`"
                          @click="modifyBaddie('defend', baddie.id)">
                     <img src="images/defend.png">
@@ -162,25 +163,25 @@
                           @click="baddie.count--">
                     <icon :icon="['far', 'trash-alt']" />
                   </button>
-                  <button class="btn btn-secondary border-dark text-light" 
+                  <button class="btn btn-secondary border-dark text-dark" 
                           :title="`Edit this ${baddie.typeLabel}`"
                           @click="baddie.beginEdit()"
                           v-if="baddie.allowEdit && !baddie.editing">
                     <icon :icon="['far', 'edit']" />
                   </button>
-                  <button class="btn btn-success border-dark text-light" 
+                  <button class="btn btn-success border-dark text-dark" 
                           :title="`Save edits on this ${baddie.typeLabel}`"
                           @click="baddie.saveEdit()"
                           v-if="baddie.editing">
                     <icon :icon="['far', 'save']" />
                   </button>
-                  <button class="btn btn-warning border-dark"
+                  <button class="btn btn-warning border-dark text-dark"
                           @click="baddie.cancelEdit()"
                           v-if="baddie.editing"
                           :title="`Cancel edits on this ${baddie.typeLabel}`">
                     <icon :icon="['fas', 'ban']" />
                   </button>
-                  <button class="btn btn-secondary border-dark"
+                  <button class="btn btn-secondary border-dark text-dark"
                           @click="$store.dispatch('export', {type: label.toLowerCase(), fileName: label, id: baddie.id})"
                           :title='`Export this ${baddie.typeLabel} to an xlsx file`'>
                     <icon :icon="['fas', 'file-download']" />
@@ -260,11 +261,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" 
+            <button class="btn btn-primary border-dark" 
                     type="button" 
                     data-dismiss="modal" 
                     @click="createBaddie()">Create</button>
-            <button class="btn btn-secondary" 
+            <button class="btn btn-secondary border-dark" 
                     type="button" 
                     data-dismiss="modal">Close</button>
           </div>
@@ -340,11 +341,11 @@
           </div>
           <div class="modal-footer">
             <button type="button" 
-                    class="btn btn-primary" 
+                    class="btn btn-primary border-dark" 
                     @click="addModifier"
                     :disabled="baddieData.modifier.name === ''">Add</button>
             <button type="button" 
-                    class="btn btn-secondary" 
+                    class="btn btn-secondary border-dark" 
                     data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -355,11 +356,11 @@
 
 <script>
   import Cookies from 'js-cookie';
-  import {Baddie} from '../scripts/baddie';
-  import {mapState} from 'vuex';
+  import { Baddie } from '../scripts/baddie';
+  import { mapState } from 'vuex';
   import Modifier from './modifier.vue';
-  import {unvue} from '../scripts/utilities';
-  import {sortActors} from '../scripts/actor';
+  import { unvue } from '../scripts/utilities';
+  import { sortActors } from '../scripts/actor';
 
   export default {
     name: 'BaddieList',
