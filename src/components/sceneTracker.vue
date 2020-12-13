@@ -176,6 +176,7 @@
   
   img {
     cursor: pointer;
+    max-width: 90px;
 
     &:hover {
       transform: translate(0px, -3px);
