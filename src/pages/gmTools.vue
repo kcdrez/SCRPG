@@ -101,7 +101,7 @@
       },
       scrolling: _.debounce(function() { //lodash doesnt like arrow functions for some reason
         this.showScrollWidget = window.scrollY >= 75;
-      }, 500)
+      }, 50)
     },
     created() {
       window.addEventListener('scroll', this.scrolling);
@@ -115,6 +115,7 @@
 
 <style lang="scss">
   @import '../styles/mixins';
+  @import '../styles/variables';
 
   .admin-page {
     max-width: 90%;
@@ -151,5 +152,10 @@
     color: black;
     opacity: 0.6;
     cursor: pointer;
+
+    &:hover {
+      border-color: $primary;
+      color: $primary;
+    }
   }
 </style>

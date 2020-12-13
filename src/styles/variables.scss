@@ -33,13 +33,22 @@ $warning-light-2: lighten($warning, 20%);
 $warning-text-light: lighten($warning, 50%);
 $warning-text-dark: darken($warning, 30%);
 
-$background: #808080;
+$dark: #262626;
+$light: #f2f2f2;
+
+$gray-1: lighten($dark, 10%);
+$gray-2: lighten($dark, 20%);
+$gray-3: lighten($dark, 30%);
+$gray-4: lighten($dark, 40%);
+$gray-5: lighten($dark, 50%);
+$gray-6: lighten($dark, 60%);
+$gray-7: lighten($dark, 70%);
+$gray-8: lighten($dark, 80%);
+
+$background: $gray-3;
 $background-dark-1: darken($background, 5%);
 $background-light-1: lighten($background, 10%);
 $background-light-2: lighten($background, 20%);
 $background-light-3: lighten($background, 35%);
 $background-light-4: lighten($background, 45%);
 $background-light-5: lighten($background, 58%);
-
-$dark: #262626;
-$light: #f2f2f2;
