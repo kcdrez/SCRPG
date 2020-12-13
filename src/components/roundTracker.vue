@@ -335,7 +335,7 @@
     color: $danger-light-1;
   }
   .hp-incapacitated {
-    color: $secondary-light-1;
+    color: $gray-6;
   }
 
   .change-hp:hover {
