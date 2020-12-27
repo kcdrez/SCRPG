@@ -12,6 +12,7 @@ class GenericObject {
     this.tempName = data.tempName || data.name || '';
     this.editing = data.editing || false;
     this.type = data.type;
+    this.rendered = false;
   }
 
   save(type, data) {

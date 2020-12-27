@@ -1,29 +1,47 @@
 <template>
   <div>
-    <navbar />
+    <!-- <navbar /> -->
     <canvas id="canvas"></canvas>
   </div>
 </template>
 
 <script>
   import { fabric } from 'fabric';
-  import { addMinion, addLocation, addLieutenant, addPlayer } from '../scripts/fabric/fabric.minion';
+  import { addMinion, addLocation, addLieutenant, addPlayer, initCanvas } from '../scripts/fabric/fabric.minion';
+  import { mapState } from 'vuex';
 
   export default {
     name: 'DebugPage',
     data() {
       return {
+        canvas: null
       }
     },
     methods: {
     },
-    mounted() {
-      const canvas = new fabric.Canvas('canvas', { selection: true, height: 500, width: 1000, backgroundColor: 'white' });
-      addMinion(canvas, 'robot');
-      addLieutenant(canvas, 'Super robot');
-      addLocation(canvas, 'castle');
-      addPlayer(canvas, 'Legacy Begacy lorem ipsum')
+    computed: {
+      ...mapState([
+        'players'
+      ])
     },
+    mounted() {
+      this.canvas = new fabric.Canvas('canvas', { selection: true, height: 500, width: 1000, backgroundColor: 'white' });
+      initCanvas(this.canvas);
+      // addMinion(canvas, 'Scary Robot');
+      // addLieutenant(canvas, 'Harley Quinn');
+      // addLocation(canvas, 'Freedom Tower');
+      // addPlayer(canvas, 'Absolute Zero');
+    },
+    watch: {
+      players(newVal) {
+        newVal.forEach(player => {
+          if (!player.rendered) {
+            addPlayer(this.canvas, player.name);
+            player.rendered = true;
+          }
+        })
+      }
+    }
   };
 </script>
 
