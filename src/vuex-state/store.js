@@ -235,7 +235,6 @@ const store = new Vuex.Store({
       const {files, filters} = data;
       if (!files) return;
       (await processXlsxFiles(files, filters)).forEach(row => {
-        // console.log(row);
         if (!row.type) return;
         switch (row.type.toLowerCase()) {
           case 'player':
@@ -319,6 +318,9 @@ const store = new Vuex.Store({
       });
 
       return arr.concat(state.lieutenants, remainingMinions);
+    },
+    locations: state => {
+      return state.scene.locations;
     }
   }
 });

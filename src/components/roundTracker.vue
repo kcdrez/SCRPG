@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="card-body">
-        <table class="table table-sm table-bordered table-dark table-striped" 
+        <table class="table table-sm table-bordered table-dark table-striped"
               v-if="actors.length > 0">
           <thead class="text-center">
             <tr>
@@ -42,8 +42,9 @@
           </thead>
           <tbody class="text-center">
             <template v-for="actor in actors">
-              <tr v-if="!!actor.name" 
-                  :key="actor.id">
+              <tr v-if="!!actor.name"
+                  :key="actor.id"
+                  :id="actor.type === 'player' ? actor.id : ''">
                 <!-- Name/Owner -->
                 <td class="text-capitalize c-pointer align-middle">
                   <input class="form-control form-control-sm"

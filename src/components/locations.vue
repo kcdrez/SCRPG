@@ -36,7 +36,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(location, index) in scene.locations" :key="'location' + location.id">
+            <tr v-for="(location, index) in scene.locations" 
+                :key="'location' + location.id"
+                :id="location.id">
               <td width="30%">
                 <input type="text" 
                        v-model.trim="location.tempName" 

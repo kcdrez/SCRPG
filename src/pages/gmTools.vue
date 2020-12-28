@@ -1,9 +1,7 @@
 <template>
   <div>
     <navbar />
-    <button class="btn btn-primary"
-            data-toggle="modal"
-            data-target="#debug">debug</button>
+    <debug />
     <div class="container admin-page">
       <div class="row">
         <h1 class="col text-center">GM Management</h1>
@@ -70,32 +68,6 @@
             <img src="images/boosts.jpeg"
                  class="img-fluid"
                  data-dismiss="modal">
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary border-dark"
-                    type="button"
-                    data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="debug"
-         class="modal"
-         tabindex="-1"
-         role="dialog">
-      <div class="modal-dialog modal-lg"
-          role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">DEBUG</h3>
-            <button type="button"
-                    class="close"
-                    data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <debug />
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary border-dark"
