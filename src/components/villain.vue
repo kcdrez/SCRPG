@@ -33,7 +33,7 @@
       <div class="col-6 mb-3" 
            v-for="villain in villains" 
            :key="villain.id"
-           :id="villain.type + villain.id">
+           :id="villain.id">
         <div class="card">
           <div class="card-header">
             <input type="text"

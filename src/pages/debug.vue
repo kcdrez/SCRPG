@@ -10,7 +10,9 @@
 
 <script>
   import { fabric } from 'fabric';
-  import { addMinion, addLocation, addLieutenant, addPlayer, addVillain, initCanvas } from '../scripts/fabric/fabric.minion';
+  import { addMinion, addLieutenant, addPlayer, addVillain } from '../scripts/fabric/fabric.actor';
+  import { addLocation } from '../scripts/fabric/fabric.scene';
+  import { initCanvas } from '../scripts/fabric/fabric.common';
   import { mapState, mapGetters } from 'vuex';
   import _ from 'lodash';
 
@@ -57,7 +59,7 @@
       players: {
         handler(newVal, oldVal) {
           newVal.forEach(player => {
-            addPlayer(this.canvas, player.name, player.id);
+            addPlayer(this.canvas, player);
           });
   
           oldVal.forEach(player => {
@@ -73,7 +75,7 @@
       minions: {
         handler(newVal, oldVal) {
           newVal.forEach(minion => {
-            addMinion(this.canvas, minion.name, minion.id, minion._count);
+            addMinion(this.canvas, minion);
           });
   
           oldVal.forEach(minion => {
@@ -97,7 +99,7 @@
       lieutenants: {
         handler(newVal, oldVal) {
           newVal.forEach(lieutenant => {
-            addLieutenant(this.canvas, lieutenant.name, lieutenant.id);
+            addLieutenant(this.canvas, lieutenant);
           });
   
           oldVal.forEach(lieutenant => {
@@ -121,7 +123,7 @@
       villains: {
         handler(newVal, oldVal) {
           newVal.forEach(villain => {
-            addVillain(this.canvas, villain.name, villain.id);
+            addVillain(this.canvas, villain);
           });
   
           oldVal.forEach(villain => {

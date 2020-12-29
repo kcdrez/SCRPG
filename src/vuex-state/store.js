@@ -279,6 +279,31 @@ const store = new Vuex.Store({
           }
         }
       });
+    },
+    moveObject(ctx, data) {
+      if (data.id && data.actorType) {
+        let match = null;
+        switch (data.actorType) {
+          case 'player':
+            match = ctx.state.players.find(player => player.id === data.id);
+            break;
+          case 'minion':
+            match = ctx.state.minions.find(minion => minion.id === data.id);
+            break;
+          case 'lieutenant':
+            match = ctx.state.lieutenants.find(lieutenant => lieutenant.id === data.id);
+            break;
+          case 'villain':
+            match = ctx.state.villains.find(villain => villain.id === data.id);
+            break;
+        }
+
+        if (match) {
+          match.top = data.top;
+          match.left = data.left;
+          match.save();
+        }
+      }
     }
   },
   getters: {

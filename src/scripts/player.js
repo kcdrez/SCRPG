@@ -192,7 +192,9 @@ class Player extends Actor {
         hp: this.hp,
         maxHp: this.maxHp,
         acted: this.acted,
-        type: this.type
+        type: this.type,
+        top: this.top,
+        left: this.left
       },
       minions
     }

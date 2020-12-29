@@ -12,6 +12,8 @@ class GenericObject {
     this.tempName = data.tempName || data.name || '';
     this.editing = data.editing || false;
     this.type = data.type;
+    this.top = data.top || null;
+    this.left = data.left || null;
   }
 
   save(type, data) {
