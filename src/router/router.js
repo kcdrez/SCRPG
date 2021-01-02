@@ -4,7 +4,6 @@ import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 
 import GMToolsPage from '../pages/gmTools.vue';
-import DebugPage from '../pages/debug.vue';
 
 import store from '../vuex-state/store';
 
@@ -18,11 +17,6 @@ const routes = [
     path: '/gmtools',
     name: 'gmTools',
     component: GMToolsPage
-  },
-  {
-    path: '/debug',
-    name: 'debug',
-    component: DebugPage
   }
 ]
 

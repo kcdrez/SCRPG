@@ -2,41 +2,39 @@ import { fabric } from 'fabric';
 import css from '../../styles/variables.scss';
 import { makeStar, getNextUnusedSpace, removeIfExists, fontSize } from './fabric.common';
 
-function addMinion(canvas, minionData) {
-  for (let i = 1; i <= minionData._count; i++) {
-    const circle = new fabric.Circle({
-      radius: 50,
-      fill: css.warning,
-      scaleY: 0.5,
-      originX: 'center',
-      originY: 'center',
-      stroke: 'black',
-      strokeWidth: 1
-    });
-  
-    const text = new fabric.Text(`${minionData.name} (${i})`, {
-      fontSize,
-      originX: 'center',
-      originY: 'center',
-      fill: css.warningText
-    });
-  
-    const group = new fabric.Group([ circle, text ], {
-      id: minionData.id,
-      countId: i,
-      borderColor: css.primary,
-      cornerColor: css.primary,
-      actorType: 'minion'
-    });
-    const removed = removeBaddieIfExists(canvas, minionData.id, i);
-    console.log(removed);
-    const data = (minionData.top && minionData.left) ? minionData : removed;
-    addGroup(canvas, group, data);
-  }
+function addMinion(canvas, minion, instance, index) {
+  const circle = new fabric.Circle({
+    radius: 50,
+    fill: css.warning,
+    scaleY: 0.5,
+    originX: 'center',
+    originY: 'center',
+    stroke: 'black',
+    strokeWidth: 1
+  });
+
+  const text = new fabric.Text(`${minion.name} (${index + 1})`, {
+    fontSize,
+    originX: 'center',
+    originY: 'center',
+    fill: css.warningText
+  });
+
+  const group = new fabric.Group([ circle, text ], {
+    id: minion.id,
+    instanceId: instance.id,
+    borderColor: css.primary,
+    cornerColor: css.primary,
+    actorType: 'minion'
+  });
+
+  const removed = removeBaddieIfExists(canvas, minion.id, instance.id);
+  const data = (instance.top && instance.left) ? instance : removed;
+  addGroup(canvas, group, data);
 };
 
 function addLieutenant(canvas, lieutenantData) {
-  for (let i = 1; i <= lieutenantData._count; i++) {
+  lieutenantData.instances.forEach((el, index) => {
     const rectOpts = {
       fill: css.secondary,
       originX: 'center',
@@ -58,15 +56,16 @@ function addLieutenant(canvas, lieutenantData) {
   
     const group = new fabric.Group([ rect, text ], {
       id: lieutenantData.id,
-      countId: i,
+      instanceId: el.id,
       borderColor: css.primary,
       cornerColor: css.primary,
       actorType: 'lieutenant'
     });
-    const removed = removeBaddieIfExists(canvas, lieutenantData.id, i);
+
+    const removed = removeBaddieIfExists(canvas, lieutenantData.id, el.id);
     const data = (lieutenantData.top && lieutenantData.left) ? lieutenantData : removed;
     addGroup(canvas, group, data);
-  }
+  });
 };
 
 function addPlayer(canvas, playerData) {
@@ -125,11 +124,11 @@ function addVillain(canvas, villainData) {
   addGroup(canvas, group, data);
 };
 
-function removeBaddieIfExists(canvas, id, countId) {
+function removeBaddieIfExists(canvas, id, instanceId) {
   const list = canvas.getObjects();
 
   const match = list.find(x => {
-    return x.id === id && x.countId === countId;
+    return x.id === id && x.instanceId === instanceId;
   });
   if (match) {
     canvas.remove(match);

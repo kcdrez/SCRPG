@@ -6,7 +6,7 @@ function initCanvas(canvas) {
   window.addEventListener('resize', resizeCanvas, false);
 
   function resizeCanvas() {
-    canvas.setWidth(window.innerWidth - 200);
+    canvas.setWidth(window.innerWidth - 17);
     canvas.renderAll();
   }
   resizeCanvas();

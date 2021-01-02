@@ -13,17 +13,29 @@ class Baddie extends Actor {
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this._count = data.count || data._count || 1;
-    this.tempCount = this._count;
     this.markForDeath = false;
+    this.instances = data.instances || [];
+    this.tempCount = this.count;
+
+    if (data.count > 0) {
+      this.addInstances(data.count);
+    } else if (this.count === 0) {
+      this.addInstances(1);
+    }
   }
 
   get owner() {
     return store.getters.byID(this._owner);
   }
-  get count() { return this._count; }
+  get count() { return this.instances.length; }
   set count(val) {
-    this._count = val;
+    const diff = val - this.count;
+    if (diff > 0) {
+      this.addInstances(diff);
+    } else {
+      this.removeInstance(null, Math.abs(diff));
+    }
+    this.tempCount = val;
     this.save();
   }
   get allowEdit() {
@@ -125,7 +137,10 @@ class Baddie extends Actor {
           id: this.id,
           size: this.size,
           acted: this.acted,
-          count: this.count
+          count: this.count,
+          instances: this.instances,
+          top: this.top,
+          left: this.left
         },
         modifiers
       }
@@ -141,11 +156,29 @@ class Baddie extends Actor {
   saveEdit() {
     this._owner = this.tempOwner;
     this.size = this.tempSize;
-    this._count = this.tempCount;
+    this.count = this.tempCount;
     this.bonuses.forEach(b => b.saveEdit());
     this.penalties.forEach(p => p.saveEdit());
     this.defends.forEach(d => d.saveEdit());
     super.saveEdit();
+  }
+  addInstances(amount) {
+    for (let i = 1; i <= amount; i++) {
+      this.instances.push({ id: uuid(), top: null, left: null });
+    }
+  }
+  removeInstance(id, amount) {
+    if (id) {
+      const index = this.instances.findIndex(x => x.id === id);
+      if (index > -1) {
+        this.instances.splice(index, 1);
+      }
+    } else if (amount) {
+      for (let i = 1; i <= amount; i++) {
+        this.instances.pop();
+      }
+    }
+    this.save();
   }
 }
 
@@ -252,6 +285,9 @@ class Villain extends Actor{
     this.penalties.forEach(p => p.saveEdit());
     this.defends.forEach(d => d.saveEdit());
     super.saveEdit();
+  }
+  remove() {
+    store.dispatch('removeBaddie', { id: this.id, type: this.type });
   }
 }
 

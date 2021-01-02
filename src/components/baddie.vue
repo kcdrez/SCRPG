@@ -419,7 +419,7 @@
     },
     methods: {
       createBaddie(baddie) {
-        this.$store.dispatch('upsertBaddie', Object.assign({type: this.label.toLowerCase()}, this.baddieData));
+        this.$store.dispatch('upsertBaddie', Object.assign({ type: this.label.toLowerCase() }, this.baddieData));
         $(`#createModal-${this.label}`).modal('hide');
       },
       addBaddie(name) {

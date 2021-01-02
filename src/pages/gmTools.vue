@@ -1,7 +1,7 @@
 <template>
   <div>
     <navbar />
-    <debug />
+    <DrawingBoard />
     <div class="container admin-page">
       <div class="row">
         <h1 class="col text-center">GM Management</h1>
@@ -85,11 +85,11 @@
   import Environment from '../components/environment.vue';
   import Villains from '../components/villain.vue';
   import _ from 'lodash';
-  import debug from './debug.vue';
+  import DrawingBoard from '../components/drawingBoard.vue';
 
   export default {
     name: 'GMTools',
-    components: { Baddies, Environment, Villains, debug },
+    components: { Baddies, Environment, Villains, DrawingBoard },
     data() {
       return {
         showScrollWidget: false

@@ -57,11 +57,11 @@
                       @click="villain.cancelEdit()"
                       v-if="villain.editing">Cancel</button>
               <button class="btn btn-danger border-dark" 
-                      @click="$store.dispatch('removeBaddie', {id: villain.id, type: villain.type})"
+                      @click="villain.remove()"
                       title="Delete this Villain">Remove</button>
               <button class="btn btn-secondary border-dark"
                       title="Export this Villain to an xlsx file"
-                      @click="$store.dispatch('export', {type: 'villains', fileName: 'villains', id: villain.id})">Export</button>
+                      @click="$store.dispatch('export', { type: 'villains', fileName: 'villains', id: villain.id })">Export</button>
             </div>
           </div>
           <div :id="`villain-${villain.id}`" 
