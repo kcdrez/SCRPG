@@ -17,7 +17,13 @@ function addMinion(canvas, minion, instance, index) {
     fontSize,
     originX: 'center',
     originY: 'center',
-    fill: css.warningText
+    fill: css.warningText,
+    shadow: new fabric.Shadow({
+      color: 'black',
+      blur: 4,
+      offsetX: 2,
+      offsetY: 1
+    })
   });
 
   const group = new fabric.Group([ circle, text ], {
@@ -76,13 +82,19 @@ function addPlayer(canvas, playerData) {
     }
   );
 
-  const text = new fabric.Textbox(playerData.name, {
+  const text = new fabric.Text(playerData.name, {
     fontSize,
-    top: size / 2 + 10,
-    left: size / 2,
-    textAlign: 'center',
-    width: size / 2,
-    fill: css.successText
+    top: size / 2 + 8,
+    left: size,
+    originX: 'center',
+    width: size,
+    fill: css.successText,
+    shadow: new fabric.Shadow({
+      color: 'black',
+      blur: 3,
+      offsetX: 2,
+      offsetY: 2
+    })
   });
 
   const group = new fabric.Group([ star, text ], {
@@ -104,13 +116,19 @@ function addVillain(canvas, villainData) {
     }
   );
 
-  const text = new fabric.Textbox(villainData.name, {
+  const text = new fabric.Text(villainData.name, {
     fontSize,
-    top: size / 2 + 10,
-    left: size / 2,
-    textAlign: 'center',
-    width: size / 2,
-    fill: css.dangerText
+    top: size / 2 + 8,
+    left: size,
+    originX: 'center',
+    width: size,
+    fill: css.dangerText,
+    shadow: new fabric.Shadow({
+      color: 'black',
+      blur: 3,
+      offsetX: 2,
+      offsetY: 2
+    })
   });
 
   const group = new fabric.Group([ star, text ], {

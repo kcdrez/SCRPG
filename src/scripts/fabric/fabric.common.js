@@ -1,3 +1,4 @@
+import { fabric } from 'fabric';
 import css from '../../styles/variables.scss';
 import store from '../../vuex-state/store';
 const fontSize = 18;

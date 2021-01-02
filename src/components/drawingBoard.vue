@@ -4,7 +4,9 @@
       <button class="btn btn-primary"
               @click="goToSelection()">View Details</button>
       <button class="btn btn-danger"
-              @click="removeSelection()">Remove Selected</button>              
+              @click="removeSelection()">Remove Selected</button>
+      <button class="btn btn-warning"
+              @click="debug()">debug</button>              
     </div>
     <canvas id="canvas"></canvas>
   </div>
@@ -101,11 +103,24 @@
             }
           }
         }
+      },
+      debug() {
+        const activeObject = this.canvas.getActiveObject();
+        if (activeObject.type === "group") {
+          const items = activeObject._objects;
+          activeObject._restoreObjectsState();
+          this.canvas.remove(activeObject);
+          for (let i = 0; i < items.length; i++) {
+            this.canvas.add(items[i]);
+            this.canvas.item(this.canvas.size() - 1).hasControls = true;
+          }
+
+          this.canvas.renderAll();
+        }
       }
     },
     computed: {
       ...mapState({
-        // players: state => _.cloneDeep(state.players),
         villains: state => _.cloneDeep(state.villains)
       }),
       ...mapState([ 'minions', 'lieutenants', 'players' ]),
@@ -124,17 +139,6 @@
       players: {
         handler(newVal, oldVal) {
           this.refreshCanvasBaddes(newVal, 'player', addPlayer);
-          // newVal.forEach(player => {
-          //   addPlayer(this.canvas, player);
-          // });
-  
-          // oldVal.forEach(player => {
-          //   const match = newVal.find(x => x.id === player.id);
-          //   if (!match) {
-          //     const canvasMatch = this.canvas.getObjects().find(x => x.id === player.id);
-          //     this.canvas.remove(canvasMatch);
-          //   }
-          // });
         },
         deep: true
       },
