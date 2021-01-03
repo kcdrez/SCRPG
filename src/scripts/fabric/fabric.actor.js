@@ -1,22 +1,16 @@
 import { fabric } from 'fabric';
+import _ from 'lodash';
 import css from '../../styles/variables.scss';
-import { makeStar, getNextUnusedSpace, removeIfExists, fontSize } from './fabric.common';
+import { makeStar, getNextUnusedSpace, removeIfExists, wrapCanvasText, fontSize } from './fabric.common';
 
-function addMinion(canvas, minion, instance, index) {
-  const circle = new fabric.Circle({
-    radius: 50,
-    fill: css.warning,
-    scaleY: 0.5,
-    originX: 'center',
-    originY: 'center',
-    stroke: 'black',
-    strokeWidth: 1
-  });
+function addBaddie(canvas, baddie, instance, index) {
+  const size = 65;
 
-  const text = new fabric.Text(`${minion.name} (${index + 1})`, {
+  const textTemp = new fabric.Text(`${baddie.name} (${index + 1})`.replace(/\w+/g, _.capitalize), {
     fontSize,
     originX: 'center',
     originY: 'center',
+    textAlign: 'center',
     fill: css.warningText,
     shadow: new fabric.Shadow({
       color: 'black',
@@ -25,53 +19,60 @@ function addMinion(canvas, minion, instance, index) {
       offsetY: 1
     })
   });
+  let bgShape = null;
+  let actorType = null;
+  let text = null;
 
-  const group = new fabric.Group([ circle, text ], {
-    id: minion.id,
+  switch (baddie.type.toLowerCase()) {
+    case 'minion':
+    case 'minions':
+    default: {
+      text = wrapCanvasText(textTemp, canvas, size + 30, size);
+      const scaleYMax = Math.max(text.height / size, 0.5);
+
+      bgShape = new fabric.Circle({
+        radius: size,
+        fill: css.warning,
+        scaleY: scaleYMax > 1 ? 1 : scaleYMax,
+        originX: 'center',
+        originY: 'center',
+        stroke: 'black',
+        strokeWidth: 1
+      });
+      actorType = 'minion';
+      break;
+    }
+    case 'lieutenant': 
+    case 'lieutenants': {
+      text = wrapCanvasText(textTemp, canvas, size + 100, size);
+      const width = Math.max(text.width + 10, size * 2);
+      const height = Math.max(text.height + 10, size - 10);
+
+      bgShape = new fabric.Rect({
+        fill: css.secondary,
+        originX: 'center',
+        originY: 'center',
+        stroke: 'black',
+        strokeWidth: 1,
+        height,
+        width
+      });
+      actorType = 'lieutenant';
+      break;
+    }
+  }
+
+  const group = new fabric.Group([ bgShape, text ], {
+    id: baddie.id,
     instanceId: instance.id,
     borderColor: css.primary,
     cornerColor: css.primary,
-    actorType: 'minion'
+    actorType
   });
 
-  const removed = removeBaddieIfExists(canvas, minion.id, instance.id);
+  const removed = removeBaddieIfExists(canvas, baddie.id, instance.id);
   const data = (instance.top && instance.left) ? instance : removed;
   addGroup(canvas, group, data);
-};
-
-function addLieutenant(canvas, lieutenantData) {
-  lieutenantData.instances.forEach((el, index) => {
-    const rectOpts = {
-      fill: css.secondary,
-      originX: 'center',
-      originY: 'center',
-      stroke: 'black',
-      strokeWidth: 1,
-      height: 50,
-      width: 120
-    };
-  
-    const textOpts = {
-      fontSize,
-      originX: 'center',
-      originY: 'center'
-    };
-  
-    const rect = new fabric.Rect(rectOpts);
-    const text = new fabric.Textbox(lieutenantData.name, textOpts);
-  
-    const group = new fabric.Group([ rect, text ], {
-      id: lieutenantData.id,
-      instanceId: el.id,
-      borderColor: css.primary,
-      cornerColor: css.primary,
-      actorType: 'lieutenant'
-    });
-
-    const removed = removeBaddieIfExists(canvas, lieutenantData.id, el.id);
-    const data = (lieutenantData.top && lieutenantData.left) ? lieutenantData : removed;
-    addGroup(canvas, group, data);
-  });
 };
 
 function addPlayer(canvas, playerData) {
@@ -82,11 +83,12 @@ function addPlayer(canvas, playerData) {
     }
   );
 
-  const text = new fabric.Text(playerData.name, {
+  const textTemp = new fabric.Text(playerData.name.replace(/\w+/g, _.capitalize), {
     fontSize,
     top: size / 2 + 8,
     left: size,
     originX: 'center',
+    textAlign: 'center',
     width: size,
     fill: css.successText,
     shadow: new fabric.Shadow({
@@ -97,7 +99,7 @@ function addPlayer(canvas, playerData) {
     })
   });
 
-  const group = new fabric.Group([ star, text ], {
+  const group = new fabric.Group([ star, wrapCanvasText(textTemp, canvas, size + 30, size) ], {
     id: playerData.id,
     borderColor: css.primary,
     cornerColor: css.primary,
@@ -116,11 +118,12 @@ function addVillain(canvas, villainData) {
     }
   );
 
-  const text = new fabric.Text(villainData.name, {
+  const textTemp = new fabric.Text(villainData.name.replace(/\w+/g, _.capitalize), {
     fontSize,
     top: size / 2 + 8,
     left: size,
     originX: 'center',
+    textAlign: 'center',
     width: size,
     fill: css.dangerText,
     shadow: new fabric.Shadow({
@@ -131,7 +134,7 @@ function addVillain(canvas, villainData) {
     })
   });
 
-  const group = new fabric.Group([ star, text ], {
+  const group = new fabric.Group([ star, wrapCanvasText(textTemp, canvas, size + 30, size) ], {
     id: villainData.id,
     borderColor: css.primary,
     cornerColor: css.primary,
@@ -164,4 +167,4 @@ function addGroup(canvas, group, data) {
   canvas.add(group);
 }
 
-export { addMinion, addLieutenant, addPlayer, addVillain };
+export { addBaddie, addPlayer, addVillain };

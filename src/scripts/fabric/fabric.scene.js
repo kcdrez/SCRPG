@@ -1,7 +1,7 @@
 import { removeIfExists, fontSize } from './fabric.common';
 import css from '../../styles/variables.scss';
 
-function addLocation(canvas, name, id) {
+function addLocation(canvas, locationData) {
   const size = 300;
 
   const square = new fabric.Rect({
@@ -11,19 +11,25 @@ function addLocation(canvas, name, id) {
     fill: ''
   });
 
-  const text = new fabric.Textbox(name, {
+  const text = new fabric.Textbox(locationData.name.replace(/\w+/g, _.capitalize), {
     fontSize: fontSize + 4,
     textAlign: 'center',
     width: size,
-    top: size / -10
+    top: size / -10,
+    shadow: new fabric.Shadow({
+      color: css.background,
+      blur: 4,
+      offsetX: 2,
+      offsetY: 1
+    })
   });
-  const exists = removeIfExists(canvas, id);
+  const exists = removeIfExists(canvas, locationData.id);
   const group = new fabric.Group([ square, text ], {
-    id,
+    id: locationData.id,
     borderColor: css.primary,
     cornerColor: css.primary,
     actorType: 'location',
-    name
+    name: locationData.name
   });
   const { top, left } = getNextLocation(canvas, 0, 200, group);
   group.top = exists ? exists.top: top;

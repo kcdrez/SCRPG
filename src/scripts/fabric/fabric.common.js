@@ -3,7 +3,8 @@ import css from '../../styles/variables.scss';
 import store from '../../vuex-state/store';
 const fontSize = 18;
 
-function initCanvas(canvas) {
+function initCanvas(id) {
+  const canvas = new fabric.Canvas(id, { selection: true, height: 500, width: 1000, backgroundColor: 'white' });
   window.addEventListener('resize', resizeCanvas, false);
 
   function resizeCanvas() {
@@ -39,6 +40,8 @@ function initCanvas(canvas) {
   canvas.on('object:moved', e => {
     store.dispatch('moveObject', e.target);
   });
+  
+  return canvas;
 };
 
 function makeStar(spikeCount, outerRadius, innerRadius, initAngle) {
@@ -93,4 +96,105 @@ function removeIfExists(canvas, id) {
   }
 };
 
-export { initCanvas, makeStar, getNextUnusedSpace, removeIfExists, fontSize };
+function wrapCanvasText(t, canvas, maxW, maxH) {
+  //Adapted from http://www.maxenko.com/wrapping-text-for-fabric-js/
+  maxH || (maxH = 0);
+  const words = t.text.split(' ');
+  let formatted = '';
+
+  // clear newlines
+  const sansBreaks = t.text.replace(/(\r\n|\n|\r)/gm, "");
+  // calc line height
+  const lineHeight = new fabric.Text(sansBreaks, {
+    fontFamily: t.fontFamily,
+    fontSize: t.fontSize
+  }).height;
+
+  const maxHAdjusted = maxH > 0 ? maxH - lineHeight : 0;
+  const context = canvas.getContext('2d');
+
+  context.font = t.fontSize + 'px ' + t.fontFamily;
+  let currentLine = '';
+  let breakLineCount = 0;
+
+  let n = 0;
+  while (n < words.length) {
+    const isNewLine = currentLine === '';
+    const testOverlap = currentLine + ' ' + words[n];
+
+    const w = context.measureText(testOverlap).width;
+
+    if (w < maxW) {
+      if (currentLine != '') currentLine += ' ';
+      currentLine += words[n];
+    } else {
+      // if this hits, we got a word that need to be hypenated
+      if (isNewLine) {
+        let wordOverlap = '';
+
+        // test word length until its over maxW
+        for (let i = 0; i < words[n].length; ++i) {
+          wordOverlap += words[n].charAt(i);
+          let withHypen = wordOverlap + '-';
+
+          if (context.measureText(withHypen).width >= maxW) {
+            // add hyphen when splitting a word
+            withHypen = wordOverlap.substr(0, wordOverlap.length - 2) + '-';
+            // update current word with remainder
+            words[n] = words[n].substr(wordOverlap.length - 1, words[n].length);
+            formatted += withHypen; // add hypenated word
+            break;
+          }
+        }
+      }
+      while (t.textAlign === 'right' && context.measureText(' ' + currentLine).width < maxW)
+      currentLine = ' ' + currentLine;
+
+      while (t.textAlign === 'center' && context.measureText(' ' + currentLine + ' ').width < maxW)
+      currentLine = ' ' + currentLine + ' ';
+
+      formatted += currentLine + '\n';
+      breakLineCount++;
+      currentLine = '';
+
+      continue; // restart cycle
+    }
+    if (maxHAdjusted > 0 && (breakLineCount * lineHeight) > maxHAdjusted) {
+        // add ... at the end indicating text was cutoff
+        formatted = formatted.substr(0, formatted.length - 3) + '...\n';
+        currentLine = '';
+        break;
+    }
+    n++;
+  }
+
+  if (currentLine !== '') {
+      while (t.textAlign === 'right' && context.measureText(' ' + currentLine).width < maxW)
+      currentLine = ' ' + currentLine;
+
+      while (t.textAlign === 'center' && context.measureText(' ' + currentLine + ' ').width < maxW)
+      currentLine = ' ' + currentLine + ' ';
+
+      formatted += currentLine + '\n';
+      breakLineCount++;
+      currentLine = '';
+  }
+
+  // get rid of empy newline at the end
+  formatted = formatted.substr(0, formatted.length - 1);
+
+  return new fabric.Text(formatted, {
+    left: t.left,
+    top: t.top,
+    fill: t.fill,
+    fontFamily: t.fontFamily,
+    fontSize: t.fontSize,
+    originX: t.originX,
+    originY: t.originY,
+    angle: t.angle,
+    shadow: t.shadow,
+    textAlign: t.textAlign
+  });
+}
+
+export { initCanvas, makeStar, getNextUnusedSpace, removeIfExists, wrapCanvasText, fontSize };

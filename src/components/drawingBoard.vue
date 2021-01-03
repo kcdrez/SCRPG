@@ -14,7 +14,7 @@
 
 <script>
   import { fabric } from 'fabric';
-  import { addMinion, addLieutenant, addPlayer, addVillain } from '../scripts/fabric/fabric.actor';
+  import { addBaddie, addPlayer, addVillain } from '../scripts/fabric/fabric.actor';
   import { addLocation } from '../scripts/fabric/fabric.scene';
   import { initCanvas } from '../scripts/fabric/fabric.common';
   import { mapState, mapGetters } from 'vuex';
@@ -37,12 +37,12 @@
           });
         }
       },
-      refreshCanvasBaddes(baddieArray, type, callback) {
+      refreshCanvas(array, type, callback) {
         this.canvas.getObjects().forEach(canvasEl => {
-          const matchBaddie = baddieArray.find(baddie => baddie.id === canvasEl.id);
-          if (matchBaddie) {
-            if ('instances' in matchBaddie) {
-              const matchInstance = matchBaddie.instances.find(instance => {
+          const match = array.find(el => el.id === canvasEl.id);
+          if (match) {
+            if ('instances' in match) {
+              const matchInstance = match.instances.find(instance => {
                 return instance.id === canvasEl.instanceId;
               });
               if (!matchInstance) {
@@ -54,20 +54,20 @@
           }
         });
 
-        baddieArray.forEach(baddie => {
-          if ('instances' in baddie) {
-            baddie.instances.forEach((instance, index) => {
+        array.forEach(el => {
+          if ('instances' in el) {
+            el.instances.forEach((instance, index) => {
               const canvasMatch = this.canvas.getObjects().find(canvasEl => {
-                return canvasEl.id === baddie.id && canvasEl.instanceId === instance.id;
+                return canvasEl.id === el.id && canvasEl.instanceId === instance.id;
               });
               if (!canvasMatch) {
-                callback(this.canvas, baddie, instance, index);
+                callback(this.canvas, el, instance, index);
               }
             });
           } else {
-            const canvasMatch = this.canvas.getObjects().find(canvasEl => canvasEl.id === baddie.id);
+            const canvasMatch = this.canvas.getObjects().find(canvasEl => canvasEl.id === el.id);
             if (!canvasMatch) {
-              callback(this.canvas, baddie);
+              callback(this.canvas, el);
             }
           }
         });
@@ -120,69 +120,57 @@
       }
     },
     computed: {
-      ...mapState({
-        villains: state => _.cloneDeep(state.villains)
-      }),
-      ...mapState([ 'minions', 'lieutenants', 'players' ]),
+      ...mapState([ 'minions', 'lieutenants', 'players', 'villains' ]),
       locations() {
         return _.cloneDeep(this.$store.getters.locations);
       }
     },
     mounted() {
-      this.canvas = new fabric.Canvas('canvas', { selection: true, height: 500, width: 1000, backgroundColor: 'white' });
-      initCanvas(this.canvas);
-      this.locations.forEach(location => {
-        addLocation(this.canvas, location.name, location.id);
-      });
+      this.canvas = initCanvas('canvas');
+      this.refreshCanvas(this.locations, 'location', addLocation);
+      // this.locations.forEach(location => {
+      //   addLocation(this.canvas, location.name, location.id);
+      // });
     },
     watch: {
       players: {
         handler(newVal, oldVal) {
-          this.refreshCanvasBaddes(newVal, 'player', addPlayer);
+          this.refreshCanvas(newVal, 'player', addPlayer);
         },
         deep: true
       },
       minions: {
         handler(newVal) {
-          this.refreshCanvasBaddes(newVal, 'minion', addMinion);
+          this.refreshCanvas(newVal, 'minion', addBaddie);
         },
         deep: true
       },
       lieutenants: {
         handler(newVal) {
-          this.refreshCanvasBaddes(newVal, 'lieutenant', addLieutenant);
+          this.refreshCanvas(newVal, 'lieutenant', addBaddie);
         },
         deep: true
       },
       villains: {
         handler(newVal, oldVal) {
-          newVal.forEach(villain => {
-            addVillain(this.canvas, villain);
-          });
-  
-          oldVal.forEach(villain => {
-            const match = newVal.find(x => x.id === villain.id);
-            if (!match) {
-              const canvasMatch = this.canvas.getObjects().find(x => x.id === villain.id);
-              this.canvas.remove(canvasMatch);
-            }
-          });
+          this.refreshCanvas(newVal, 'villain', addVillain);
         },
         deep: true
       },
       locations: {
         handler(newVal, oldVal) {
-          newVal.forEach(location => {
-            addLocation(this.canvas, location.name, location.id);
-          });
+          this.refreshCanvas(newVal, 'location', addLocation);
+          // newVal.forEach(location => {
+          //   addLocation(this.canvas, location.name, location.id);
+          // });
 
-          oldVal.forEach(location => {
-            const match = newVal.find(x => x.id === location.id);
-            if (!match) {
-              const canvasMatch = this.canvas.getObjects().find(x => x.id === location.id);
-              this.canvas.remove(canvasMatch);
-            }
-          });
+          // oldVal.forEach(location => {
+          //   const match = newVal.find(x => x.id === location.id);
+          //   if (!match) {
+          //     const canvasMatch = this.canvas.getObjects().find(x => x.id === location.id);
+          //     this.canvas.remove(canvasMatch);
+          //   }
+          // });
         },
         deep: true
       }
