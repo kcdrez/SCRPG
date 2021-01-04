@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div class="util-buttons">
-      <button class="btn btn-primary"
+    <Legend />
+    <div class="btn-group btn-group-sm mb-1">
+      <button class="btn btn-primary border-dark"
               @click="goToSelection()">View Details</button>
-      <button class="btn btn-danger"
+      <button class="btn btn-danger border-dark"
               @click="removeSelection()">Remove Selected</button>          
     </div>
-    <Legend />
     <canvas id="canvas"></canvas>
   </div>
 </template>
@@ -171,11 +171,5 @@
 
   #canvas {
     border: 1px black solid;
-  }
-  .util-buttons {
-    display: inline;
-    button {
-      vertical-align: top;
-    }
   }
 </style>
