@@ -1,10 +1,8 @@
 <template>
   <div>
     <navbar />
+    <h1 class="text-center">GM Management</h1>
     <div class="container admin-page">
-      <div class="row">
-        <h1 class="col text-center">GM Management</h1>
-      </div>
       <Environment @add-minion="$refs.minions.modal('show', $event)" />
       <Baddies label="Minions" 
                :allowOwner="true" ref="minions" />
@@ -13,6 +11,7 @@
       <Villains ref="villains" 
                 @add-minion="$refs.minions.modal('show', $event)" />
     </div>
+    <DrawingBoard />
     <div class="scroll-to-top" 
          @click="scrollToTop()"
          title="Scroll to the top of the page"
@@ -84,10 +83,11 @@
   import Environment from '../components/environment.vue';
   import Villains from '../components/villain.vue';
   import _ from 'lodash';
+  import DrawingBoard from '../components/drawingBoard.vue';
 
   export default {
     name: 'GMTools',
-    components: { Baddies, Environment, Villains },
+    components: { Baddies, Environment, Villains, DrawingBoard },
     data() {
       return {
         showScrollWidget: false

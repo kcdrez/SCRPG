@@ -46,7 +46,7 @@
         <tbody>
           <template v-for="baddie in list">
             <tr :key="baddie.id"
-                :id="baddie.type + baddie.id">
+                :id="baddie.id">
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
@@ -419,7 +419,7 @@
     },
     methods: {
       createBaddie(baddie) {
-        this.$store.dispatch('upsertBaddie', Object.assign({type: this.label.toLowerCase()}, this.baddieData));
+        this.$store.dispatch('upsertBaddie', Object.assign({ type: this.label.toLowerCase() }, this.baddieData));
         $(`#createModal-${this.label}`).modal('hide');
       },
       addBaddie(name) {

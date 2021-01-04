@@ -52,3 +52,19 @@ $background-light-2: lighten($background, 20%);
 $background-light-3: lighten($background, 35%);
 $background-light-4: lighten($background, 45%);
 $background-light-5: lighten($background, 58%);
+
+:export {
+  primary: $primary;
+  primaryText: $primary-text-light;
+  secondary: $secondary;
+  secondaryText: $secondary-text-light;
+  success: $success;
+  successText: $success-text-light;
+  danger: $danger;
+  dangerText: $danger-text-light;
+  warning: $warning;
+  warningText: $warning-text-light;
+  background: $background-light-2;
+  light: $light;
+  dark: $dark;
+}

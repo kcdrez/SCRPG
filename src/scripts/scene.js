@@ -157,12 +157,13 @@ class Scene extends Actor {
     const completed = arr.filter(x => x.checked).length;
     return `${completed}-${arr.length}`;
   }
+  
   exportChallenges(id) {
-    return this.challenges.reduce((acc, el) => {
-      if (!id || el.id === id) {
-        acc.push(el.export());
-        el.list.forEach(x => {
-          acc.push(x.export(el.id));
+    return this.challenges.reduce((acc, challenge) => {
+      if (!id || challenge.id === id) {
+        acc.push(challenge.export());
+        challenge.list.forEach(challengeEl => {
+          acc.push(challengeEl.export(challenge.id));
         });
       }
       return acc;
@@ -240,7 +241,9 @@ class Challenge extends GenericObject {
       id: this.id,
       name: this.name,
       type: 'challenge',
-      description: this.description
+      description: this.description,
+      top: this.top,
+      left: this.left
     }
   }
 }
@@ -287,7 +290,9 @@ class Location extends GenericObject {
       id: this.id,
       name: this.name,
       description: this.description,
-      type: 'location'
+      type: 'location',
+      top: this.top,
+      left: this.left
     }
   }
 }

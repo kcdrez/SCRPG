@@ -172,7 +172,7 @@ const store = new Vuex.Store({
     reconcile(ctx, type) {
       for (let i = 0; i < ctx.state[type].length - 1; i++) {
         if (sameBaddies(ctx.state[type][i], ctx.state[type][i + 1])) {
-          ctx.state[type][i].count += ctx.state[type][i+1].count;
+          ctx.state[type][i].count += ctx.state[type][i + 1].count;
           ctx.state[type][i + 1].markForDeath = true;
         }
       }
@@ -235,7 +235,6 @@ const store = new Vuex.Store({
       const {files, filters} = data;
       if (!files) return;
       (await processXlsxFiles(files, filters)).forEach(row => {
-        // console.log(row);
         if (!row.type) return;
         switch (row.type.toLowerCase()) {
           case 'player':
@@ -280,6 +279,45 @@ const store = new Vuex.Store({
           }
         }
       });
+    },
+    moveObject(ctx, data) {
+      if (data.id && data.actorType) {
+        let match = null;
+        let instance = null;
+        switch (data.actorType) {
+          case 'player':
+            match = ctx.state.players.find(player => player.id === data.id);
+            break;
+          case 'minion':
+            match = ctx.state.minions.find(minion => minion.id === data.id);
+            instance = match ? match.instances.find(instance => instance.id === data.instanceId) : null;
+            break;
+          case 'lieutenant':
+            match = ctx.state.lieutenants.find(lieutenant => lieutenant.id === data.id);
+            instance = match ? match.instances.find(instance => instance.id === data.instanceId) : null;
+            break;
+          case 'villain':
+            match = ctx.state.villains.find(villain => villain.id === data.id);
+            break;
+          case 'location':
+            match = ctx.state.scene.locations.find(location => location.id === data.id);
+            break;
+          case 'challenge': 
+            match = ctx.state.scene.challenges.find(challenge => challenge.id === data.id);
+            break;
+        }
+
+        if (match) {
+          if (instance) {
+            instance.top = data.top;
+            instance.left = data.left;
+          } else {
+            match.top = data.top;
+            match.left = data.left;
+          }
+          match.save();
+        }
+      }
     }
   },
   getters: {
@@ -319,6 +357,12 @@ const store = new Vuex.Store({
       });
 
       return arr.concat(state.lieutenants, remainingMinions);
+    },
+    locations: state => {
+      return state.scene.locations;
+    },
+    challenges: state => {
+      return state.scene.challenges;
     }
   }
 });
