@@ -299,6 +299,12 @@ const store = new Vuex.Store({
           case 'villain':
             match = ctx.state.villains.find(villain => villain.id === data.id);
             break;
+          case 'location':
+            match = ctx.state.scene.locations.find(location => location.id === data.id);
+            break;
+          case 'challenge': 
+            match = ctx.state.scene.challenges.find(challenge => challenge.id === data.id);
+            break;
         }
 
         if (match) {
@@ -354,6 +360,9 @@ const store = new Vuex.Store({
     },
     locations: state => {
       return state.scene.locations;
+    },
+    challenges: state => {
+      return state.scene.challenges;
     }
   }
 });

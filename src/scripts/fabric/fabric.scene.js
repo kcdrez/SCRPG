@@ -1,4 +1,4 @@
-import { removeIfExists, fontSize } from './fabric.common';
+import { removeIfExists, addGroup, wrapCanvasText, fontSize } from './fabric.common';
 import css from '../../styles/variables.scss';
 
 function addLocation(canvas, locationData) {
@@ -29,14 +29,68 @@ function addLocation(canvas, locationData) {
     borderColor: css.primary,
     cornerColor: css.primary,
     actorType: 'location',
-    name: locationData.name
+    name: locationData.name,
+    top: locationData.top,
+    left: locationData.left
   });
-  const { top, left } = getNextLocation(canvas, 0, 200, group);
-  group.top = exists ? exists.top: top;
-  group.left = exists ? exists.left: left;
+  const { top, left } = getNextLocation(canvas, 0, 300, group);
+  if (locationData.top) {
+    group.top = locationData.top;
+  } else if (exists) {
+    group.top = exists.top;
+  } else {
+    group.top = top;
+  }
+
+  if (locationData.left) {
+    group.left = locationData.left;
+  } else if (exists) {
+    group.left = exists.left;
+  } else {
+    group.left = left;
+  }
 
   canvas.add(group);
   canvas.sendToBack(group);
+};
+
+function addChallenge(canvas, challengeData) {
+  const size = 100;
+  const triangle = new fabric.Triangle({
+    fill: css.primary,
+    stroke: 'black',
+    height: size * 0.75,
+    width: size
+  });
+
+  const textTemp = new fabric.Text(challengeData.name.replace(/\w+/g, _.capitalize), {
+    fontSize,
+    top: 10,
+    left: size / 2,
+    originX: 'center',
+    textAlign: 'center',
+    width: size,
+    fill: css.primaryText,
+    shadow: new fabric.Shadow({
+      color: 'black',
+      blur: 3,
+      offsetX: 2,
+      offsetY: 2
+    })
+  });
+  const text = wrapCanvasText(textTemp, canvas, size, size - 30);
+  text.top = size / 2 - text.height / 2 - 5;
+
+  const group = new fabric.Group([ triangle, text ], {
+    id: challengeData.id,
+    borderColor: css.primary,
+    cornerColor: css.primary,
+    actorType: 'challenge'
+  });
+
+  const removed = removeIfExists(canvas, challengeData.id);
+  const data = (challengeData.top && challengeData.left) ? challengeData : removed;
+  addGroup(canvas, group, data);
 };
 
 function getNextLocation(canvas, top, left, obj) {
@@ -62,4 +116,4 @@ function getNextLocation(canvas, top, left, obj) {
   }
 };
 
-export { addLocation };
+export { addLocation, addChallenge};

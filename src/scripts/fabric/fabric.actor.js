@@ -1,7 +1,7 @@
 import { fabric } from 'fabric';
 import _ from 'lodash';
 import css from '../../styles/variables.scss';
-import { makeStar, getNextUnusedSpace, removeIfExists, wrapCanvasText, fontSize } from './fabric.common';
+import { makeStar, addGroup, removeIfExists, wrapCanvasText, fontSize } from './fabric.common';
 
 function addBaddie(canvas, baddie, instance, index) {
   const size = 65;
@@ -158,13 +158,5 @@ function removeBaddieIfExists(canvas, id, instanceId) {
     return null;
   }
 };
-
-function addGroup(canvas, group, data) {
-  const { top, left } = getNextUnusedSpace(canvas, 50, 0, group);
-  group.top = data ? data.top: top;
-  group.left = data ? data.left: left;
-
-  canvas.add(group);
-}
 
 export { addBaddie, addPlayer, addVillain };

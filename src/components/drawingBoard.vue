@@ -4,24 +4,25 @@
       <button class="btn btn-primary"
               @click="goToSelection()">View Details</button>
       <button class="btn btn-danger"
-              @click="removeSelection()">Remove Selected</button>
-      <button class="btn btn-warning"
-              @click="debug()">debug</button>              
+              @click="removeSelection()">Remove Selected</button>          
     </div>
+    <Legend />
     <canvas id="canvas"></canvas>
   </div>
 </template>
 
 <script>
   import { fabric } from 'fabric';
-  import { addBaddie, addPlayer, addVillain } from '../scripts/fabric/fabric.actor';
-  import { addLocation } from '../scripts/fabric/fabric.scene';
-  import { initCanvas } from '../scripts/fabric/fabric.common';
-  import { mapState, mapGetters } from 'vuex';
   import _ from 'lodash';
+  import { mapState, mapGetters } from 'vuex';
+  import { addBaddie, addPlayer, addVillain } from '../scripts/fabric/fabric.actor';
+  import { addLocation, addChallenge } from '../scripts/fabric/fabric.scene';
+  import { initCanvas } from '../scripts/fabric/fabric.common';
+  import Legend from './legend.vue';
 
   export default {
     name: 'DrawingBoard',
+    components: { Legend },
     data() {
       return {
         canvas: null
@@ -101,21 +102,11 @@
               this.$store.state.scene.removeLocation(index);
               break;
             }
+            case 'challenge': {
+              const index = this.challenges.findIndex(x => x.id === el.id);
+              this.$store.state.scene.removeChallenge(index);
+            }
           }
-        }
-      },
-      debug() {
-        const activeObject = this.canvas.getActiveObject();
-        if (activeObject.type === "group") {
-          const items = activeObject._objects;
-          activeObject._restoreObjectsState();
-          this.canvas.remove(activeObject);
-          for (let i = 0; i < items.length; i++) {
-            this.canvas.add(items[i]);
-            this.canvas.item(this.canvas.size() - 1).hasControls = true;
-          }
-
-          this.canvas.renderAll();
         }
       }
     },
@@ -123,18 +114,19 @@
       ...mapState([ 'minions', 'lieutenants', 'players', 'villains' ]),
       locations() {
         return _.cloneDeep(this.$store.getters.locations);
+      },
+      challenges() {
+        return _.cloneDeep(this.$store.getters.challenges);
       }
     },
     mounted() {
       this.canvas = initCanvas('canvas');
       this.refreshCanvas(this.locations, 'location', addLocation);
-      // this.locations.forEach(location => {
-      //   addLocation(this.canvas, location.name, location.id);
-      // });
+      this.refreshCanvas(this.challenges, 'challenge', addChallenge);
     },
     watch: {
       players: {
-        handler(newVal, oldVal) {
+        handler(newVal) {
           this.refreshCanvas(newVal, 'player', addPlayer);
         },
         deep: true
@@ -152,25 +144,20 @@
         deep: true
       },
       villains: {
-        handler(newVal, oldVal) {
+        handler(newVal) {
           this.refreshCanvas(newVal, 'villain', addVillain);
         },
         deep: true
       },
       locations: {
-        handler(newVal, oldVal) {
+        handler(newVal) {
           this.refreshCanvas(newVal, 'location', addLocation);
-          // newVal.forEach(location => {
-          //   addLocation(this.canvas, location.name, location.id);
-          // });
-
-          // oldVal.forEach(location => {
-          //   const match = newVal.find(x => x.id === location.id);
-          //   if (!match) {
-          //     const canvasMatch = this.canvas.getObjects().find(x => x.id === location.id);
-          //     this.canvas.remove(canvasMatch);
-          //   }
-          // });
+        },
+        deep: true
+      },
+      challenges: {
+        handler(newVal) {
+          this.refreshCanvas(newVal, 'challenge', addChallenge);
         },
         deep: true
       }
@@ -184,9 +171,6 @@
 
   #canvas {
     border: 1px black solid;
-  }
-  .canvas-container {
-    display: inline-block;
   }
   .util-buttons {
     display: inline;

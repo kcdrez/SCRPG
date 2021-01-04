@@ -4,7 +4,7 @@ import store from '../../vuex-state/store';
 const fontSize = 18;
 
 function initCanvas(id) {
-  const canvas = new fabric.Canvas(id, { selection: true, height: 500, width: 1000, backgroundColor: 'white' });
+  const canvas = new fabric.Canvas(id, { selection: true, height: 700, width: 1000, backgroundColor: 'white' });
   window.addEventListener('resize', resizeCanvas, false);
 
   function resizeCanvas() {
@@ -14,7 +14,7 @@ function initCanvas(id) {
   resizeCanvas();
 
   const unusedRect = new fabric.Rect({
-    width: 200,
+    width: 300,
     height: canvas.height,
     top: 0,
     left: 0,
@@ -22,11 +22,10 @@ function initCanvas(id) {
     stroke: 'black'
   });
 
-  const text = new fabric.Textbox('Unused', {
+  const text = new fabric.Textbox('No Location', {
     textAlign: 'center',
-    width: 200,
-    fill: css.light,
-    name: 'bob'
+    width: 300,
+    fill: css.light
   });
 
   const group = new fabric.Group([ unusedRect, text ], {
@@ -195,6 +194,14 @@ function wrapCanvasText(t, canvas, maxW, maxH) {
     shadow: t.shadow,
     textAlign: t.textAlign
   });
+};
+
+function addGroup(canvas, group, data) {
+  const { top, left } = getNextUnusedSpace(canvas, 50, 0, group);
+  group.top = data ? data.top: top;
+  group.left = data ? data.left: left;
+
+  canvas.add(group);
 }
 
-export { initCanvas, makeStar, getNextUnusedSpace, removeIfExists, wrapCanvasText, fontSize };
+export { initCanvas, addGroup, makeStar, removeIfExists, wrapCanvasText, fontSize };

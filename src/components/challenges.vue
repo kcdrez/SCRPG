@@ -30,10 +30,11 @@
           There are no challenges in the scene.
         </div>
         <div v-for="(challenge, challengeIndex) in scene.challenges" 
-            :key="challenge.name">
+            :key="challenge.name"
+            :id="challenge.id">
           <div class="mb-1">
             <div class="text-left my-2">
-              <h5 class="d-inline-block align-middle m-0"
+              <h5 class="d-inline-block align-middle m-0 text-capitalize"
                   v-if="!challenge.editing">{{challenge.name}}</h5>
               <div :class="challenge.editing ? 'input-group input-group-sm mb-2' : 'd-inline float-right'">
                 <input type="text"

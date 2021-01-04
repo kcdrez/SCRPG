@@ -30,7 +30,7 @@
           There is no Scene Tracker.
         </div>
         <div v-else>
-          <h4 class="scene-name">{{ scene.name }}</h4>
+          <h4 class="scene-name text-capitalize">{{ scene.name }}</h4>
           <div v-for="(item, index) in scene.green" 
                 class="d-inline" 
                 @click="scene.progressScene(item)" 
