@@ -1,11 +1,15 @@
 <template>
   <div>
     <Legend />
-    <div class="btn-group btn-group-sm mb-1">
+    <div class="btn-group btn-group-sm mb-1 mx-1">
       <button class="btn btn-primary border-dark"
               @click="goToSelection()">View Details</button>
+      <!-- <button class="btn btn-warning border-dark"
+              @click="removeSelection()">Demote Selected</button>
+      <button class="btn btn-success border-dark"
+              @click="removeSelection()">Promote Selected</button> -->
       <button class="btn btn-danger border-dark"
-              @click="removeSelection()">Remove Selected</button>          
+              @click="removeSelection()">Remove Selected</button>
     </div>
     <canvas id="canvas"></canvas>
   </div>

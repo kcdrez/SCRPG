@@ -45,23 +45,31 @@ class Baddie extends Actor {
     return true;
   }
 
-  demote() {
-    const copy = this.copy();
+  demote(id) {
+    const copy = this.copy(true);
     copy.id = uuid();
     copy.size = this.size - 2;
     copy.count = 1;
     if (copy.size >= 4) {
-      this.count--;
+      if (id) {
+        this.removeInstance(id);
+      } else {
+        this.count--;
+      }
       store.dispatch('upsertBaddie', copy);
     }
   }
-  promote() {
-    const copy = this.copy();
+  promote(id) {
+    const copy = this.copy(true);
     copy.id = uuid();
     copy.size = this.size + 2;
     copy.count = 1;
     if (copy.size <= 12) {
-      this.count--;
+      if (id) {
+        this.removeInstance(id);
+      } else {
+        this.count--;
+      }
       store.dispatch('upsertBaddie', copy);
     }
   }
@@ -85,7 +93,7 @@ class Baddie extends Actor {
   }
   removeModifier(type, index) {
     const remove = () => {
-      const copy = this.copy();
+      const copy = this.copy(true);
       copy[type].splice(index, 1);
       copy.id = uuid();
       copy.count = 1;
@@ -121,37 +129,42 @@ class Baddie extends Actor {
       store.dispatch('reconcile', this.type);
     }
   }
-  export(id) {
+  export(id, excludeInstances) {
     if (!id || this.id === id) {
       const modifiers = [
         ...this.bonuses.map(x => x.export(this.id)),
         ...this.penalties.map(x => x.export(this.id)),
         ...this.defends.map(x => x.export(this.id)),
       ];
+
+      const baddie = {
+        name: this.name,
+        type: this.type,
+        parent: this._owner,
+        id: this.id,
+        size: this.size,
+        acted: this.acted,
+        count: this.count,
+        top: this.top,
+        left: this.left
+      };
+
+      if (!excludeInstances) {
+        baddie.instances = this.instances;
+      }
   
       return {
-        baddie: {
-          name: this.name,
-          type: this.type,
-          parent: this._owner,
-          id: this.id,
-          size: this.size,
-          acted: this.acted,
-          count: this.count,
-          instances: this.instances,
-          top: this.top,
-          left: this.left
-        },
+        baddie,
         modifiers
       }
     } else return {};
   }
-  copy() {
+  copy(excludeInstances) {
     return Object.assign({
       bonuses: this.bonuses.map(x => x.export(this.id)),
       penalties: this.penalties.map(x => x.export(this.id)),
       defends: this.defends.map(x => x.export(this.id)),
-    }, this.export().baddie);
+    }, this.export(null, excludeInstances).baddie);
   }
   saveEdit() {
     this._owner = this.tempOwner;
