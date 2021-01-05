@@ -1,7 +1,7 @@
 <template>
   <div>
     <h4 class="mx-3">Legend:</h4>
-    <canvas id="legendCanvas"></canvas>
+    <canvas id="legendCanvas" class="mx-1"></canvas>
   </div>
 </template>
 

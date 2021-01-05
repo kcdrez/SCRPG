@@ -137,7 +137,7 @@ const store = new Vuex.Store({
             }
           });
         } else {
-          const copy = match.copy();
+          const copy = match.copy(true);
           copy.count = modifier.applyTo === 'single' ? 1 : match.count;
           match.count--;
           copy.id = uuid();
