@@ -125,6 +125,10 @@
     },
     mounted() {
       this.canvas = initCanvas('canvas');
+      this.refreshCanvas(this.minions, 'minion', addBaddie);
+      this.refreshCanvas(this.lieutenants, 'lieutenant', addBaddie);
+      this.refreshCanvas(this.players, 'player', addPlayer);
+      this.refreshCanvas(this.villains, 'villain', addVillain);
       this.refreshCanvas(this.locations, 'location', addLocation);
       this.refreshCanvas(this.challenges, 'challenge', addChallenge);
     },
