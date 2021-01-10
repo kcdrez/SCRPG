@@ -263,7 +263,6 @@
           <div class="modal-footer">
             <button class="btn btn-primary border-dark" 
                     type="button" 
-                    data-dismiss="modal" 
                     @click="createBaddie()">Create</button>
             <button class="btn btn-secondary border-dark" 
                     type="button" 
@@ -421,6 +420,7 @@
       createBaddie(baddie) {
         this.$store.dispatch('upsertBaddie', Object.assign({ type: this.label.toLowerCase() }, this.baddieData));
         $(`#createModal-${this.label}`).modal('hide');
+        $(':focus').blur();
       },
       addBaddie(name) {
         this.baddieData.name = name;

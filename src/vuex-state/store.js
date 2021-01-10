@@ -18,7 +18,12 @@ const store = new Vuex.Store({
     minions: [],
     villains: [],
     players: [],
-    scene: new Scene({})
+    scene: new Scene({}),
+    selection: {
+      id: null,
+      instance: null,
+      type: null
+    }
   },
   mutations: {
     INIT(state, {players, minions, lieutenants, villains, scene}) {
@@ -77,6 +82,11 @@ const store = new Vuex.Store({
     },
     RESET_PLAYERS(state) {
       state.players = [];
+    },
+    SELECT_CANVAS_EL(state, data) {
+      state.selection.id = data.id || null;
+      state.selection.instance = data.instanceId || null;
+      state.selection.type = data.actorType || null;
     }
   },
   actions: {
@@ -318,6 +328,9 @@ const store = new Vuex.Store({
           match.save();
         }
       }
+    },
+    selectObject(ctx, data) {
+      ctx.commit('SELECT_CANVAS_EL', data);
     }
   },
   getters: {

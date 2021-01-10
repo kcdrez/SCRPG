@@ -4,10 +4,21 @@
     <div class="btn-group btn-group-sm mb-1 mx-1">
       <button class="btn btn-primary border-dark"
               @click="goToSelection()">View Details</button>
-      <!-- <button class="btn btn-warning border-dark"
-              @click="removeSelection()">Demote Selected</button>
+      <button class="btn btn-warning border-dark"
+              @click="demote()"
+              v-if="selection.instance">Demote Selected</button>
       <button class="btn btn-success border-dark"
-              @click="removeSelection()">Promote Selected</button> -->
+              @click="promote()"
+              v-if="selection.instance">Promote Selected</button>
+      <button class="btn btn-success border-dark"
+              @click="boost()"
+              v-if="selection.instance">Boost Selected</button>
+      <button class="btn btn-warning border-dark"
+              @click="hinder()"
+              v-if="selection.instance">Hinder Selected</button>
+      <button class="btn btn-success border-dark"
+              @click="defend()"
+              v-if="selection.instance">Defend Selected</button>                                          
       <button class="btn btn-danger border-dark"
               @click="removeSelection()">Remove Selected</button>
     </div>
@@ -65,13 +76,15 @@
               const canvasMatch = this.canvas.getObjects().find(canvasEl => {
                 return canvasEl.id === el.id && canvasEl.instanceId === instance.id;
               });
-              if (!canvasMatch) {
+              if (!canvasMatch || el.updateCanvas) {
+                el.updateCanvas = false;
                 callback(this.canvas, el, instance, index);
               }
             });
           } else {
             const canvasMatch = this.canvas.getObjects().find(canvasEl => canvasEl.id === el.id);
-            if (!canvasMatch) {
+            if (!canvasMatch|| el.updateCanvas) {
+              el.updateCanvas = false;
               callback(this.canvas, el);
             }
           }
@@ -112,10 +125,37 @@
             }
           }
         }
+      },
+      demote() {
+        let match = null;
+        switch (this.selection.type) {
+          case 'minion':
+            match = this.minions.find(minion => minion.id === this.selection.id);
+            break;
+          case 'lieutenant':
+            match = this.lieutenants.find(lieutenant => lieutenant.id === this.selection.id);
+            break;
+        }
+        if (match) match.demote(this.selection.instance);
+      },
+      promote() {
+        let match = null;
+        switch (this.selection.type) {
+          case 'minion':
+            match = this.minions.find(minion => minion.id === this.selection.id);
+            break;
+          case 'lieutenant':
+            match = this.lieutenants.find(lieutenant => lieutenant.id === this.selection.id);
+            break;
+        }
+        if (match) match.promote(this.selection.instance);
+      },
+      boost() {
+        this.$emit('boostSelected');
       }
     },
     computed: {
-      ...mapState([ 'minions', 'lieutenants', 'players', 'villains' ]),
+      ...mapState([ 'minions', 'lieutenants', 'players', 'villains', 'selection' ]),
       locations() {
         return _.cloneDeep(this.$store.getters.locations);
       },
