@@ -14,6 +14,7 @@ class GenericObject {
     this.type = data.type;
     this.top = data.top || null;
     this.left = data.left || null;
+    this.updateCanvas = false;
   }
 
   save(type, data) {
@@ -28,6 +29,7 @@ class GenericObject {
   saveEdit() {
     this.editing = false;
     this.name = this.tempName;
+    this.updateCanvas = true;
     this.save();
   }
 }

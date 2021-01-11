@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import store from '../vuex-state/store';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import Actor from './actor';
+import { unvue } from './utilities';
 
 class Baddie extends Actor {
   constructor(data) {
@@ -13,15 +14,16 @@ class Baddie extends Actor {
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this.markForDeath = false;
     this.instances = data.instances || [];
-    this.tempCount = this.count;
 
-    if (data.count > 0) {
-      this.addInstances(data.count);
-    } else if (this.count === 0) {
-      this.addInstances(1);
+    if (this.instances.length === 0) {
+      if (data.count > 0) {
+        this.addInstances(data.count);
+      } else if (this.count <= 0) {
+        this.addInstances(1);
+      }
     }
+    this.tempCount = this.count; //this has to be after adding instances
   }
 
   get owner() {
@@ -46,28 +48,23 @@ class Baddie extends Actor {
   }
 
   demote(id) {
-    const copy = this.copy(true);
-    copy.id = uuid();
-    copy.size = this.size - 2;
-    copy.count = 1;
-    if (copy.size >= 4) {
-      if (id) {
-        this.removeInstance(id);
-      } else {
-        this.count--;
-      }
-      store.dispatch('upsertBaddie', copy);
-    }
+    this.changeSize(this.size - 2, id);
   }
   promote(id) {
+    this.changeSize(this.size + 2, id);
+  }
+  changeSize(newSize, id) {
     const copy = this.copy(true);
     copy.id = uuid();
-    copy.size = this.size + 2;
-    copy.count = 1;
-    if (copy.size <= 12) {
+    copy.size = newSize;
+    if (copy.size >= 4 && copy.size <= 12) {
       if (id) {
+        const match = this.instances.find(x => x.id === id);
+        copy.instances.push(match);
         this.removeInstance(id);
       } else {
+        const x = this.instances[this.instances.length - 1];
+        copy.instances.push(unvue(x));
         this.count--;
       }
       store.dispatch('upsertBaddie', copy);
@@ -93,11 +90,12 @@ class Baddie extends Actor {
   }
   removeModifier(type, index) {
     const remove = () => {
-      const copy = this.copy(true);
+      const copy = this.copy();
       copy[type].splice(index, 1);
       copy.id = uuid();
-      copy.count = 1;
+      copy.instances.splice(1);
       this.count--;
+      console.log(copy);
       if (copy.count > 0) store.dispatch('upsertBaddie', copy);
       this.save();
     }
@@ -124,7 +122,7 @@ class Baddie extends Actor {
   }
   save() {
     if (this.count <= 0) {
-      store.dispatch('removeBaddie', {type: this.type, id: this.id});
+      store.dispatch('removeBaddie', { type: this.type, id: this.id });
     } else {
       store.dispatch('reconcile', this.type);
     }
@@ -146,13 +144,10 @@ class Baddie extends Actor {
         acted: this.acted,
         count: this.count,
         top: this.top,
-        left: this.left
+        left: this.left,
+        instances: excludeInstances ? [] : unvue(this.instances)
       };
 
-      if (!excludeInstances) {
-        baddie.instances = this.instances;
-      }
-  
       return {
         baddie,
         modifiers

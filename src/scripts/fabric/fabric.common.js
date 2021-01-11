@@ -39,6 +39,27 @@ function initCanvas(id) {
   canvas.on('object:moved', e => {
     store.dispatch('moveObject', e.target);
   });
+
+  canvas.on('selection:created', e => {
+    store.dispatch('selectObject', e.target);
+  });
+
+  canvas.on('selection:updated', e => {
+    store.dispatch('selectObject', e.target);
+  });
+  
+  canvas.on('selection:cleared', e => {
+    store.dispatch('selectObject', e);
+  });
+
+  fabric.Object.prototype.toObject = (function (toObject) {
+    return function (propertiesToInclude) {
+      propertiesToInclude = (propertiesToInclude || []).concat(
+        ['id','actorType', 'instanceId']
+      );
+      return toObject.apply(this, [propertiesToInclude]);
+    };
+  })(fabric.Object.prototype.toObject);
   
   return canvas;
 };
@@ -202,6 +223,14 @@ function addGroup(canvas, group, data) {
   group.left = data ? data.left: left;
 
   canvas.add(group);
-}
+};
 
-export { initCanvas, addGroup, makeStar, removeIfExists, wrapCanvasText, fontSize };
+function loadImage(src, opts) {
+  return new Promise((resolve, reject) => {
+    fabric.Image.fromURL(src, img => {
+      resolve(img);
+    }, opts);
+  });
+};
+
+export { initCanvas, addGroup, makeStar, removeIfExists, wrapCanvasText, loadImage, fontSize };

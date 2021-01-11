@@ -8,8 +8,7 @@
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button class="btn btn-sm btn-success border-dark" 
-                  data-toggle="modal" 
-                  :data-target="`#createModal-${label}`">Create</button>
+                  @click="modal('show')">Create</button>
           <button class="btn btn-primary border-dark"
                     @click="$refs.import.click()"
                     :title="`Import ${labelSingle} data from an xlsx file`">Import</button>
@@ -263,7 +262,6 @@
           <div class="modal-footer">
             <button class="btn btn-primary border-dark" 
                     type="button" 
-                    data-dismiss="modal" 
                     @click="createBaddie()">Create</button>
             <button class="btn btn-secondary border-dark" 
                     type="button" 
@@ -295,7 +293,8 @@
               <input class="form-control" 
                      type="text"
                      v-model.trim="baddieData.modifier.name"
-                     @keydown.enter="addModifier">
+                     @keydown.enter="addModifier"
+                     ref="modName">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -390,7 +389,10 @@
             max: 0,
             min: 0,
             type: '',
-            target: null,
+            target: {
+              id: null,
+              instanceId: null
+            },
             persistent: false,
             exclusive: false,
             applyTo: 'single'
@@ -421,12 +423,13 @@
       createBaddie(baddie) {
         this.$store.dispatch('upsertBaddie', Object.assign({ type: this.label.toLowerCase() }, this.baddieData));
         $(`#createModal-${this.label}`).modal('hide');
+        $(':focus').blur();
       },
       addBaddie(name) {
         this.baddieData.name = name;
         $(`#createModal-${this.label}`).modal('show');
       },
-      modifyBaddie(type, id) {
+      modifyBaddie(type, id, instanceId) {
         if (type === 'boost') {
           this.baddieData.modifier.max = 4;
           this.baddieData.modifier.min = 1;
@@ -447,13 +450,19 @@
         } else {
           return;
         }
-        this.baddieData.modifier.target = id;
+        this.baddieData.modifier.target.id = id;
+        this.baddieData.modifier.target.instanceId = instanceId;
         $(`#modifierModal-${this.label}`).modal('show');
+
+        this.$nextTick(() => {
+          this.$refs.modName.focus();
+        });
       },
       addModifier() {
         if (this.baddieData.modifier.name !== '') {
-          this.$store.dispatch('modifyBaddie', {type: this.label.toLowerCase(), modifier: this.baddieData.modifier});
+          this.$store.dispatch('modifyBaddie', { type: this.label.toLowerCase(), modifier: this.baddieData.modifier });
           $(`#modifierModal-${this.label}`).modal('hide');
+          // this.baddieData.modifier.target.instanceId = null;
         }
       },
       modal(status, owner) {
