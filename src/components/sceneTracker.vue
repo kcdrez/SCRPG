@@ -35,27 +35,27 @@
                 class="d-inline" 
                 @click="scene.progressScene(item)" 
                 :key="'green' + index">
-            <img src="images/green_checked.png" 
+            <img src="/dist/images/green_checked.png" 
                   v-if="item.checked">
-            <img src="images/green.png" 
+            <img src="/dist/images/green.png" 
                   v-else>
           </div>
           <div v-for="(item, index) in scene.yellow" 
                 class="d-inline" 
                 @click="scene.progressScene(item)"
                 :key="'yellow' + index">
-            <img src="images/yellow_checked.png" 
+            <img src="/dist/images/yellow_checked.png" 
                   v-if="item.checked">
-            <img src="images/yellow.png" 
+            <img src="/dist/images/yellow.png" 
                   v-else>
           </div>
           <div v-for="(item, index) in scene.red" 
                 class="d-inline" 
                 @click="scene.progressScene(item)"
                 :key="'red' + index">
-            <img src="images/red_checked.png" 
+            <img src="/dist/images/red_checked.png" 
                   v-if="item.checked">
-            <img src="images/red.png" 
+            <img src="/dist/images/red.png" 
                   v-else>
           </div>
         </div>

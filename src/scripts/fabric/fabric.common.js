@@ -51,16 +51,6 @@ function initCanvas(id) {
   canvas.on('selection:cleared', e => {
     store.dispatch('selectObject', e);
   });
-
-  fabric.Object.prototype.toObject = (function (toObject) {
-    return function (propertiesToInclude) {
-      propertiesToInclude = (propertiesToInclude || []).concat(
-        ['id','actorType', 'instanceId']
-      );
-      return toObject.apply(this, [propertiesToInclude]);
-    };
-  })(fabric.Object.prototype.toObject);
-  
   return canvas;
 };
 

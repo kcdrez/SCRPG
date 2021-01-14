@@ -19,14 +19,14 @@
                     :disabled="scene.locations.length === 0">Export</button>
         </div>
         <input type="file"
-                accept=".xlsx"
-                class="d-none"
-                ref="import"
-                @change="$store.dispatch('import', {files: $event.target.files, filters: ['location']})">
+               accept=".xlsx"
+               class="d-none"
+               ref="import"
+               @change="$store.dispatch('import', {files: $event.target.files, filters: ['location']})">
       </div>
       <div class="card-body">
         <div v-if="scene.locations.length === 0"
-              class="text-center">There are no locations.</div>
+             class="text-center">There are no locations.</div>
         <table class="table table-sm table-striped table-bordered table-dark text-center mt-3 mb-0" v-else>
           <thead>
             <tr>

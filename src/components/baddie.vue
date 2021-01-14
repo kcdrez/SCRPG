@@ -8,7 +8,8 @@
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button class="btn btn-sm btn-success border-dark" 
-                  @click="modal('show')">Create</button>
+                  data-toggle="modal" 
+                  :data-target="`#createModal-${label}`">Create</button>
           <button class="btn btn-primary border-dark"
                     @click="$refs.import.click()"
                     :title="`Import ${labelSingle} data from an xlsx file`">Import</button>
@@ -46,7 +47,7 @@
           <template v-for="baddie in list">
             <tr :key="baddie.id"
                 :id="baddie.id">
-                <!-- Name/Owner -->
+                <!-- Name (Owner) -->
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
@@ -90,7 +91,7 @@
                        min="4"
                        max="12"
                        step="2">
-                <img :src="`images/d${baddie.size}.png`"
+                <img :src="`/dist/images/d${baddie.size}.png`" 
                      :title="`This minion uses a d${baddie.size}`"
                      v-else>
               </td>
@@ -131,17 +132,17 @@
                   <button class="btn btn-success border-dark"
                           :title="`Add a Bonus to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('boost', baddie.id)">
-                    <img src="images/boost.png">
+                    <img src="/dist/images/boost.png">
                   </button>
                   <button class="btn btn-warning border-dark" 
                           :title="`Add a Penalty to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('hinder', baddie.id)">
-                    <img src="images/hinder.png">
+                    <img src="/dist/images/hinder.png">
                   </button>
                   <button class="btn btn-success border-dark" 
                          :title="`Add a Defend to this ${baddie.typeLabel}`"
                          @click="modifyBaddie('defend', baddie.id)">
-                    <img src="images/defend.png">
+                    <img src="/dist/images/defend.png">
                   </button>
                 </div>
                 <div class="btn-group btn-group-sm w-100 actions">
@@ -298,8 +299,7 @@
               <input class="form-control" 
                      type="text"
                      v-model.trim="baddieData.modifier.name"
-                     @keydown.enter="addModifier"
-                     ref="modName">
+                     @keydown.enter="addModifier">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
@@ -394,10 +394,7 @@
             max: 0,
             min: 0,
             type: '',
-            target: {
-              id: null,
-              instanceId: null
-            },
+            target: null,
             persistent: false,
             exclusive: false,
             applyTo: 'single'
@@ -434,7 +431,7 @@
         this.baddieData.name = name;
         $(`#createModal-${this.label}`).modal('show');
       },
-      modifyBaddie(type, id, instanceId) {
+      modifyBaddie(type, id) {
         if (type === 'boost') {
           this.baddieData.modifier.max = 4;
           this.baddieData.modifier.min = 1;
@@ -455,19 +452,13 @@
         } else {
           return;
         }
-        this.baddieData.modifier.target.id = id;
-        this.baddieData.modifier.target.instanceId = instanceId;
+        this.baddieData.modifier.target = id;
         $(`#modifierModal-${this.label}`).modal('show');
-
-        this.$nextTick(() => {
-          this.$refs.modName.focus();
-        });
       },
       addModifier() {
         if (this.baddieData.modifier.name !== '') {
-          this.$store.dispatch('modifyBaddie', { type: this.label.toLowerCase(), modifier: this.baddieData.modifier });
+          this.$store.dispatch('modifyBaddie', {type: this.label.toLowerCase(), modifier: this.baddieData.modifier});
           $(`#modifierModal-${this.label}`).modal('hide');
-          // this.baddieData.modifier.target.instanceId = null;
         }
       },
       modal(status, owner) {
