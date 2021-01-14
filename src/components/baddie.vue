@@ -47,7 +47,6 @@
           <template v-for="baddie in list">
             <tr :key="baddie.id"
                 :id="baddie.id">
-                <!-- Name/Owner -->
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
@@ -82,7 +81,6 @@
                   <div v-if="baddie.owner">({{baddie.owner.name}})</div>
                 </template>
               </td>
-              <!-- Die Size -->
               <td class="text-center align-middle">
                 <input type="number"
                        class="form-control form-control-sm"
@@ -91,11 +89,10 @@
                        min="4"
                        max="12"
                        step="2">
-                <img :src="`images/d${baddie.size}.png`"
+                <img :src="`images/d${baddie.size}.png`" 
                      :title="`This minion uses a d${baddie.size}`"
                      v-else>
               </td>
-              <!-- Count -->
               <td class="text-center align-middle">
                 <input type="number"
                        class="form-control form-control-sm"
@@ -104,7 +101,6 @@
                        min="1">
                 <template v-else>{{baddie.count}}</template>
               </td>
-              <!-- Modifiers -->
               <td>
                 <Modifier label="bonus"
                           labelPlural="bonuses"
@@ -125,7 +121,6 @@
                           @remove="baddie.removeModifier('defends', $event)"
                           @save-edit="baddie.saveEdit()"></Modifier>                      
               </td>
-              <!-- Actions -->
               <td class="align-middle">
                 <div class="btn-group btn-group-sm w-100 mb-2 actions"
                      role="group">
