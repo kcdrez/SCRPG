@@ -31,22 +31,24 @@
         There are no Villains.
       </div>
       <div class="col-6 mb-3" 
-           v-for="villain in villains" 
+           v-for="(villain, index) in villains" 
            :key="villain.id"
            :id="villain.id">
         <div class="card">
           <div class="card-header">
             <input type="text"
                    v-model.trim="villain.tempName"
-                   class="form-control form-control-sm d-inline w-50"
+                   class="form-control form-control-sm d-inline w-50 border-dark"
                    @keypress.enter="villain.saveEdit()"
-                   v-if="villain.editing">
+                   @keydown.esc="villain.cancelEdit()"
+                   v-if="villain.editing"
+                   ref="editName">
             <h3 class="villain-name"
                 v-else>{{villain.name}}</h3>
             <div class="btn-group btn-group-sm float-right">
               <button class="btn btn-secondary border-dark"
                       title="Edit this Villain"
-                      @click="villain.beginEdit()"
+                      @click="editVillain(villain, index)"
                       v-if="!villain.editing">Edit</button>
               <button class="btn btn-success border-dark"
                       title="Save edits on this Villain"
@@ -99,17 +101,20 @@
                       labelPlural="bonuses"
                       :list="villain.bonuses"
                       :editing="villain.editing"
-                      @remove="villain.removeModifier('bonuses', $event)"></Modifier>
+                      @remove="villain.removeModifier('bonuses', $event)"
+                      @cancel-edit="villain.cancelEdit()"></Modifier>
             <Modifier label="penalty"
                       labelPlural="penalties"
                       :list="villain.penalties"
                       :editing="villain.editing"
-                      @remove="villain.removeModifier('penalties', $event)"></Modifier>
+                      @remove="villain.removeModifier('penalties', $event)"
+                      @cancel-edit="villain.cancelEdit()"></Modifier>
             <Modifier label="defend"
                       labelPlural="defends"
                       :list="villain.defends"
                       :editing="villain.editing"
-                      @remove="villain.removeModifier('defends', $event)"></Modifier>          
+                      @remove="villain.removeModifier('defends', $event)"
+                      @cancel-edit="villain.cancelEdit()"></Modifier>          
           </div>
         </div>
       </div>
@@ -132,9 +137,9 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Name</div>
+                <div class="input-group-text border-dark">Name</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      v-model.trim="name" 
                      type="text"
                      ref="villainName"
@@ -171,9 +176,9 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Name</div>
+                <div class="input-group-text border-dark">Name</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      type="text"
                      v-model.trim="modifier.name"
                      @keydown.enter="target.addModifier(modifier)"
@@ -181,9 +186,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Amount</div>
+                <div class="input-group-text border-dark">Amount</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      v-model.number="modifier.amount" 
                      type="number" 
                      :max="modifier.max"
@@ -290,6 +295,10 @@
             this.$refs.villainName.focus();
           }); 
         }
+      },
+      editVillain(villain, index) {
+        villain.beginEdit();
+        this.$refs.editName[index].focus();
       }
     }
   };

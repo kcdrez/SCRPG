@@ -18,23 +18,25 @@
            class="m-1">
         <div class="input-group input-group-sm mb-3">
           <div class="input-group-prepend">
-            <div class="input-group-text">Name</div>
+            <div class="input-group-text border-dark">Name</div>
           </div>
-          <input class="form-control" 
+          <input class="form-control border-dark" 
                   v-model.trim="modifier.tempName" 
                   type="text"
-                  @keydown.enter="$emit('save-edit')">
+                  @keypress.enter="$emit('save-edit')"
+                  @keydown.esc="$emit('cancel-edit')">
         </div>
         <div class="input-group input-group-sm mb-3">
           <div class="input-group-prepend">
-            <div class="input-group-text">Amount</div>
+            <div class="input-group-text border-dark">Amount</div>
           </div>
-          <input class="form-control" 
+          <input class="form-control border-dark" 
                   v-model.number="modifier.tempAmount" 
                   type="number" 
                   :max="modifier.max"
                   :min="modifier.min"
-                  @keydown.enter="$emit('save-edit')">
+                  @keypress.enter="$emit('save-edit')"
+                  @keydown.esc="$emit('cancel-edit')">
         </div>
         <div class="d-inline" 
               v-if="modifier.type !== 'Defend'">
@@ -42,7 +44,8 @@
                  class="c-pointer">Persistent?</label>          
           <input type="checkbox" 
                   v-model="modifier.tempPersistent"
-                  @keydown.enter="$emit('save-edit')"
+                  @keypress.enter="$emit('save-edit')"
+                  @keydown.esc="$emit('cancel-edit')"
                   :id="`mod-persistent-${modifier.id}`">
         </div>
         <div class="d-inline mx-3" 
@@ -51,7 +54,8 @@
                  class="c-pointer">Exclusive?</label>
           <input type="checkbox" 
                  v-model="modifier.tempExclusive"
-                 @keydown.enter="$emit('save-edit')"
+                 @keypress.enter="$emit('save-edit')"
+                 @keydown.esc="$emit('cancel-edit')"
                  :id="`mod-exclusive-${modifier.id}`">
         </div>
       </div>

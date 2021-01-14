@@ -38,14 +38,17 @@
                   v-if="!challenge.editing">{{challenge.name}}</h5>
               <div :class="challenge.editing ? 'input-group input-group-sm mb-2' : 'd-inline float-right'">
                 <input type="text"
-                      class="form-control form-control-sm"
-                      placeholder="Challenge Name"
-                      v-model.trim="challenge.tempName"
-                      v-if="challenge.editing">
+                       class="form-control form-control-sm border-dark"
+                       placeholder="Challenge Name"
+                       v-model.trim="challenge.tempName"
+                       v-if="challenge.editing"
+                       @keypress.enter="challenge.saveEdit()"
+                       @keydown.esc="challenge.cancelEdit()"
+                       ref="challengeNameEdit">
                 <div :class="challenge.editing ? 'input-group-append' : 'btn-group btn-group-sm'">
                   <button class="btn btn-sm btn-primary border-dark"
                           title="Edit this Challenge"
-                          @click="challenge.beginEdit()"
+                          @click="editChallenge(challenge, challengeIndex)"
                           v-if="!challenge.editing">Edit</button>
                   <button class="btn btn-sm btn-success border-dark"
                           title="Save this Challenge"
@@ -67,9 +70,11 @@
                 </div>
               </div>
               <div v-if="!challenge.editing">{{challenge.description}}</div>
-              <textarea class="form-control form-control-sm"
+              <textarea class="form-control form-control-sm border-dark"
                         v-model.trim="challenge.tempDescription"
                         placeholder="Challenge Description"
+                        @keypress.enter="challenge.saveEdit()"
+                        @keydown.esc="challenge.cancelEdit()"
                         v-else>
               </textarea>
             </div>
@@ -102,6 +107,7 @@
                            class="form-control form-control-sm"
                            placeholder="Challenge Entry Name"
                            @keypress.enter="challengeEntry.saveEdit()"
+                           @keydown.esc="challengeEntry.cancelEdit()"
                            :ref="challengeEntry.id">
                     <template v-else>{{challengeEntry.name}}</template>
                   </td>
@@ -178,21 +184,21 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text">Name</span>
+                <span class="input-group-text border-dark">Name</span>
               </div>
               <input type="text"
                      v-model.trim="newChallenge.name"
-                     class="form-control"
+                     class="form-control border-dark"
                      placeholder="Challenge Name"
                      @keypress.enter="addChallenge()"
                      ref="challengeName">
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text">Description</span>
+                <span class="input-group-text border-dark">Description</span>
               </div>
               <textarea v-model.trim="newChallenge.description"
-                        class="form-control"
+                        class="form-control border-dark"
                         placeholder="Add a description of the challenge (optional)"
                         @keypress.enter="addChallenge()">
               </textarea>
@@ -270,6 +276,12 @@
       addChallengeModal() {
         $("#challengeModal").modal('show');
         this.$refs.challengeName.focus();
+      },
+      editChallenge(challenge, index) {
+        challenge.beginEdit();
+        this.$nextTick(() => {
+          this.$refs.challengeNameEdit[index].focus();
+        });
       },
       addChallenge(challenge) {
         if (challenge) {

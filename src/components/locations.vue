@@ -43,16 +43,18 @@
                 <input type="text" 
                        v-model.trim="location.tempName" 
                        v-if="location.editing" 
-                       class="form-control form-control-sm"
+                       class="form-control form-control-sm border-dark"
                        @keypress.enter="location.saveEdit()"
+                       @keydown.esc="location.cancelEdit()"
                        :ref="location.id + 'locationName'">
                 <template v-else>{{location.name || '-'}}</template>
               </td>
               <td width="50%">
                 <textarea v-model.trim="location.tempDescription" 
                           v-if="location.editing" 
-                          class="form-control form-control-sm"
+                          class="form-control form-control-sm border-dark"
                           @keypress.enter="location.saveEdit()"
+                          @keydown.esc="location.cancelEdit()"
                           :ref="location.id + 'locationDescription'">
                 </textarea>
                 <template v-else>{{location.description || '-'}}</template>
@@ -109,14 +111,14 @@
             <h5>Name</h5>
             <input type="text" 
                     v-model.trim="newLocation.name" 
-                    class="form-control form-control-sm" 
+                    class="form-control form-control-sm border-dark" 
                     placeholder="Location Name" 
                     @keypress.enter="addLocation()" 
                     ref="locationName">
             <h5>Description</h5>
             <textarea type="text" 
                     v-model.trim="newLocation.description" 
-                    class="form-control form-control-sm" 
+                    class="form-control form-control-sm border-dark" 
                     placeholder="Location Description" 
                     @keypress.enter="addLocation()" 
                     ref="locationDescription">

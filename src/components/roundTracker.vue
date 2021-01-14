@@ -41,15 +41,18 @@
             </tr>
           </thead>
           <tbody class="text-center">
-            <template v-for="actor in actors">
+            <template v-for="(actor, index) in actors">
               <tr v-if="!!actor.name"
                   :key="actor.id"
                   :id="actor.type === 'player' ? actor.id : ''">
                 <!-- Name/Owner -->
                 <td class="text-capitalize c-pointer align-middle">
-                  <input class="form-control form-control-sm"
-                        v-model="actor.tempName"
-                        v-if="actor.editing">
+                  <input class="form-control form-control-sm border-dark"
+                         v-model="actor.tempName"
+                         v-if="actor.editing"
+                         @keypress.enter="actor.saveEdit()"
+                         @keydown.esc="actor.cancelEdit()"
+                         ref="nameEdit">
                   <div v-else
                        @click="actor.takenAction()"
                        :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`">
@@ -94,22 +97,25 @@
                     </template>
                   </div>
                   <input type="number"
-                          class="form-control form-control-sm"
-                          v-model="actor.tempCount"
-                          v-if="actor.count && actor.editing"
-                          min="1"
-                          max="100"
-                          @keydown.enter="actor.saveEdit()">
+                         class="form-control form-control-sm border-dark"
+                         v-model="actor.tempCount"
+                         v-if="actor.count && actor.editing"
+                         min="1"
+                         max="100"
+                         @keypress.enter="actor.saveEdit()"
+                         @keydown.esc="actor.cancelEdit()">
                 </td>
                 <!-- HP/Die Size -->
                 <td class="align-middle">
                   <template v-if="typeof actor.hp === 'number'">
                     <input type="number"
-                           class="form-control form-control-sm"
+                           class="form-control form-control-sm border-dark"
                            v-model.number="actor.tempHP"  
                            v-if="actor.editing"
                            min="0"
-                           :max="actor.maxHp">
+                           :max="actor.maxHp"
+                           @keypress.enter="actor.saveEdit()"
+                           @keydown.esc="actor.cancelEdit()">
                     <template v-else>
                       <span :class="'hp-' + actor.zone">{{actor.hp}}</span>
                       <span @click="actor.hp++">
@@ -126,13 +132,14 @@
                   </template>
                   <template v-else-if="actor.size">
                     <input type="number"
-                            class="form-control form-control-sm"
+                            class="form-control form-control-sm border-dark"
                             v-model="actor.tempSize"
                             v-if="actor.editing"
                             min="4"
                             max="12"
                             step="2"
-                            @keydown.enter="actor.saveEdit()">
+                            @keypress.enter="actor.saveEdit()"
+                            @keydown.esc="actor.cancelEdit()">
                     <img :src="`images/d${actor.size}.png`"
                           :title="`This ${actor.typeLabel} uses a d${actor.size}`"
                           v-else>
@@ -143,7 +150,7 @@
                 <td class="align-middle">
                   <div class="btn-group btn-group-sm">
                     <button class="btn btn-secondary border-dark"
-                            @click="actor.beginEdit()"
+                            @click="editActor(actor, index)"
                             :title="`Edit this ${actor.typeLabel}`"
                             v-if="actor.allowEdit && !actor.editing">
                       <icon :icon="['far', 'edit']" />
@@ -214,30 +221,30 @@
           <div class="modal-body">
             <div class="input-group input-group-sm">
               <div class="input-group-prepend">
-                <span class="input-group-text">Name</span>
+                <span class="input-group-text border-dark">Name</span>
               </div>
               <input type="text"
                     v-model.trim="newPlayer.name"
-                    class="form-control form-control-sm"
+                    class="form-control border-dark"
                     @keypress.enter="addPlayer"
                     ref="newPlayerName">
             </div>
             <div class="input-group input-group-sm mt-2">
               <div class="input-group-prepend">
-                <span class="input-group-text">Max HP</span>
+                <span class="input-group-text border-dark">Max HP</span>
               </div>
               <input type="number"
                      v-model.number="newPlayer.maxHp"
-                     class="form-control"
+                     class="form-control border-dark"
                      @keypress.enter="addPlayer"
                      min="17"
                      max="40">
               <div class="input-group-prepend">
-                <span class="input-group-text">Current HP</span>
+                <span class="input-group-text border-dark">Current HP</span>
               </div>
               <input type="number"
                      v-model.number="newPlayer.hp"
-                     class="form-control"
+                     class="form-control border-dark"
                      @keypress.enter="addPlayer"
                      min="0"
                      :max="newPlayer.maxHp"
@@ -302,6 +309,12 @@
           scrollTop: $(`#${actor.type}${actor.id}`).offset().top
         }, 800, () => {
           window.location.hash = actor.id;
+        });
+      },
+      editActor(actor, index) {
+        actor.beginEdit();
+        this.$nextTick(() => {
+          this.$refs.nameEdit[index].focus();
         });
       }
     },
