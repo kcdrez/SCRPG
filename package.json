@@ -1,7 +1,7 @@
 {
   "name": "scrpg",
-  "version": "1.4.26",
-  "description": "",
+  "version": "1.4.28",
+  "description": "A set of GM tools used for Sentinel Comics RPG",
   "main": "main.js",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.32",

@@ -79,9 +79,9 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Name</div>
+                <div class="input-group-text border-dark">Name</div>
               </div>
-              <input class="form-control"
+              <input class="form-control border-dark"
                      v-model.trim="name"
                      type="text"
                      ref="scene"
@@ -89,9 +89,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Green</div>
+                <div class="input-group-text border-dark">Green</div>
               </div>
-              <input class="form-control"
+              <input class="form-control border-dark"
                      v-model.number="green"
                      type="number"
                      ref="green"
@@ -100,9 +100,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Yellow</div>
+                <div class="input-group-text border-dark">Yellow</div>
               </div>
-              <input class="form-control"
+              <input class="form-control border-dark"
                      v-model.number="yellow"
                      type="number"
                      ref="yellow"
@@ -111,9 +111,9 @@
             </div>
             <div class="input-group input-group-sm">
               <div class="input-group-prepend">
-                <div class="input-group-text">Red</div>
+                <div class="input-group-text border-dark">Red</div>
               </div>
-              <input class="form-control"
+              <input class="form-control border-dark"
                      v-model.number="red" 
                      type="number"
                      ref="red"

@@ -80,7 +80,7 @@
               </button>
             </div>
           </editor-menu-bar>
-          <editor-content class="editor-container"
+          <editor-content class="editor-container border-dark"
                           :editor="editor" />
         </div>
       </div>

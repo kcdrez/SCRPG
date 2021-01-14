@@ -51,19 +51,22 @@
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
-                      <div class="input-group-text">Name</div>
+                      <div class="input-group-text border-dark">Name</div>
                     </div>
-                    <input class="form-control" 
+                    <input class="form-control border-dark" 
                            v-model.trim="baddie.tempName" 
                            type="text"
-                           @keydown.enter="baddie.saveEdit()">
+                           @keypress.enter="baddie.saveEdit()"
+                           @keydown.esc="baddie.cancelEdit()"
+                           ref="nameEdit">
                   </div>
                   <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
-                      <div class="input-group-text">Owner</div>
+                      <div class="input-group-text border-dark">Owner</div>
                     </div>
-                    <select class="form-control"
-                            @keydown.enter="baddie.saveEdit()"
+                    <select class="form-control border-dark"
+                            @keypress.enter="baddie.saveEdit()"
+                            @keydown.esc="baddie.cancelEdit()"
                             v-model="baddie.tempOwner">
                       <option :value="null">-</option>
                       <option v-for="player in players"
@@ -84,12 +87,14 @@
               <!-- Die Size -->
               <td class="text-center align-middle">
                 <input type="number"
-                       class="form-control form-control-sm"
+                       class="form-control form-control-sm border-dark"
                        v-model="baddie.tempSize"
                        v-if="baddie.editing"
                        min="4"
                        max="12"
-                       step="2">
+                       step="2"
+                       @keypress.enter="baddie.saveEdit()"
+                       @keydown.esc="baddie.cancelEdit()">
                 <img :src="`images/d${baddie.size}.png`" 
                      :title="`This minion uses a d${baddie.size}`"
                      v-else>
@@ -97,10 +102,12 @@
               <!-- Count -->
               <td class="text-center align-middle">
                 <input type="number"
-                       class="form-control form-control-sm"
+                       class="form-control form-control-sm border-dark"
                        v-model="baddie.tempCount"
                        v-if="baddie.editing"
-                       min="1">
+                       min="1"
+                       @keypress.enter="baddie.saveEdit()"
+                       @keydown.esc="baddie.cancelEdit()">
                 <template v-else>{{baddie.count}}</template>
               </td>
               <!-- Modifiers -->
@@ -110,19 +117,22 @@
                           :list="baddie.bonuses"
                           :editing="baddie.editing"
                           @remove="baddie.removeModifier('bonuses', $event)"
-                          @save-edit="baddie.saveEdit()"></Modifier>
+                          @save-edit="baddie.saveEdit()"
+                          @cancel-edit="baddie.cancelEdit()"></Modifier>
                 <Modifier label="penalty"
                           labelPlural="penalties"
                           :list="baddie.penalties"
                           :editing="baddie.editing"
                           @remove="baddie.removeModifier('penalties', $event)"
-                          @save-edit="baddie.saveEdit()"></Modifier>
+                          @save-edit="baddie.saveEdit()"
+                          @cancel-edit="baddie.cancelEdit()"></Modifier>
                 <Modifier label="defend" 
                           labelPlural="defends" 
                           :list="baddie.defends"
                           :editing="baddie.editing"
                           @remove="baddie.removeModifier('defends', $event)"
-                          @save-edit="baddie.saveEdit()"></Modifier>                      
+                          @save-edit="baddie.saveEdit()"
+                          @cancel-edit="baddie.cancelEdit()"></Modifier>                      
               </td>
               <!-- Actions -->
               <td class="align-middle">
@@ -169,7 +179,7 @@
                   </button>
                   <button class="btn btn-secondary border-dark text-dark" 
                           :title="`Edit this ${baddie.typeLabel}`"
-                          @click="baddie.beginEdit()"
+                          @click="editBaddie(baddie, index)"
                           v-if="baddie.allowEdit && !baddie.editing">
                     <icon :icon="['far', 'edit']" />
                   </button>
@@ -215,9 +225,9 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Name</div>
+                <div class="input-group-text border-dark">Name</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      v-model.trim="baddieData.name" 
                      type="text"
                      @keydown.enter="createBaddie()"
@@ -225,9 +235,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Size</div>
+                <div class="input-group-text border-dark">Size</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      v-model.number="baddieData.size" 
                      type="number" 
                      step="2" 
@@ -237,9 +247,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Count</div>
+                <div class="input-group-text border-dark">Count</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      v-model.number="baddieData.count" 
                      type="number" 
                      min="1"
@@ -248,9 +258,9 @@
             <div class="input-group input-group-sm mb-3"
                  v-if="allowOwner">
               <div class="input-group-prepend">
-                <div class="input-group-text">Owner</div>
+                <div class="input-group-text border-dark">Owner</div>
               </div>
-              <select class="form-control"
+              <select class="form-control border-dark"
                       @keydown.enter="createBaddie()"
                       v-model="baddieData.owner">
                 <option :value="null">-</option>
@@ -293,9 +303,9 @@
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Name</div>
+                <div class="input-group-text border-dark">Name</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      type="text"
                      v-model.trim="baddieData.modifier.name"
                      @keydown.enter="addModifier"
@@ -303,9 +313,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Amount</div>
+                <div class="input-group-text border-dark">Amount</div>
               </div>
-              <input class="form-control" 
+              <input class="form-control border-dark" 
                      v-model.number="baddieData.modifier.amount" 
                      type="number" 
                      :max="baddieData.modifier.max"
@@ -314,9 +324,9 @@
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-prepend">
-                <div class="input-group-text">Apply To</div>
+                <div class="input-group-text border-dark">Apply To</div>
               </div>
-              <select class="form-control"
+              <select class="form-control border-dark"
                      v-model.number="baddieData.modifier.applyTo" 
                      @keydown.enter="addModifier">
                 <option value="single">Just one</option>
@@ -475,6 +485,12 @@
         this.baddieData.owner = owner || null;
         this.$nextTick(() => {
           this.$refs.createName.focus();
+        });
+      },
+      editBaddie(baddie, index) {
+        baddie.beginEdit();
+        this.$nextTick(() => {
+          this.$refs.nameEdit[index].focus();
         });
       }
     }

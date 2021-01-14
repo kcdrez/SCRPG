@@ -14,7 +14,16 @@ class Baddie extends Actor {
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this.instances = data.instances || [];
+    this.instances = (() => {
+      if (typeof data.instances === 'string') {
+        const parsed = JSON.parse(data.instances);
+        return Array.isArray(parsed) ? parsed : [];
+      } else if (Array.isArray(data.instances)) {
+        return data.instances;
+      } else {
+        return [];
+      }
+    })();
 
     if (this.instances.length === 0) {
       if (data.count > 0) {
@@ -94,8 +103,7 @@ class Baddie extends Actor {
       copy[type].splice(index, 1);
       copy.id = uuid();
       copy.instances.splice(1);
-      this.count--;
-      console.log(copy);
+      this.count--; //todo use id to remove it
       if (copy.count > 0) store.dispatch('upsertBaddie', copy);
       this.save();
     }
@@ -142,10 +150,7 @@ class Baddie extends Actor {
         id: this.id,
         size: this.size,
         acted: this.acted,
-        count: this.count,
-        top: this.top,
-        left: this.left,
-        instances: excludeInstances ? [] : unvue(this.instances)
+        instances: excludeInstances ? [] : JSON.stringify(this.instances)
       };
 
       return {
