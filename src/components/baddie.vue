@@ -91,7 +91,7 @@
                        min="4"
                        max="12"
                        step="2">
-                <img :src="`/images/d${baddie.size}.png`" 
+                <img :src="`images/d${baddie.size}.png`" 
                      :title="`This minion uses a d${baddie.size}`"
                      v-else>
               </td>
@@ -132,17 +132,17 @@
                   <button class="btn btn-success border-dark"
                           :title="`Add a Bonus to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('boost', baddie.id)">
-                    <img src="/images/boost.png">
+                    <img src="images/boost.png">
                   </button>
                   <button class="btn btn-warning border-dark" 
                           :title="`Add a Penalty to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('hinder', baddie.id)">
-                    <img src="/images/hinder.png">
+                    <img src="images/hinder.png">
                   </button>
                   <button class="btn btn-success border-dark" 
                          :title="`Add a Defend to this ${baddie.typeLabel}`"
                          @click="modifyBaddie('defend', baddie.id)">
-                    <img src="/images/defend.png">
+                    <img src="images/defend.png">
                   </button>
                 </div>
                 <div class="btn-group btn-group-sm w-100 actions">
