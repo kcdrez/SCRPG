@@ -44,7 +44,7 @@
                        v-model.trim="location.tempName" 
                        v-if="location.editing" 
                        class="form-control form-control-sm"
-                       @keypress.enter="location.saveEdit()"
+                       @keypress.enter="location.edit()"
                        :ref="location.id + 'locationName'">
                 <template v-else>{{location.name || '-'}}</template>
               </td>
@@ -52,7 +52,7 @@
                 <textarea v-model.trim="location.tempDescription" 
                           v-if="location.editing" 
                           class="form-control form-control-sm"
-                          @keypress.enter="location.saveEdit()"
+                          @keypress.enter="location.edit()"
                           :ref="location.id + 'locationDescription'">
                 </textarea>
                 <template v-else>{{location.description || '-'}}</template>
