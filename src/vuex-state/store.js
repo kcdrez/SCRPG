@@ -50,7 +50,7 @@ const store = new Vuex.Store({
     UPSERT_BADDIE(state, baddie) {
       const match = state[baddie.type].find(x => sameBaddies(baddie, x));
       if (match && baddie.type !== 'villains') {
-        match.instances.push(...baddie.instances);
+        match.count++;
       } else {
         state[baddie.type].push(baddie);
       }
@@ -135,8 +135,8 @@ const store = new Vuex.Store({
       }
       ctx.dispatch('saveData', baddieData.type);
     },
-    modifyBaddie(ctx, { modifier, type }) {
-      const match = ctx.state[type].find(x => x.id === modifier.target.id);
+    modifyBaddie(ctx, {modifier, type}) {
+      const match = ctx.state[type].find(x => x.id === modifier.target);
       if (match) {
         if (modifier.applyTo === 'row' || match.count === 1) {
           match.addModifier(modifier);
@@ -148,15 +148,9 @@ const store = new Vuex.Store({
           });
         } else {
           const copy = match.copy(true);
+          copy.count = modifier.applyTo === 'single' ? 1 : match.count;
+          match.count--;
           copy.id = uuid();
-          if (modifier.target.instanceId) {
-            const instance = match.instances.find(x => x.id === modifier.target.instanceId);
-            copy.instances.push(unvue(instance));
-            match.removeInstance(modifier.target.instanceId);
-          } else {
-            copy.count = modifier.applyTo === 'single' ? 1 : match.count;
-            match.count--;
-          }
           const baddie = new Baddie(copy);
           baddie.addModifier(modifier);
           ctx.commit('UPSERT_BADDIE', baddie);
@@ -186,14 +180,13 @@ const store = new Vuex.Store({
       ctx.dispatch('saveData', 'players');
     },
     reconcile(ctx, type) {
-      const baddiesList = ctx.state[type];
-      for (let i = 0; i < baddiesList.length - 1; i++) {
-        if (sameBaddies(baddiesList[i], baddiesList[i + 1])) {
-          baddiesList[i].instances.push(...baddiesList[i + 1].instances);
-          baddiesList[i + 1].instances = [];
+      for (let i = 0; i < ctx.state[type].length - 1; i++) {
+        if (sameBaddies(ctx.state[type][i], ctx.state[type][i + 1])) {
+          ctx.state[type][i].count += ctx.state[type][i + 1].count;
+          ctx.state[type][i + 1].markForDeath = true;
         }
       }
-      ctx.state[type] = baddiesList.filter(x => x.count > 0);
+      ctx.state[type] = ctx.state[type].filter(x => !x.markForDeath);
       ctx.dispatch('saveData', type);
     },
     export(ctx, options) {
@@ -268,7 +261,7 @@ const store = new Vuex.Store({
           case 'lieutenants':
           case 'villain':
           case 'villains':
-            ctx.dispatch('upsertBaddie', Object.assign({ forceCreate: true }, row));
+            ctx.dispatch('upsertBaddie', Object.assign({forceCreate: true}, row));
             break;
           case 'challenge':
             ctx.state.scene.addChallenge(row, true);
