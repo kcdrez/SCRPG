@@ -47,6 +47,7 @@
           <template v-for="baddie in list">
             <tr :key="baddie.id"
                 :id="baddie.id">
+                <!-- Name (Owner) -->
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
@@ -81,6 +82,7 @@
                   <div v-if="baddie.owner">({{baddie.owner.name}})</div>
                 </template>
               </td>
+              <!-- Die Size -->
               <td class="text-center align-middle">
                 <input type="number"
                        class="form-control form-control-sm"
@@ -89,10 +91,11 @@
                        min="4"
                        max="12"
                        step="2">
-                <img :src="`images/d${baddie.size}.png`" 
+                <img :src="`/dist/images/d${baddie.size}.png`" 
                      :title="`This minion uses a d${baddie.size}`"
                      v-else>
               </td>
+              <!-- Count -->
               <td class="text-center align-middle">
                 <input type="number"
                        class="form-control form-control-sm"
@@ -101,6 +104,7 @@
                        min="1">
                 <template v-else>{{baddie.count}}</template>
               </td>
+              <!-- Modifiers -->
               <td>
                 <Modifier label="bonus"
                           labelPlural="bonuses"
@@ -121,23 +125,24 @@
                           @remove="baddie.removeModifier('defends', $event)"
                           @save-edit="baddie.saveEdit()"></Modifier>                      
               </td>
+              <!-- Actions -->
               <td class="align-middle">
                 <div class="btn-group btn-group-sm w-100 mb-2 actions"
                      role="group">
                   <button class="btn btn-success border-dark"
                           :title="`Add a Bonus to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('boost', baddie.id)">
-                    <img src="images/boost.png">
+                    <img src="/dist/images/boost.png">
                   </button>
                   <button class="btn btn-warning border-dark" 
                           :title="`Add a Penalty to this ${baddie.typeLabel}`"
                           @click="modifyBaddie('hinder', baddie.id)">
-                    <img src="images/hinder.png">
+                    <img src="/dist/images/hinder.png">
                   </button>
                   <button class="btn btn-success border-dark" 
                          :title="`Add a Defend to this ${baddie.typeLabel}`"
                          @click="modifyBaddie('defend', baddie.id)">
-                    <img src="images/defend.png">
+                    <img src="/dist/images/defend.png">
                   </button>
                 </div>
                 <div class="btn-group btn-group-sm w-100 actions">

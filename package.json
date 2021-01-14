@@ -1,10 +1,6 @@
 {
   "name": "scrpg",
-<<<<<<< HEAD
-  "version": "1.4.27",
-=======
-  "version": "1.4.25",
->>>>>>> parent of d01c95b... trying to fix dice size image
+  "version": "1.4.26",
   "description": "",
   "main": "main.js",
   "dependencies": {

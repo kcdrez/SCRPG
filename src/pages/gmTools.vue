@@ -35,7 +35,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <img src="images/overcome.jpeg"
+            <img src="/dist/images/overcome.jpeg"
                  class="img-fluid"
                  data-dismiss="modal">
           </div>
@@ -63,7 +63,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <img src="images/boosts.jpeg"
+            <img src="/dist/images/boosts.jpeg"
                  class="img-fluid"
                  data-dismiss="modal">
           </div>

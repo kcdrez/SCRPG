@@ -71,17 +71,17 @@
                 <button class="btn btn-success border-dark" 
                         @click="modifyVillain(villain, 'boost')"
                         title="Add a Bonus to this Villain">
-                  <img src="images/boost.png">
+                  <img src="/dist/images/boost.png">
                 </button>
                 <button class="btn btn-warning border-dark" 
                         @click="modifyVillain(villain, 'hinder')"
                         title="Add a Penalty to this Villain">
-                  <img src="images/hinder.png">
+                  <img src="/dist/images/hinder.png">
                 </button>
                 <button class="btn btn-secondary border-dark" 
                         @click="modifyVillain(villain, 'defend')"
                         title="Add a Defend to this Villain">
-                  <img src="images/defend.png">
+                  <img src="/dist/images/defend.png">
                 </button>
                 <button class="btn btn-primary border-dark" 
                         @click="$emit('add-minion', villain.id)"

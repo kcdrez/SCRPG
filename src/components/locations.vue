@@ -19,14 +19,14 @@
                     :disabled="scene.locations.length === 0">Export</button>
         </div>
         <input type="file"
-                accept=".xlsx"
-                class="d-none"
-                ref="import"
-                @change="$store.dispatch('import', {files: $event.target.files, filters: ['location']})">
+               accept=".xlsx"
+               class="d-none"
+               ref="import"
+               @change="$store.dispatch('import', {files: $event.target.files, filters: ['location']})">
       </div>
       <div class="card-body">
         <div v-if="scene.locations.length === 0"
-              class="text-center">There are no locations.</div>
+             class="text-center">There are no locations.</div>
         <table class="table table-sm table-striped table-bordered table-dark text-center mt-3 mb-0" v-else>
           <thead>
             <tr>
@@ -44,7 +44,7 @@
                        v-model.trim="location.tempName" 
                        v-if="location.editing" 
                        class="form-control form-control-sm"
-                       @keypress.enter="location.edit()"
+                       @keypress.enter="location.saveEdit()"
                        :ref="location.id + 'locationName'">
                 <template v-else>{{location.name || '-'}}</template>
               </td>
@@ -52,7 +52,7 @@
                 <textarea v-model.trim="location.tempDescription" 
                           v-if="location.editing" 
                           class="form-control form-control-sm"
-                          @keypress.enter="location.edit()"
+                          @keypress.enter="location.saveEdit()"
                           :ref="location.id + 'locationDescription'">
                 </textarea>
                 <template v-else>{{location.description || '-'}}</template>
