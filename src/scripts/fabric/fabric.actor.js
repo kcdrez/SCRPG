@@ -43,7 +43,7 @@ async function addBaddie(canvas, baddie, instance, index) {
         strokeWidth: 1
       });
 
-      img = await loadImage(`/images/d${baddie.size}.png`, {
+      img = await loadImage(`/dist/images/d${baddie.size}.png`, {
         scaleY: 0.5,
         scaleX: 0.5,
         top: bgShape.radius * bgShape.scaleY - imgTopOffset,
