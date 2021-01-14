@@ -133,7 +133,7 @@
                             max="12"
                             step="2"
                             @keydown.enter="actor.saveEdit()">
-                    <img :src="`/dist/images/d${actor.size}.png`"
+                    <img :src="`images/d${actor.size}.png`"
                           :title="`This ${actor.typeLabel} uses a d${actor.size}`"
                           v-else>
                   </template>
