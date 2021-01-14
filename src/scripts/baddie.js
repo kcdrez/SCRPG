@@ -14,7 +14,6 @@ class Baddie extends Actor {
     this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
     this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
     this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this.markForDeath = false;
     this.instances = data.instances || [];
 
     if (this.instances.length === 0) {
@@ -91,11 +90,12 @@ class Baddie extends Actor {
   }
   removeModifier(type, index) {
     const remove = () => {
-      const copy = this.copy(true);
+      const copy = this.copy();
       copy[type].splice(index, 1);
       copy.id = uuid();
-      copy.count = 1;
+      copy.instances.splice(1);
       this.count--;
+      console.log(copy);
       if (copy.count > 0) store.dispatch('upsertBaddie', copy);
       this.save();
     }

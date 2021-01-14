@@ -5,13 +5,15 @@
     <div class="container admin-page">
       <Environment @add-minion="$refs.minions.modal('show', $event)" />
       <Baddies label="Minions" 
-               :allowOwner="true" ref="minions" />
+               :allowOwner="true" 
+               ref="minions" />
       <Baddies label="Lieutenants" 
                ref="lieutenants" />
       <Villains ref="villains" 
                 @add-minion="$refs.minions.modal('show', $event)" />
     </div>
-    <DrawingBoard />
+    <DrawingBoard 
+      @modifySelected="modifySelected($event)" />
     <div class="scroll-to-top" 
          @click="scrollToTop()"
          title="Scroll to the top of the page"
@@ -101,7 +103,14 @@
       },
       scrolling: _.debounce(function() { //lodash doesnt like arrow functions for some reason
         this.showScrollWidget = window.scrollY >= 75;
-      }, 50)
+      }, 50),
+      modifySelected(type) {
+        if (this.$store.state.selection.type === 'minion') {
+          this.$refs.minions.modifyBaddie(type, this.$store.state.selection.id, this.$store.state.selection.instance);
+        } else if (this.$store.state.selection.type === 'lieutenant') {
+          this.$refs.lieutenants.modifyBaddie(type, this.$store.state.selection.id, this.$store.state.selection.instance);
+        }
+      }
     },
     created() {
       window.addEventListener('scroll', this.scrolling);
