@@ -32,30 +32,30 @@
         <div v-else>
           <h4 class="scene-name text-capitalize">{{ scene.name }}</h4>
           <div v-for="(item, index) in scene.green" 
-                class="d-inline" 
-                @click="scene.progressScene(item)" 
+                class="d-inline"
+                @click="scene.progressScene(item)"
                 :key="'green' + index">
-            <img src="/dist/images/green_checked.png" 
-                  v-if="item.checked">
-            <img src="/dist/images/green.png" 
-                  v-else>
+            <img src="/images/green_checked.png" 
+                 v-if="item.checked">
+            <img src="/images/green.png" 
+                 v-else>
           </div>
           <div v-for="(item, index) in scene.yellow" 
-                class="d-inline" 
+                class="d-inline"
                 @click="scene.progressScene(item)"
                 :key="'yellow' + index">
-            <img src="/dist/images/yellow_checked.png" 
+            <img src="/images/yellow_checked.png"
                   v-if="item.checked">
-            <img src="/dist/images/yellow.png" 
+            <img src="/images/yellow.png"
                   v-else>
           </div>
-          <div v-for="(item, index) in scene.red" 
-                class="d-inline" 
+          <div v-for="(item, index) in scene.red"
+                class="d-inline"
                 @click="scene.progressScene(item)"
                 :key="'red' + index">
-            <img src="/dist/images/red_checked.png" 
+            <img src="/images/red_checked.png"
                   v-if="item.checked">
-            <img src="/dist/images/red.png" 
+            <img src="/images/red.png"
                   v-else>
           </div>
         </div>
