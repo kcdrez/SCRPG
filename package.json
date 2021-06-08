@@ -1,6 +1,6 @@
 {
   "name": "scrpg",
-  "version": "1.4.28",
+  "version": "1.4.29",
   "description": "A set of GM tools used for Sentinel Comics RPG",
   "main": "main.js",
   "dependencies": {
