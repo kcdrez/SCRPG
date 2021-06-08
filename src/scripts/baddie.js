@@ -99,12 +99,12 @@ class Baddie extends Actor {
   }
   removeModifier(type, index) {
     const remove = () => {
-      const copy = this.copy();
+      const copy = this.copy(false, true);
       copy[type].splice(index, 1);
       copy.id = uuid();
       copy.instances.splice(1);
       this.count--; //todo use id to remove it
-      if (copy.count > 0) store.dispatch('upsertBaddie', copy);
+      if (copy.instances.length > 0) store.dispatch('upsertBaddie', copy);
       this.save();
     }
 
@@ -135,13 +135,18 @@ class Baddie extends Actor {
       store.dispatch('reconcile', this.type);
     }
   }
-  export(id, excludeInstances) {
+  export(id, excludeInstances, rawInstances) {
+    let instances = [];
     if (!id || this.id === id) {
       const modifiers = [
         ...this.bonuses.map(x => x.export(this.id)),
         ...this.penalties.map(x => x.export(this.id)),
         ...this.defends.map(x => x.export(this.id)),
       ];
+
+      if (!excludeInstances) {
+        instances = rawInstances ? JSON.parse(JSON.stringify(this.instances)): JSON.stringify(this.instances);
+      }
 
       const baddie = {
         name: this.name,
@@ -150,7 +155,7 @@ class Baddie extends Actor {
         id: this.id,
         size: this.size,
         acted: this.acted,
-        instances: excludeInstances ? [] : JSON.stringify(this.instances)
+        instances
       };
 
       return {
@@ -159,12 +164,12 @@ class Baddie extends Actor {
       }
     } else return {};
   }
-  copy(excludeInstances) {
+  copy(excludeInstances, rawInstances) {
     return Object.assign({
       bonuses: this.bonuses.map(x => x.export(this.id)),
       penalties: this.penalties.map(x => x.export(this.id)),
       defends: this.defends.map(x => x.export(this.id)),
-    }, this.export(null, excludeInstances).baddie);
+    }, this.export(null, excludeInstances, rawInstances).baddie);
   }
   saveEdit() {
     this._owner = this.tempOwner;
