@@ -1,10 +1,9 @@
-import Vue from 'vue';
-import store from '../vuex-state/store';
-import Actor from './actor';
+import store from "../vuex-state/store";
+import Actor from "./actor";
 
 class Player extends Actor {
   constructor(data) {
-    data.type = data.type || 'player';
+    data.type = data.type || "player";
     super(data);
     this.initHp(data);
   }
@@ -43,14 +42,14 @@ class Player extends Actor {
     return this.hp <= 0;
   }
   get zone() {
-    if (this.inGreen) return 'green'
-    else if (this.inYellow) return 'yellow'
-    else if (this.inRed) return 'red';
-    else if (this.incapacitated) return 'incapacitated';
-    else return '';
+    if (this.inGreen) return "green";
+    else if (this.inYellow) return "yellow";
+    else if (this.inRed) return "red";
+    else if (this.incapacitated) return "incapacitated";
+    else return "";
   }
 
-  initHp({maxHp, hp, _hp, tempHP}) {
+  initHp({ maxHp, hp, _hp, tempHP }) {
     let green;
     let yellow;
 
@@ -72,7 +71,7 @@ class Player extends Actor {
       case 35:
         green = 27;
         yellow = 13;
-          break;
+        break;
       case 34:
       case 33:
         green = 26;
@@ -148,24 +147,24 @@ class Player extends Actor {
   takenAction() {
     const minions = store.getters.childMinions(this.id);
     const newStatus = !this.acted;
-    const minionNotMatched = minions.some(x => x.acted !== newStatus);
-    const message = newStatus ? 
-      `Some of this player's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
-      `Some of this player's minions have already acted. Do you also want to mark their minions as having not acted?`;
+    const minionNotMatched = minions.some((x) => x.acted !== newStatus);
+    const message = newStatus
+      ? `Some of this player's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`
+      : `Some of this player's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      Vue.dialog.confirm({
-        title: 'Warning',
-        body: message
-      },
-      {
-        okText: 'Yes',
-        cancelText: 'No'
-      })
-      .then(() => {
-        minions.forEach(minion => {
-          minion.takenAction(newStatus);
-        })
-      });
+      // Vue.dialog.confirm({
+      //   title: 'Warning',
+      //   body: message
+      // },
+      // {
+      //   okText: 'Yes',
+      //   cancelText: 'No'
+      // })
+      // .then(() => {
+      //   minions.forEach(minion => {
+      //     minion.takenAction(newStatus);
+      //   })
+      // });
     }
     this.acted = newStatus;
     this.save();
@@ -175,15 +174,17 @@ class Player extends Actor {
     super.saveEdit();
   }
   save() {
-    super.save('players', this.export().player);
+    super.save("players", this.export().player);
   }
   export() {
-    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
-      const {baddie, modifiers} = minion.export();
-      acc.push(baddie);
-      acc.push(...modifiers);
-      return acc;
-    }, []);
+    const minions = store.getters
+      .childMinions(this.id)
+      .reduce((acc, minion) => {
+        const { baddie, modifiers } = minion.export();
+        acc.push(baddie);
+        acc.push(...modifiers);
+        return acc;
+      }, []);
 
     return {
       player: {
@@ -194,25 +195,25 @@ class Player extends Actor {
         acted: this.acted,
         type: this.type,
         top: this.top,
-        left: this.left
+        left: this.left,
       },
-      minions
-    }
+      minions,
+    };
   }
   remove() {
-    Vue.dialog.confirm({
-      title: 'Are You Sure?',
-      body: 'Are you sure you want to remove this player from the scene?'
-    },
-    {
-      okText: 'Yes',
-      cancelText: 'No'
-    })
-    .then(() => {
-      store.dispatch('removePlayer', this.id);
-    });
+    // Vue.dialog.confirm({
+    //   title: 'Are You Sure?',
+    //   body: 'Are you sure you want to remove this player from the scene?'
+    // },
+    // {
+    //   okText: 'Yes',
+    //   cancelText: 'No'
+    // })
+    // .then(() => {
+    //   store.dispatch('removePlayer', this.id);
+    // });
   }
 }
 
 export default Player;
-export {Player};
+export { Player };

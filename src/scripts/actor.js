@@ -1,15 +1,17 @@
-import { v4 as uuid } from 'uuid';
-import store from '../vuex-state/store';
+import { v4 as uuid } from "uuid";
 
+import store from "../vuex-state/store";
 
 class GenericObject {
   constructor(data) {
     if (this.constructor === GenericObject) {
-      throw new TypeError('Abstract class "GenericObject" cannot be instantiated directly.')
+      throw new TypeError(
+        'Abstract class "GenericObject" cannot be instantiated directly.'
+      );
     }
     this.id = data.id || uuid();
     this.name = data.name;
-    this.tempName = data.tempName || data.name || '';
+    this.tempName = data.tempName || data.name || "";
     this.editing = data.editing || false;
     this.type = data.type;
     this.top = data.top || null;
@@ -18,7 +20,7 @@ class GenericObject {
   }
 
   save(type, data) {
-    store.dispatch('saveData', { type: type || this.type, data });
+    store.dispatch("saveData", { type: type || this.type, data });
   }
   beginEdit() {
     this.editing = true;
@@ -38,19 +40,21 @@ class Actor extends GenericObject {
   constructor(data) {
     super(data);
     if (this.constructor === Actor) {
-      throw new TypeError('Abstract class "Actor" cannot be instantiated directly.')
+      throw new TypeError(
+        'Abstract class "Actor" cannot be instantiated directly.'
+      );
     }
     this.acted = data.acted || false;
   }
 
   get typeLabel() {
     switch (this.type) {
-      case 'minions':
-        return 'minion';
-      case 'lieutenants':
-        return 'lieutenant';
-      case 'villains':
-        return 'villain';
+      case "minions":
+        return "minion";
+      case "lieutenants":
+        return "lieutenant";
+      case "villains":
+        return "villain";
       default:
         return this.type;
     }
@@ -67,13 +71,13 @@ class Actor extends GenericObject {
   sortModifiers(list) {
     list.sort((a, b) => {
       if (a.name !== b.name) {
-        return a.name > b.name ? 1: -1;
+        return a.name > b.name ? 1 : -1;
       } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? 1: -1;
+        return a.amount > b.amount ? 1 : -1;
       } else if (a.persistent !== b.persistent) {
-        return a.persistent ? -1: 1;
+        return a.persistent ? -1 : 1;
       } else if (a.exclusive !== b.exclusive) {
-        return a.exclusive ? -1: 1;
+        return a.exclusive ? -1 : 1;
       } else {
         return 0;
       }
