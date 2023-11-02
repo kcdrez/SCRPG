@@ -66,13 +66,13 @@
 <script>
 import { defineComponent } from "vue";
 
-import { version } from "../../package.json";
+import config from "../../package.json";
 
 export default defineComponent({
   name: "NavBar",
   data() {
     return {
-      version,
+      version: config.version,
     };
   },
 });

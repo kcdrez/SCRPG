@@ -6,9 +6,8 @@
         <div class="btn-group btn-group-sm w-50">
           <button
             class="btn btn-sm btn-success border-dark"
-            data-toggle="modal"
-            data-target="#sceneTrackerModal"
             title="Create a new Scene Tracker"
+            @click="showCreateModal = true"
           >
             Create
           </button>
@@ -84,90 +83,74 @@
         </div>
       </div>
     </div>
-    <div id="sceneTrackerModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Edit Scene Tracker</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Name</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.trim="name"
-                type="text"
-                ref="scene"
-                @keypress.enter="createScene"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Green</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.number="green"
-                type="number"
-                ref="green"
-                min="0"
-                @keypress.enter="createScene"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Yellow</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.number="yellow"
-                type="number"
-                ref="yellow"
-                min="0"
-                @keypress.enter="createScene"
-              />
-            </div>
-            <div class="input-group input-group-sm">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Red</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.number="red"
-                type="number"
-                ref="red"
-                min="0"
-                @keypress.enter="createScene"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-success border-dark"
-              type="button"
-              data-dismiss="modal"
-              @click="createScene"
-              :disabled="name === ''"
-              :title="!name ? 'Enter a name to create the Scene Tracker' : ''"
-            >
-              Create
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+    <Modal :isOpen="showCreateModal">
+      <template v-slot:header
+        ><h5 class="modal-title">Edit Scene Tracker</h5></template
+      >
+      <template v-slot:body>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Name</div>
+          <input
+            class="form-control border-dark"
+            v-model.trim="name"
+            type="text"
+            ref="scene"
+            @keypress.enter="createScene"
+          />
         </div>
-      </div>
-    </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Green</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="green"
+            type="number"
+            ref="green"
+            min="0"
+            @keypress.enter="createScene"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Yellow</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="yellow"
+            type="number"
+            ref="yellow"
+            min="0"
+            @keypress.enter="createScene"
+          />
+        </div>
+        <div class="input-group input-group-sm">
+          <div class="input-group-text border-dark">Red</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="red"
+            type="number"
+            ref="red"
+            min="0"
+            @keypress.enter="createScene"
+          />
+        </div>
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-success border-dark"
+          type="button"
+          @click="createScene"
+          :disabled="name === ''"
+          :title="!name ? 'Enter a name to create the Scene Tracker' : ''"
+        >
+          Create
+        </button>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          @click="showCreateModal = false"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -175,13 +158,18 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
+import Modal from "components/general/modal.vue";
+
 export default defineComponent({
+  name: "SceneTracker",
+  components: { Modal },
   data() {
     return {
       green: 2,
       yellow: 4,
       red: 2,
       name: "",
+      showCreateModal: false,
     };
   },
   computed: {
@@ -191,14 +179,9 @@ export default defineComponent({
     createScene() {
       if (this.name !== "") {
         this.scene.create(this.green, this.yellow, this.red, this.name);
-        $("#sceneTrackerModal").modal("hide");
+        this.showCreateModal = false;
       }
     },
-  },
-  mounted() {
-    $("#sceneTrackerModal").on("shown.bs.modal", (e) => {
-      this.$refs.scene.focus();
-    });
   },
 });
 </script>

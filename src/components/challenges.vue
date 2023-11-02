@@ -61,96 +61,98 @@
           :key="challenge.name"
           :id="challenge.id"
         >
-          <div class="mb-1">
-            <div class="text-left my-2">
-              <h5
-                class="d-inline-block align-middle m-0 text-capitalize"
-                v-if="!challenge.editing"
-              >
-                {{ challenge.name }}
-              </h5>
-              <div
-                :class="
-                  challenge.editing
-                    ? 'input-group input-group-sm mb-2'
-                    : 'd-inline float-right'
-                "
-              >
-                <input
-                  type="text"
-                  class="form-control form-control-sm border-dark"
-                  placeholder="Challenge Name"
-                  v-model.trim="challenge.tempName"
-                  v-if="challenge.editing"
-                  @keypress.enter="challenge.saveEdit()"
-                  @keydown.esc="challenge.cancelEdit()"
-                  ref="challengeNameEdit"
-                />
-                <div
-                  :class="
-                    challenge.editing
-                      ? 'input-group-append'
-                      : 'btn-group btn-group-sm'
-                  "
-                >
-                  <button
-                    class="btn btn-sm btn-primary border-dark"
-                    title="Edit this Challenge"
-                    @click="editChallenge(challenge, challengeIndex)"
-                    v-if="!challenge.editing"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    class="btn btn-sm btn-success border-dark"
-                    title="Save this Challenge"
-                    @click="challenge.saveEdit()"
-                    :disabled="challenge.tempName === ''"
-                    v-if="challenge.editing"
-                  >
-                    Save
-                  </button>
-                  <button
-                    class="btn btn-sm btn-warning border-dark"
-                    title="Cancel edits on this Challenge"
-                    @click="challenge.cancelEdit()"
-                    v-if="challenge.editing"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    class="btn btn-sm btn-danger border-dark"
-                    title="Remove this Challenge from the Scene"
-                    @click="scene.removeChallenge(challengeIndex)"
-                  >
-                    Remove
-                  </button>
-                  <button
-                    class="btn btn-secondary border-dark"
-                    @click="
-                      $store.dispatch('export', {
-                        type: 'challenges',
-                        fileName: challenge.name + '_challenges',
-                        id: challenge.id,
-                      })
-                    "
-                    title="Export this Challenge to an xlsx file"
-                  >
-                    Export
-                  </button>
-                </div>
-              </div>
-              <div v-if="!challenge.editing">{{ challenge.description }}</div>
-              <textarea
-                class="form-control form-control-sm border-dark"
-                v-model.trim="challenge.tempDescription"
-                placeholder="Challenge Description"
+          <div class="mb-2" v-if="challenge.editing">
+            <div class="input-group input-group-sm mb-2">
+              <input
+                type="text"
+                class="form-control border-dark"
+                placeholder="Challenge Name"
+                v-model.trim="challenge.tempName"
                 @keypress.enter="challenge.saveEdit()"
                 @keydown.esc="challenge.cancelEdit()"
-                v-else
+                ref="challengeNameEdit"
+              />
+              <button
+                class="btn btn-sm btn-success border-dark"
+                title="Save this Challenge"
+                @click="challenge.saveEdit()"
+                :disabled="challenge.tempName === ''"
               >
-              </textarea>
+                Save
+              </button>
+              <button
+                class="btn btn-sm btn-warning border-dark"
+                title="Cancel edits on this Challenge"
+                @click="challenge.cancelEdit()"
+              >
+                Cancel
+              </button>
+              <button
+                class="btn btn-sm btn-danger border-dark"
+                title="Remove this Challenge from the Scene"
+                @click="scene.removeChallenge(challengeIndex)"
+              >
+                Remove
+              </button>
+              <button
+                class="btn btn-secondary border-dark"
+                @click="
+                  $store.dispatch('export', {
+                    type: 'challenges',
+                    fileName: challenge.name + '_challenges',
+                    id: challenge.id,
+                  })
+                "
+                title="Export this Challenge to an xlsx file"
+              >
+                Export
+              </button>
             </div>
+            <textarea
+              class="form-control form-control-sm border-dark"
+              v-model.trim="challenge.tempDescription"
+              placeholder="Challenge Description"
+              @keypress.enter="challenge.saveEdit()"
+              @keydown.esc="challenge.cancelEdit()"
+            >
+            </textarea>
+          </div>
+          <div class="mb-2" v-else>
+            <div class="d-flex justify-content-between">
+              <h5 class="m-0 text-capitalize">
+                {{ challenge.name }}
+              </h5>
+              <div class="btn-group btn-group-sm">
+                <button
+                  class="btn btn-sm btn-primary border-dark"
+                  title="Edit this Challenge"
+                  @click="editChallenge(challenge, challengeIndex)"
+                >
+                  Edit
+                </button>
+                <button
+                  class="btn btn-sm btn-danger border-dark"
+                  title="Remove this Challenge from the Scene"
+                  @click="scene.removeChallenge(challengeIndex)"
+                >
+                  Remove
+                </button>
+                <button
+                  class="btn btn-secondary border-dark"
+                  @click="
+                    $store.dispatch('export', {
+                      type: 'challenges',
+                      fileName: challenge.name + '_challenges',
+                      id: challenge.id,
+                    })
+                  "
+                  title="Export this Challenge to an xlsx file"
+                >
+                  Export
+                </button>
+              </div>
+            </div>
+            <div>{{ challenge.description }}</div>
           </div>
           <div>
             <table
@@ -169,16 +171,11 @@
                   :key="challengeEntry.name"
                 >
                   <td @click="challengeEntry.complete()" class="h4">
-                    <icon
-                      :icon="['far', 'check-square']"
+                    <i
+                      class="far fa-check-square c-pointer text-success"
                       v-if="challengeEntry.completed"
-                      class="c-pointer text-success"
-                    />
-                    <icon
-                      :icon="['far', 'square']"
-                      v-else
-                      class="c-pointer text-danger"
-                    />
+                    ></i>
+                    <i class="far fa-square c-pointer text-danger" v-else></i>
                   </td>
                   <td>
                     <input
@@ -201,7 +198,7 @@
                         v-if="!challengeEntry.editing"
                         title="Edit this Challenge Entry"
                       >
-                        <icon :icon="['far', 'edit']" />
+                        <i class="fas fa-edit"></i>
                       </button>
                       <template v-else>
                         <button
@@ -210,14 +207,14 @@
                           title="Save this Challenge Entry"
                           :disabled="challengeEntry.tempName === ''"
                         >
-                          <icon :icon="['far', 'save']" />
+                          <i class="fas fa-save"></i>
                         </button>
                         <button
                           class="btn btn-warning border-dark"
                           @click="challengeEntry.cancelEdit()"
                           title="Cancel Editing"
                         >
-                          <icon :icon="['fas', 'ban']" />
+                          <i class="fas fa-ban"></i>
                         </button>
                       </template>
                       <button
@@ -225,7 +222,7 @@
                         @click="challenge.remove(itemIndex)"
                         title="Remove this Challenge Entry"
                       >
-                        <icon :icon="['far', 'trash-alt']" />
+                        <i class="fas fa-trash-alt"></i>
                       </button>
                     </div>
                   </td>
@@ -260,118 +257,104 @@
         </div>
       </div>
     </div>
-    <div id="challengeModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add a Challenge</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text border-dark">Name</span>
-              </div>
-              <input
-                type="text"
-                v-model.trim="newChallenge.name"
-                class="form-control border-dark"
-                placeholder="Challenge Name"
-                @keypress.enter="addChallenge()"
-                ref="challengeName"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text border-dark">Description</span>
-              </div>
-              <textarea
-                v-model.trim="newChallenge.description"
-                class="form-control border-dark"
-                placeholder="Add a description of the challenge (optional)"
-                @keypress.enter="addChallenge()"
+    <Modal :isOpen="showCreateModal">
+      <template v-slot:header
+        ><h5 class="modal-title">Add a Challenge</h5></template
+      >
+      <template v-slot:body>
+        <div class="input-group input-group-sm mb-3">
+          <span class="input-group-text border-dark">Name</span>
+          <input
+            type="text"
+            v-model.trim="newChallenge.name"
+            class="form-control border-dark"
+            placeholder="Challenge Name"
+            @keypress.enter="addChallenge()"
+            ref="challengeName"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <span class="input-group-text border-dark">Description</span>
+          <textarea
+            v-model.trim="newChallenge.description"
+            class="form-control border-dark"
+            placeholder="Add a description of the challenge (optional)"
+            @keypress.enter="addChallenge()"
+          >
+          </textarea>
+        </div>
+        <div>
+          <h6 class="text-light">Add some challenge entries (optional)</h6>
+          <div class="input-group input-group-sm mb-3">
+            <input
+              type="text"
+              class="form-control border-dark"
+              placeholder="Challenge Entry"
+              v-model.trim="newChallenge.entry"
+              @keydown.enter="addTempChallenge"
+            />
+            <div class="input-group-append">
+              <button
+                class="btn btn-primary border-dark"
+                type="button"
+                @click="addTempChallenge"
+                :disabled="newChallenge.entry === ''"
               >
-              </textarea>
-            </div>
-            <div>
-              <h6 class="text-light">Add some challenge entries (optional)</h6>
-              <div class="input-group input-group-sm mb-3">
-                <input
-                  type="text"
-                  class="form-control border-dark"
-                  placeholder="Challenge Entry"
-                  v-model.trim="newChallenge.entry"
-                  @keydown.enter="addTempChallenge"
-                />
-                <div class="input-group-append">
-                  <button
-                    class="btn btn-primary border-dark"
-                    type="button"
-                    @click="addTempChallenge"
-                    :disabled="newChallenge.entry === ''"
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-              <div
-                class="input-group input-group-sm mb-1"
-                v-for="(item, index) in newChallenge.list"
-                :key="'challenge' + index"
-              >
-                <input
-                  type="text"
-                  class="form-control border-dark"
-                  placeholder="Challenge Entry Description"
-                  v-model.trim="item.name"
-                />
-                <div class="input-group-append">
-                  <button
-                    class="btn btn-danger border-dark"
-                    type="button"
-                    @click="newChallenge.list.splice(index, 1)"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
+                Add
+              </button>
             </div>
           </div>
-          <div class="modal-footer">
+          <div
+            class="input-group input-group-sm mb-1"
+            v-for="(item, index) in newChallenge.list"
+            :key="'challenge' + index"
+          >
+            <input
+              type="text"
+              class="form-control border-dark"
+              placeholder="Challenge Entry Description"
+              v-model.trim="item.name"
+            />
             <button
-              class="btn btn-success border-dark"
+              class="btn btn-danger border-dark"
               type="button"
-              data-dismiss="modal"
-              @click="addChallenge()"
-              :disabled="newChallenge.name === ''"
+              @click="newChallenge.list.splice(index, 1)"
             >
-              Save
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
+              Remove
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-success border-dark"
+          type="button"
+          @click="addChallenge()"
+          :disabled="newChallenge.name === ''"
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          @click="showCreateModal = false"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script>
-import Cookies from "js-cookie";
-import { unvue } from "../scripts/utilities";
-import { Challenge } from "../scripts/scene";
 import { mapState } from "vuex";
 import { defineComponent } from "vue";
 
+import Modal from "components/general/modal.vue";
+
 export default defineComponent({
   name: "ChallengesTracker",
+  components: { Modal },
   data() {
     return {
       newChallenge: {
@@ -380,6 +363,7 @@ export default defineComponent({
         description: "",
         list: [],
       },
+      showCreateModal: false,
     };
   },
   computed: {
@@ -387,7 +371,7 @@ export default defineComponent({
   },
   methods: {
     addChallengeModal() {
-      $("#challengeModal").modal("show");
+      this.showCreateModal = true;
       this.$refs.challengeName.focus();
     },
     editChallenge(challenge, index) {
@@ -404,7 +388,7 @@ export default defineComponent({
         this.newChallenge.name = "";
         this.newChallenge.list = [];
         this.newChallenge.name = "";
-        $("#challengeModal").modal("hide");
+        this.showCreateModal = false;
       }
     },
     addTempChallenge() {

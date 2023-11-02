@@ -17,7 +17,7 @@
       title="Scroll to the top of the page"
       :class="showScrollWidget ? 'd-block' : 'd-none'"
     >
-      <icon :icon="['fas', 'arrow-up']"></icon>
+      <i class="fas fa-arrow-up"></i>
       TOP
     </div>
     <div id="overcomeChartModal" class="modal" tabindex="-1" role="dialog">

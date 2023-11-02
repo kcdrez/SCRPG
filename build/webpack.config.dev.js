@@ -2,6 +2,7 @@
 
 const webpack = require("webpack");
 const jquery = require("jquery");
+const path = require("path");
 const { VueLoaderPlugin } = require("vue-loader");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
@@ -13,7 +14,7 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js", ".vue"],
     alias: {
       vue: "vue/dist/vue.esm-bundler.js",
-      // components: path.resolve(__dirname, "../src/components"),
+      components: path.resolve(__dirname, "../src/components"),
       // pages: path.resolve(__dirname, "../src/pages"),
       // types: path.resolve(__dirname, "../src/types"),
       // resources: path.resolve(__dirname, "../src/resources"),
@@ -34,14 +35,14 @@ module.exports = {
         test: /\.vue$/,
         use: "vue-loader",
       },
-      {
-        test: /\.tsx?$/,
-        loader: "ts-loader",
-        options: {
-          appendTsSuffixTo: [/\.vue$/],
-        },
-        exclude: /node_modules/,
-      },
+      // {
+      //   test: /\.tsx?$/,
+      //   loader: "ts-loader",
+      //   options: {
+      //     appendTsSuffixTo: [/\.vue$/],
+      //   },
+      //   exclude: /node_modules/,
+      // },
       {
         test: /\.scss$/,
         use: [

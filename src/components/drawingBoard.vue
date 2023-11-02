@@ -8,7 +8,7 @@
         :title="`Scroll to view details of ${selection.type}`"
         :disabled="!selection.id"
       >
-        <icon :icon="['fas', 'eye']" />
+        <i class="fas fa-eye"></i>
       </button>
       <button
         class="btn btn-danger border-dark"
@@ -16,7 +16,7 @@
         :disabled="!selection.id"
         :title="`Delete selected ${selection.type}`"
       >
-        <icon :icon="['far', 'trash-alt']" />
+        <i class="fas fa-trash-alt"></i>
       </button>
       <button
         class="btn btn-secondary border-dark"
@@ -24,7 +24,7 @@
         :disabled="mod >= states.length - 1"
         title="Undo"
       >
-        <icon :icon="['fas', 'undo']" />
+        <i class="fas fa-undo"></i>
       </button>
       <button
         class="btn btn-secondary border-dark"
@@ -32,7 +32,7 @@
         title="Redo"
         :disabled="mod <= 0"
       >
-        <icon :icon="['fas', 'redo']" />
+        <i class="fas fa-redo"></i>
       </button>
       <button
         class="btn btn-warning border-dark"
@@ -40,7 +40,7 @@
         v-if="selection.instance"
         :title="`Demote selected ${selection.type}`"
       >
-        <icon :icon="['fas', 'level-down-alt']" />
+        <i class="fas fa-level-down-alt"></i>
       </button>
       <button
         class="btn btn-success border-dark"
@@ -48,7 +48,7 @@
         v-if="selection.instance"
         :title="`Promote selected ${selection.type}`"
       >
-        <icon :icon="['fas', 'level-up-alt']" />
+        <i class="fas fa-level-up-alt"></i>
       </button>
       <button
         class="btn btn-success border-dark"

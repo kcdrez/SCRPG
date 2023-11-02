@@ -1,7 +1,7 @@
 import { createStore } from "vuex";
 import { v4 as uuid } from "uuid";
 import Cookies from "js-cookie";
-import xlsx from "xlsx";
+import { writeFile, utils } from "xlsx";
 
 import { Baddie, Villain, sameBaddies } from "../scripts/baddie";
 import { Player } from "../scripts/player";
@@ -252,12 +252,12 @@ const store = createStore({
         });
       }
 
-      const wb = xlsx.utils.book_new();
-      const sceneWS = xlsx.utils.json_to_sheet(rows);
+      const wb = utils.book_new();
+      const sceneWS = utils.json_to_sheet(rows);
 
-      xlsx.utils.book_append_sheet(wb, sceneWS, "SCRPG");
+      utils.book_append_sheet(wb, sceneWS, "SCRPG");
 
-      xlsx.writeFile(wb, (fileName || "SCRPG-GM") + ".xlsx");
+      writeFile(wb, (fileName || "SCRPG-GM") + ".xlsx");
     },
     async import(ctx, data) {
       const { files, filters } = data;

@@ -146,14 +146,11 @@
                   title="Add a Minion to this Villain"
                 >
                   <span class="fa-stack">
-                    <icon
-                      :icon="['fas', 'dragon']"
-                      transform="right-4 down-4"
-                    />
-                    <icon
-                      :icon="['fas', 'plus']"
+                    <i class="fas fa-dragon" transform="right-4 down-4"></i>
+                    <i
+                      class="fas fa-plus"
                       transform="shrink-6 left-4 down-4"
-                    />
+                    ></i>
                   </span>
                 </button>
               </div>

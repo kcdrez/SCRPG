@@ -10,56 +10,53 @@
         >
           Reset Round Tracker
         </button>
-        <div class="w-auto">
-          <span class="mr-1">Players:</span>
-          <div class="btn-group btn-group-sm">
-            <button
-              class="btn btn-success border-dark"
-              data-toggle="modal"
-              data-target="#addPlayerModal"
-              title="Add a new player to the scene"
-            >
-              Add
-            </button>
-            <button
-              class="btn btn-warning border-dark"
-              title="Remove all players from the scene"
-              @click="clearPlayers"
-            >
-              Clear
-            </button>
-            <button
-              class="btn btn-primary border-dark"
-              @click="$refs.import.click()"
-            >
-              Import
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              title="Export the player data to an xlsx file"
-              @click="
-                $store.dispatch('export', {
-                  type: 'players',
-                  fileName: 'players',
-                })
-              "
-            >
-              Export
-            </button>
-          </div>
-          <input
-            type="file"
-            accept=".xlsx"
-            class="d-none"
-            ref="import"
-            @change="
-              $store.dispatch('import', {
-                files: $event.target.files,
-                filters: ['player', 'minions', 'bonus', 'penalty', 'defend'],
+        <div class="input-group input-group-sm justify-content-center">
+          <div class="input-group-text border-dark">Players:</div>
+          <button
+            class="btn btn-success border-dark"
+            title="Add a new player to the scene"
+            @click="showCreateModal = true"
+          >
+            Add
+          </button>
+          <button
+            class="btn btn-warning border-dark"
+            title="Remove all players from the scene"
+            @click="clearPlayers"
+          >
+            Clear
+          </button>
+          <button
+            class="btn btn-primary border-dark"
+            @click="$refs.import.click()"
+          >
+            Import
+          </button>
+          <button
+            class="btn btn-secondary border-dark"
+            title="Export the player data to an xlsx file"
+            @click="
+              $store.dispatch('export', {
+                type: 'players',
+                fileName: 'players',
               })
             "
-          />
+          >
+            Export
+          </button>
         </div>
+        <input
+          type="file"
+          accept=".xlsx"
+          class="d-none"
+          ref="import"
+          @change="
+            $store.dispatch('import', {
+              files: $event.target.files,
+              filters: ['player', 'minions', 'bonus', 'penalty', 'defend'],
+            })
+          "
+        />
       </div>
       <div class="card-body">
         <table
@@ -97,7 +94,7 @@
                     :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`"
                   >
                     <span v-if="actor.acted">
-                      <icon :icon="['fas', 'check']" class="text-success" />
+                      <i class="fas fa-check text-success"></i>
                     </span>
                     {{ actor.name }}
                     <sup
@@ -110,7 +107,7 @@
                         'text-danger': actor.owner.type === 'villains',
                       }"
                     >
-                      <icon :icon="['fas', 'user']"></icon>
+                      <i class="fas fa-user"></i>
                     </sup>
                     <sup
                       class="text-success c-help"
@@ -180,18 +177,16 @@
                     <template v-else>
                       <span :class="'hp-' + actor.zone">{{ actor.hp }}</span>
                       <span @click="actor.hp++">
-                        <icon
-                          :icon="['fas', 'chevron-circle-up']"
+                        <i
+                          class="fas fa-chevron-circle-up c-pointer change-hp"
                           :title="`Increase ${actor.typeLabel} HP`"
-                          class="c-pointer change-hp"
-                        />
+                        ></i>
                       </span>
                       <span @click="actor.hp--">
-                        <icon
-                          :icon="['fas', 'chevron-circle-down']"
+                        <i
+                          class="fas fa-chevron-circle-down c-pointer change-hp"
                           :title="`Decrease ${actor.typeLabel} HP`"
-                          class="c-pointer change-hp"
-                        />
+                        ></i>
                       </span>
                     </template>
                   </template>
@@ -224,7 +219,7 @@
                       :title="`Edit this ${actor.typeLabel}`"
                       v-if="actor.allowEdit && !actor.editing"
                     >
-                      <icon :icon="['far', 'edit']" />
+                      <i class="fas fa-edit"></i>
                     </button>
                     <button
                       class="btn btn-success border-dark"
@@ -232,7 +227,7 @@
                       v-if="actor.editing"
                       :title="`Save edits on this ${actor.typeLabel}`"
                     >
-                      <icon :icon="['far', 'save']" />
+                      <i class="fas fa-save"></i>
                     </button>
                     <button
                       class="btn btn-warning border-dark"
@@ -240,7 +235,7 @@
                       v-if="actor.editing"
                       :title="`Cancel edits on this ${actor.typeLabel}`"
                     >
-                      <icon :icon="['fas', 'ban']" />
+                      <i class="fas fa-ban"></i>
                     </button>
                     <button
                       class="btn btn-primary border-dark add-minion"
@@ -249,14 +244,11 @@
                       v-if="actor.allowAddMinion"
                     >
                       <span class="fa-stack">
-                        <icon
-                          :icon="['fas', 'dragon']"
-                          transform="right-4 down-4"
-                        />
-                        <icon
-                          :icon="['fas', 'plus']"
+                        <i class="fas fa-dragon" transform="right-4 down-4"></i>
+                        <i
+                          class="fas fa-plus"
                           transform="shrink-6 left-4 down-4"
-                        />
+                        ></i>
                       </span>
                     </button>
                     <button
@@ -265,7 +257,7 @@
                       :title="`Remove this ${actor.typeLabel} from the scene`"
                       v-if="actor.allowRemove"
                     >
-                      <icon :icon="['far', 'trash-alt']" />
+                      <i class="fas fa-trash-alt"></i>
                     </button>
                     <button
                       class="btn btn-secondary border-dark"
@@ -273,7 +265,7 @@
                       title="See Details"
                       v-if="actor.viewDetails"
                     >
-                      <icon :icon="['fas', 'eye']" title="View Details"></icon>
+                      <i class="fas fa-eye" title="View Details" />
                     </button>
                   </div>
                 </td>
@@ -284,83 +276,75 @@
         <div v-else class="text-center">There are no actors in the scene.</div>
       </div>
     </div>
-    <div id="addPlayerModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add a Player</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm">
-              <div class="input-group-prepend">
-                <span class="input-group-text border-dark">Name</span>
-              </div>
-              <input
-                type="text"
-                v-model.trim="newPlayer.name"
-                class="form-control border-dark"
-                @keypress.enter="addPlayer"
-                ref="newPlayerName"
-              />
-            </div>
-            <div class="input-group input-group-sm mt-2">
-              <div class="input-group-prepend">
-                <span class="input-group-text border-dark">Max HP</span>
-              </div>
-              <input
-                type="number"
-                v-model.number="newPlayer.maxHp"
-                class="form-control border-dark"
-                @keypress.enter="addPlayer"
-                min="17"
-                max="40"
-              />
-              <div class="input-group-prepend">
-                <span class="input-group-text border-dark">Current HP</span>
-              </div>
-              <input
-                type="number"
-                v-model.number="newPlayer.hp"
-                class="form-control border-dark"
-                @keypress.enter="addPlayer"
-                min="0"
-                :max="newPlayer.maxHp"
-                ref="newPlayerHP"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-success border-dark"
-              type="button"
-              data-dismiss="modal"
-              @click="addPlayer"
-              :disabled="newPlayer.name === ''"
-            >
-              Create
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+    <Modal :isOpen="showCreateModal">
+      <template v-slot:header
+        ><h5 class="modal-title">Add a Player</h5></template
+      >
+      <template v-slot:body>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text border-dark">Name</span>
+          <input
+            type="text"
+            v-model.trim="newPlayer.name"
+            class="form-control border-dark"
+            @keypress.enter="addPlayer"
+            ref="newPlayerName"
+          />
         </div>
-      </div>
-    </div>
+        <div class="input-group input-group-sm mt-2">
+          <span class="input-group-text border-dark">Max HP</span>
+          <input
+            type="number"
+            v-model.number="newPlayer.maxHp"
+            class="form-control border-dark"
+            @keypress.enter="addPlayer"
+            min="17"
+            max="40"
+          />
+          <div class="input-group-prepend">
+            <span class="input-group-text border-dark">Current HP</span>
+          </div>
+          <input
+            type="number"
+            v-model.number="newPlayer.hp"
+            class="form-control border-dark"
+            @keypress.enter="addPlayer"
+            min="0"
+            :max="newPlayer.maxHp"
+            ref="newPlayerHP"
+          />
+        </div>
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-success border-dark"
+          type="button"
+          @click="addPlayer"
+          :disabled="newPlayer.name === ''"
+        >
+          Create
+        </button>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          @click="showCreateModal = false"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { defineComponent } from "vue";
-import { mapState, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
+
+import Modal from "components/general/modal.vue";
 
 export default defineComponent({
+  name: "RoundTracker",
+  components: { Modal },
   data() {
     return {
       newPlayer: {
@@ -368,6 +352,7 @@ export default defineComponent({
         hp: 30,
         maxHp: 30,
       },
+      showCreateModal: false,
     };
   },
   computed: {
@@ -377,24 +362,24 @@ export default defineComponent({
     addPlayer() {
       if (this.newPlayer.name !== "") {
         this.$store.dispatch("addPlayer", this.newPlayer);
-        $("#addPlayerModal").modal("hide");
+        this.showCreateModal = false;
       }
     },
     clearPlayers() {
-      this.$dialog
-        .confirm(
-          {
-            title: "Are You Sure?",
-            body: "Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.",
-          },
-          {
-            okText: "Yes",
-            cancelText: "No",
-          }
-        )
-        .then((r) => {
-          this.$store.dispatch("resetPlayers");
-        });
+      // this.$dialog
+      //   .confirm(
+      //     {
+      //       title: "Are You Sure?",
+      //       body: "Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.",
+      //     },
+      //     {
+      //       okText: "Yes",
+      //       cancelText: "No",
+      //     }
+      //   )
+      //   .then((r) => {
+      //     this.$store.dispatch("resetPlayers");
+      //   });
     },
     scroll(actor) {
       $("html, body").animate(
@@ -413,11 +398,6 @@ export default defineComponent({
         this.$refs.nameEdit[index].focus();
       });
     },
-  },
-  mounted() {
-    $("#addPlayerModal").on("shown.bs.modal", (e) => {
-      this.$refs.newPlayerName.focus();
-    });
   },
   watch: {
     "newPlayer.maxHp"(newVal) {

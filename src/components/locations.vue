@@ -7,7 +7,7 @@
           <button
             class="btn btn-success border-dark"
             title="Add a new Location to the Scene"
-            @click="addLocationModal"
+            @click="showCreateModal = true"
           >
             Add
           </button>
@@ -105,7 +105,7 @@
                     v-if="!location.editing"
                     title="Edit this Location"
                   >
-                    <icon :icon="['far', 'edit']" />
+                    <i class="fas fa-edit"></i>
                   </button>
                   <template v-else>
                     <button
@@ -114,14 +114,14 @@
                       :disabled="location.tempName === ''"
                       title="Save changes on this Location"
                     >
-                      <icon :icon="['far', 'save']" />
+                      <i class="fas fa-save"></i>
                     </button>
                     <button
                       class="btn btn-warning border-dark"
                       @click="location.editing = false"
                       title="Cancel Editing"
                     >
-                      <icon :icon="['fas', 'ban']" />
+                      <i class="fas fa-ban"></i>
                     </button>
                   </template>
                   <button
@@ -129,7 +129,7 @@
                     @click="scene.removeLocation(index)"
                     title="Remove this Location"
                   >
-                    <icon :icon="['far', 'trash-alt']" />
+                    <i class="fas fa-trash-alt"></i>
                   </button>
                 </div>
               </td>
@@ -138,57 +138,49 @@
         </table>
       </div>
     </div>
-    <div id="locationModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add a Location</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <h5>Name</h5>
-            <input
-              type="text"
-              v-model.trim="newLocation.name"
-              class="form-control form-control-sm border-dark"
-              placeholder="Location Name"
-              @keypress.enter="addLocation()"
-              ref="locationName"
-            />
-            <h5>Description</h5>
-            <textarea
-              type="text"
-              v-model.trim="newLocation.description"
-              class="form-control form-control-sm border-dark"
-              placeholder="Location Description"
-              @keypress.enter="addLocation()"
-              ref="locationDescription"
-            >
-            </textarea>
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-success border-dark"
-              type="button"
-              data-dismiss="modal"
-              @click="addLocation()"
-              :disabled="newLocation.name === ''"
-            >
-              Save
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Modal :isOpen="showCreateModal">
+      <template v-slot:header
+        ><h5 class="modal-title">Add a Location</h5></template
+      >
+      <template v-slot:body>
+        <h5>Name</h5>
+        <input
+          type="text"
+          v-model.trim="newLocation.name"
+          class="form-control form-control-sm border-dark"
+          placeholder="Location Name"
+          @keypress.enter="addLocation()"
+          ref="locationName"
+        />
+        <h5>Description</h5>
+        <textarea
+          type="text"
+          v-model.trim="newLocation.description"
+          class="form-control form-control-sm border-dark"
+          placeholder="Location Description"
+          @keypress.enter="addLocation()"
+          ref="locationDescription"
+        >
+        </textarea>
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-success border-dark"
+          type="button"
+          @click="addLocation()"
+          :disabled="newLocation.name === ''"
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          @click="showCreateModal = false"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -196,31 +188,29 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { unvue } from "../scripts/utilities.js";
+import Modal from "components/general/modal.vue";
 
 export default defineComponent({
   name: "LocationsTracker",
+  components: { Modal },
   data() {
     return {
       newLocation: {
         name: "",
         description: "",
       },
+      showCreateModal: false,
     };
   },
   computed: {
     ...mapState(["scene"]),
   },
   methods: {
-    addLocationModal() {
-      $("#locationModal").modal("show");
-      this.$refs.locationName.focus();
-    },
     addLocation() {
       this.scene.addLocation(this.newLocation);
-      $("#locationModal").modal("hide");
       this.newLocation.name = "";
       this.newLocation.description = "";
+      this.showCreateModal = false;
     },
     editLocationElement(location, index) {
       location.beginEdit();

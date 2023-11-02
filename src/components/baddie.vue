@@ -8,7 +8,7 @@
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
-            @click="modal('show')"
+            @click="showCreateModal = true"
           >
             Create
           </button>
@@ -71,9 +71,7 @@
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
                   <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                      <div class="input-group-text border-dark">Name</div>
-                    </div>
+                    <div class="input-group-text border-dark">Name</div>
                     <input
                       class="form-control border-dark"
                       v-model.trim="baddie.tempName"
@@ -84,9 +82,7 @@
                     />
                   </div>
                   <div class="input-group input-group-sm mb-3">
-                    <div class="input-group-prepend">
-                      <div class="input-group-text border-dark">Owner</div>
-                    </div>
+                    <div class="input-group-text border-dark">Owner</div>
                     <select
                       class="form-control border-dark"
                       @keypress.enter="baddie.saveEdit()"
@@ -216,7 +212,7 @@
                     @click="baddie.demote()"
                     :disabled="baddie.size <= 4"
                   >
-                    <icon :icon="['fas', 'level-down-alt']" />
+                    <i class="fas fa-level-down-alt"></i>
                   </button>
                   <button
                     class="btn btn-success border-dark text-dark"
@@ -224,21 +220,21 @@
                     @click="baddie.promote()"
                     :disabled="baddie.size >= 12"
                   >
-                    <icon :icon="['fas', 'level-up-alt']" />
+                    <i class="fas fa-level-up-alt"></i>
                   </button>
                   <button
                     class="btn btn-info border-dark text-dark"
                     :title="`Add another ${baddie.typeLabel} to this row`"
                     @click="baddie.count++"
                   >
-                    <icon :icon="['far', 'plus-square']" />
+                    <i class="fas fa-plus-square"></i>
                   </button>
                   <button
                     class="btn btn-danger border-dark text-dark"
                     :title="`Remove one ${baddie.typeLabel} from this group from the scene`"
                     @click="baddie.count--"
                   >
-                    <icon :icon="['far', 'trash-alt']" />
+                    <i class="fas fa-trash-alt"></i>
                   </button>
                   <button
                     class="btn btn-secondary border-dark text-dark"
@@ -246,7 +242,7 @@
                     @click="editBaddie(baddie, index)"
                     v-if="baddie.allowEdit && !baddie.editing"
                   >
-                    <icon :icon="['far', 'edit']" />
+                    <i class="fas fa-edit"></i>
                   </button>
                   <button
                     class="btn btn-success border-dark text-dark"
@@ -254,7 +250,7 @@
                     @click="baddie.saveEdit()"
                     v-if="baddie.editing"
                   >
-                    <icon :icon="['far', 'save']" />
+                    <i class="fas fa-save"></i>
                   </button>
                   <button
                     class="btn btn-warning border-dark text-dark"
@@ -262,7 +258,7 @@
                     v-if="baddie.editing"
                     :title="`Cancel edits on this ${baddie.typeLabel}`"
                   >
-                    <icon :icon="['fas', 'ban']" />
+                    <i class="fas fa-ban"></i>
                   </button>
                   <button
                     class="btn btn-secondary border-dark text-dark"
@@ -275,7 +271,7 @@
                     "
                     :title="`Export this ${baddie.typeLabel} to an xlsx file`"
                   >
-                    <icon :icon="['fas', 'file-download']" />
+                    <i class="fas fa-download"></i>
                   </button>
                 </div>
               </td>
@@ -284,103 +280,170 @@
         </tbody>
       </table>
     </div>
-    <div :id="`createModal-${label}`" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Create a {{ labelSingle }}</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Name</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.trim="baddieData.name"
-                type="text"
-                @keydown.enter="createBaddie()"
-                ref="createName"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Size</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.number="baddieData.size"
-                type="number"
-                step="2"
-                min="4"
-                max="12"
-                @keydown.enter="createBaddie()"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Count</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.number="baddieData.count"
-                type="number"
-                min="1"
-                @keydown.enter="createBaddie()"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3" v-if="allowOwner">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Owner</div>
-              </div>
-              <select
-                class="form-control border-dark"
-                @keydown.enter="createBaddie()"
-                v-model="baddieData.owner"
-              >
-                <option :value="null">-</option>
-                <option
-                  v-for="player in players"
-                  :key="player.id"
-                  :value="player.id"
-                >
-                  {{ player.name }}
-                </option>
-                <option
-                  v-for="villain in villains"
-                  :key="villain.id"
-                  :value="villain.id"
-                >
-                  {{ villain.name }}
-                </option>
-                <option v-if="scene.name" :value="scene.id">
-                  {{ scene.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-primary border-dark"
-              type="button"
-              @click="createBaddie()"
-            >
-              Create
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+    <Modal :isOpen="showCreateModal">
+      <template v-slot:header>Create a {{ labelSingle }}</template>
+      <template v-slot:body>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Name</div>
+          <input
+            class="form-control border-dark"
+            v-model.trim="baddieData.name"
+            type="text"
+            @keydown.enter="createBaddie()"
+            ref="createName"
+          />
         </div>
-      </div>
-    </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Size</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="baddieData.size"
+            type="number"
+            step="2"
+            min="4"
+            max="12"
+            @keydown.enter="createBaddie()"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Count</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="baddieData.count"
+            type="number"
+            min="1"
+            @keydown.enter="createBaddie()"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-3" v-if="allowOwner">
+          <div class="input-group-text border-dark">Owner</div>
+          <select
+            class="form-control border-dark"
+            @keydown.enter="createBaddie()"
+            v-model="baddieData.owner"
+          >
+            <option :value="null">-</option>
+            <option
+              v-for="player in players"
+              :key="player.id"
+              :value="player.id"
+            >
+              {{ player.name }}
+            </option>
+            <option
+              v-for="villain in villains"
+              :key="villain.id"
+              :value="villain.id"
+            >
+              {{ villain.name }}
+            </option>
+            <option v-if="scene.name" :value="scene.id">
+              {{ scene.name }}
+            </option>
+          </select>
+        </div>
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-primary border-dark"
+          type="button"
+          data-bs-dismiss="modal"
+          @click="createBaddie()"
+          :disabled="!baddieData.name"
+        >
+          Create
+        </button>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          data-dismiss="modal"
+          @click="showCreateModal = false"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
+    <Modal :isOpen="showModifierModal">
+      <template v-slot:header>Add a {{ baddieData.modifier.type }}</template>
+      <template v-slot:body>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Name</div>
+          <input
+            class="form-control border-dark"
+            type="text"
+            v-model.trim="baddieData.modifier.name"
+            @keydown.enter="addModifier"
+            ref="modName"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Amount</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="baddieData.modifier.amount"
+            type="number"
+            :max="baddieData.modifier.max"
+            :min="baddieData.modifier.min"
+            @keydown.enter="addModifier"
+          />
+        </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Apply To</div>
+          <select
+            class="form-control border-dark"
+            v-model.number="baddieData.modifier.applyTo"
+            @keydown.enter="addModifier"
+          >
+            <option value="single">Just one</option>
+            <option value="row">
+              All of the {{ label.toLowerCase() }} in this row
+            </option>
+            <option value="name">
+              All of the {{ label.toLowerCase() }} with the same name
+            </option>
+          </select>
+        </div>
+        <div class="d-inline" v-if="baddieData.modifier.type !== 'Defend'">
+          <label :for="`persistent-${labelSingle}`" class="c-pointer"
+            >Persistent?</label
+          >
+          <input
+            type="checkbox"
+            v-model="baddieData.modifier.persistent"
+            @keydown.enter="addModifier"
+            :id="`persistent-${labelSingle}`"
+          />
+        </div>
+        <div class="d-inline mx-3" v-if="baddieData.modifier.type !== 'Defend'">
+          <label :for="`exclusive-${labelSingle}`" class="c-pointer"
+            >Exclusive?</label
+          >
+          <input
+            type="checkbox"
+            v-model="baddieData.modifier.exclusive"
+            @keydown.enter="addModifier"
+            :id="`exclusive-${labelSingle}`"
+          /></div
+      ></template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn btn-primary border-dark"
+          @click="addModifier()"
+          :disabled="baddieData.modifier.name === ''"
+        >
+          Add
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary border-dark"
+          data-dismiss="modal"
+          @click="showModifierModal = false"
+        >
+          Close
+        </button></template
+      >
+    </Modal>
     <div
       :id="`modifierModal-${label}`"
       class="modal"
@@ -397,9 +460,7 @@
           </div>
           <div class="modal-body">
             <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Name</div>
-              </div>
+              <div class="input-group-text border-dark">Name</div>
               <input
                 class="form-control border-dark"
                 type="text"
@@ -409,9 +470,7 @@
               />
             </div>
             <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Amount</div>
-              </div>
+              <div class="input-group-text border-dark">Amount</div>
               <input
                 class="form-control border-dark"
                 v-model.number="baddieData.modifier.amount"
@@ -422,9 +481,7 @@
               />
             </div>
             <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Apply To</div>
-              </div>
+              <div class="input-group-text border-dark">Apply To</div>
               <select
                 class="form-control border-dark"
                 v-model.number="baddieData.modifier.applyTo"
@@ -490,17 +547,17 @@
 
 <script>
 import { defineComponent } from "vue";
-import Cookies from "js-cookie";
-import { Baddie } from "../scripts/baddie";
 import { mapState } from "vuex";
+
 import Modifier from "./modifier.vue";
-import { unvue } from "../scripts/utilities";
 import { sortActors } from "../scripts/actor";
+import Modal from "components/general/modal.vue";
 
 export default defineComponent({
   name: "BaddieList",
   components: {
     Modifier,
+    Modal,
   },
   props: {
     label: {
@@ -514,6 +571,8 @@ export default defineComponent({
   },
   data() {
     return {
+      showCreateModal: false,
+      showModifierModal: false,
       baddieData: {
         name: "",
         size: 8,
@@ -557,12 +616,11 @@ export default defineComponent({
         "upsertBaddie",
         Object.assign({ type: this.label.toLowerCase() }, this.baddieData)
       );
-      $(`#createModal-${this.label}`).modal("hide");
-      $(":focus").blur();
+      this.showCreateModal = false;
     },
     addBaddie(name) {
       this.baddieData.name = name;
-      $(`#createModal-${this.label}`).modal("show");
+      this.showCreateModal = true;
     },
     modifyBaddie(type, id, instanceId) {
       if (type === "boost") {
@@ -587,7 +645,7 @@ export default defineComponent({
       }
       this.baddieData.modifier.target.id = id;
       this.baddieData.modifier.target.instanceId = instanceId;
-      $(`#modifierModal-${this.label}`).modal("show");
+      this.showModifierModal = true;
 
       this.$nextTick(() => {
         this.$refs.modName.focus();
@@ -599,16 +657,8 @@ export default defineComponent({
           type: this.label.toLowerCase(),
           modifier: this.baddieData.modifier,
         });
-        $(`#modifierModal-${this.label}`).modal("hide");
-        // this.baddieData.modifier.target.instanceId = null;
+        this.showModifierModal = false;
       }
-    },
-    modal(status, owner) {
-      $(`#createModal-${this.label}`).modal(status);
-      this.baddieData.owner = owner || null;
-      this.$nextTick(() => {
-        this.$refs.createName.focus();
-      });
     },
     editBaddie(baddie, index) {
       baddie.beginEdit();

@@ -6,104 +6,93 @@
       </div>
       <div class="card-body">
         <div class="editor">
-          <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
-            <div class="menubar">
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.bold() }"
-                @click="commands.bold"
-                title="Bold"
-              >
-                <icon :icon="['fas', 'bold']" />
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.italic() }"
-                @click="commands.italic"
-                title="Italic"
-              >
-                <icon :icon="['fas', 'italic']" />
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.strike() }"
-                @click="commands.strike"
-                title="Strikethrough"
-              >
-                <icon :icon="['fas', 'strikethrough']" />
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.underline() }"
-                @click="commands.underline"
-                title="Underline"
-              >
-                <icon :icon="['fas', 'underline']" />
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.heading({ level: 1 }) }"
-                @click="commands.heading({ level: 1 })"
-                title="Heading 1"
-              >
-                <icon :icon="['fas', 'heading']" />1
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.heading({ level: 2 }) }"
-                @click="commands.heading({ level: 2 })"
-                title="Heading 2"
-              >
-                <icon :icon="['fas', 'heading']" />2
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.heading({ level: 3 }) }"
-                @click="commands.heading({ level: 3 })"
-                title="Heading 3"
-              >
-                <icon :icon="['fas', 'heading']" />3
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.bullet_list() }"
-                @click="commands.bullet_list"
-                title="Unordered List"
-              >
-                <icon :icon="['fas', 'list-ul']" />
-              </button>
-              <button
-                class="menubar__button"
-                :class="{ 'is-active': isActive.ordered_list() }"
-                @click="commands.ordered_list"
-                title="Ordered List"
-              >
-                <icon :icon="['fas', 'list-ol']" />
-              </button>
-              <button
-                class="menubar__button"
-                @click="commands.horizontal_rule"
-                title="Horizonal Line"
-              >
-                <icon :icon="['fas', 'grip-lines']" />
-              </button>
-              <button
-                class="menubar__button"
-                @click="commands.undo"
-                title="Undo"
-              >
-                <icon :icon="['fas', 'undo']" />
-              </button>
-              <button
-                class="menubar__button"
-                @click="commands.redo"
-                title="Redo"
-              >
-                <icon :icon="['fas', 'redo']" />
-              </button>
-            </div>
-          </editor-menu-bar>
-          <editor-content
+          <div class="menubar">
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleBold().run()"
+              title="Bold"
+            >
+              <i class="fas fa-bold"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleItalic().run()"
+              title="Italic"
+            >
+              <i class="fas fa-italic"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleStrike().run()"
+              title="Strikethrough"
+            >
+              <i class="fas fa-strikethrough"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleUnderline().run()"
+              title="Underline"
+            >
+              <i class="fas fa-underline"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+              title="Heading 1"
+            >
+              <i class="fas fa-heading"></i>1
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+              title="Heading 2"
+            >
+              <i class="fas fa-heading"></i>2
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+              title="Heading 3"
+            >
+              <i class="fas fa-heading"></i>3
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleBulletList().run()"
+              title="Unordered List"
+            >
+              <i class="fas fa-list-ul"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().toggleOrderedList().run()"
+              title="Ordered List"
+            >
+              <i class="fas fa-list-ol"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().setHorizontalRule().run()"
+              title="Horizonal Line"
+            >
+              <i class="fas fa-grip-lines-horizontal"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().undo().run()"
+              title="Undo"
+            >
+              <i class="fas fa-undo"></i>
+            </button>
+            <button
+              class="menubar__button"
+              @click="editor.chain().focus().redo().run()"
+              title="Redo"
+            >
+              <i class="fas fa-redo"></i>
+            </button>
+          </div>
+          <EditorContent
             class="editor-container border-dark"
             :editor="editor"
           />
@@ -116,24 +105,12 @@
 <script>
 import { mapState } from "vuex";
 import { defineComponent } from "vue";
-// import { Editor, EditorContent, EditorMenuBar } from "tiptap";
-// import {
-//   HardBreak,
-//   Heading,
-//   HorizontalRule,
-//   OrderedList,
-//   BulletList,
-//   ListItem,
-//   Bold,
-//   Italic,
-//   Strike,
-//   Underline,
-//   History,
-// } from "tiptap-extensions";
+import { Editor, EditorContent } from "@tiptap/vue-3";
+import StarterKit from "@tiptap/starter-kit";
 
 export default defineComponent({
   name: "EnvironmentNotes",
-  // components: { EditorContent, EditorMenuBar },
+  components: { EditorContent },
   data() {
     return {
       editor: null,
@@ -143,25 +120,13 @@ export default defineComponent({
     ...mapState(["scene"]),
   },
   mounted() {
-    // this.editor = new Editor({
-    //   content: this.scene.notes,
-    //   extensions: [
-    //     new BulletList(),
-    //     new HardBreak(),
-    //     new Heading({ levels: [1, 2, 3] }),
-    //     new HorizontalRule(),
-    //     new ListItem(),
-    //     new OrderedList(),
-    //     new Bold(),
-    //     new Italic(),
-    //     new Strike(),
-    //     new Underline(),
-    //     new History(),
-    //   ],
-    //   onUpdate: (e) => {
-    //     this.scene.setNote(e.getHTML());
-    //   },
-    // });
+    this.editor = new Editor({
+      content: this.scene.notes,
+      extensions: [StarterKit],
+      onUpdate: ({ editor }) => {
+        this.scene.setNote(editor.getHTML());
+      },
+    });
   },
   beforeDestroy() {
     this.editor.destroy();

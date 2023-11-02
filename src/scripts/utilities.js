@@ -1,4 +1,4 @@
-import xlsx from 'xlsx';
+import { read, utils } from "xlsx";
 
 function unvue(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -14,10 +14,9 @@ async function processXlsxFiles(files, filterTypes) {
     arr = arr.concat(await readFile(files[i]));
   }
   if (filterTypes) {
-    filterTypes = filterTypes.map(x => x.toLowerCase());
-    return arr.filter(x => filterTypes.includes(x.type.toLowerCase()));
-  }
-  else return arr;
+    filterTypes = filterTypes.map((x) => x.toLowerCase());
+    return arr.filter((x) => filterTypes.includes(x.type.toLowerCase()));
+  } else return arr;
 }
 
 function readFile(file) {
@@ -31,9 +30,9 @@ function readFile(file) {
       for (let j = 0; j < bytes.byteLength; j++) {
         binary += String.fromCharCode(bytes[j]);
       }
-      const wb = xlsx.read(binary, {type: 'binary'});
-      wb.SheetNames.forEach(sheetName => {
-        const jsonSheet = xlsx.utils.sheet_to_json(wb.Sheets[sheetName]);
+      const wb = read(binary, { type: "binary" });
+      wb.SheetNames.forEach((sheetName) => {
+        const jsonSheet = utils.sheet_to_json(wb.Sheets[sheetName]);
         arr = arr.concat(jsonSheet);
       });
       resolve(arr);
@@ -42,11 +41,7 @@ function readFile(file) {
     reader.onerror = reject;
 
     reader.readAsArrayBuffer(file);
-  })
+  });
 }
 
-export {
-  unvue,
-  roll,
-  processXlsxFiles
-};
+export { unvue, roll, processXlsxFiles };
