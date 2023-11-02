@@ -1,11 +1,18 @@
+import { v4 as uuid } from "uuid";
+
 import store from "../vuex-state/store";
-import Actor from "./actor";
+import { Actor, Modifier } from "./actor";
 
 class Player extends Actor {
   constructor(data) {
     data.type = data.type || "player";
     super(data);
     this.initHp(data);
+    this.bonuses = data.bonuses ? data.bonuses.map((x) => new Modifier(x)) : [];
+    this.penalties = data.penalties
+      ? data.penalties.map((x) => new Modifier(x))
+      : [];
+    this.defends = data.defends ? data.defends.map((x) => new Modifier(x)) : [];
   }
 
   get hp() {
@@ -15,6 +22,17 @@ class Player extends Actor {
     if (val < 0 || val > this.maxHp) return;
     this._hp = val;
     this.tempHP = val;
+    this.save();
+  }
+  get maxHp() {
+    return this._maxHp;
+  }
+  set maxHp(val) {
+    if (val > 40) {
+      return;
+    }
+    this._maxHp = val;
+    this.initHp({ maxHp: val, hp: this.hp });
     this.save();
   }
   get allowEdit() {
@@ -140,9 +158,30 @@ class Player extends Actor {
         break;
     }
     this.status = { green, yellow };
-    this.maxHp = maxHp || 40;
+    this._maxHp = maxHp || 40;
     this._hp = hp || _hp;
     this.tempHP = tempHP || this._hp;
+  }
+  addModifier(modifierData) {
+    if (!modifierData.name) return;
+
+    switch (modifierData.type.toLowerCase()) {
+      case "bonus":
+        this.bonuses.push(new Modifier(modifierData));
+        this.sortModifiers(this.bonuses);
+        break;
+      case "penalty":
+        this.penalties.push(new Modifier(modifierData));
+        this.sortModifiers(this.penalties);
+        break;
+      case "defend":
+        this.defends.push(new Modifier(modifierData));
+        this.sortModifiers(this.defends);
+        break;
+    }
+  }
+  removeModifier(type, index) {
+    this[type].splice(index, 1);
   }
   takenAction() {
     const minions = store.getters.childMinions(this.id);

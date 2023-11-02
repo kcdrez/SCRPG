@@ -1,5 +1,7 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light border-bottom border-dark">
+  <nav
+    class="navbar navbar-expand-lg navbar-light border-bottom border-dark px-3"
+  >
     <router-link :to="{ name: 'home' }" class="navbar-brand">Home</router-link>
     <button
       class="navbar-toggler"

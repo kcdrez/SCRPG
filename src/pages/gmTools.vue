@@ -3,6 +3,7 @@
     <h1 class="text-center">GM Management</h1>
     <div class="container admin-page">
       <Environment @add-minion="$refs.minions.modal('show', $event)" />
+      <Players ref="players" />
       <Baddies label="Minions" :allowOwner="true" ref="minions" />
       <Baddies label="Lieutenants" ref="lieutenants" />
       <Villains
@@ -86,11 +87,12 @@ import _ from "lodash";
 import Baddies from "../components/baddie.vue";
 import Environment from "../components/environment.vue";
 import Villains from "../components/villain.vue";
+import Players from "components/player.vue";
 import DrawingBoard from "../components/drawingBoard.vue";
 
 export default defineComponent({
   name: "GMTools",
-  components: { Baddies, Environment, Villains, DrawingBoard },
+  components: { Baddies, Environment, Villains, Players, DrawingBoard },
   data() {
     return {
       showScrollWidget: false,
@@ -110,19 +112,20 @@ export default defineComponent({
       this.showScrollWidget = window.scrollY >= 75;
     }, 50),
     modifySelected(type) {
-      if (this.$store.state.selection.type === "minion") {
-        this.$refs.minions.modifyBaddie(
-          type,
-          this.$store.state.selection.id,
-          this.$store.state.selection.instance
-        );
-      } else if (this.$store.state.selection.type === "lieutenant") {
-        this.$refs.lieutenants.modifyBaddie(
-          type,
-          this.$store.state.selection.id,
-          this.$store.state.selection.instance
-        );
-      }
+      console.log("todo modify Selected in gmTools.vue");
+      // if (this.$store.state.selection.type === "minion") {
+      //   this.$refs.minions.modifyBaddie(
+      //     type,
+      //     this.$store.state.selection.id,
+      //     this.$store.state.selection.instance
+      //   );
+      // } else if (this.$store.state.selection.type === "lieutenant") {
+      //   this.$refs.lieutenants.modifyBaddie(
+      //     type,
+      //     this.$store.state.selection.id,
+      //     this.$store.state.selection.instance
+      //   );
+      // }
     },
   },
   created() {
@@ -137,7 +140,7 @@ export default defineComponent({
 
 <style lang="scss">
 @import "../styles/mixins";
-@import "../styles/variables";
+@import "../styles/variables.module.scss";
 
 .admin-page {
   max-width: 90%;

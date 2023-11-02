@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 
 import store from "../vuex-state/store";
-import Actor from "./actor";
+import { Actor, Modifier } from "./actor";
 import { unvue } from "./utilities";
 
 class Baddie extends Actor {
@@ -16,42 +16,19 @@ class Baddie extends Actor {
       ? data.penalties.map((x) => new Modifier(x))
       : [];
     this.defends = data.defends ? data.defends.map((x) => new Modifier(x)) : [];
-    this.instances = (() => {
-      if (typeof data.instances === "string") {
-        const parsed = JSON.parse(data.instances);
-        return Array.isArray(parsed) ? parsed : [];
-      } else if (Array.isArray(data.instances)) {
-        return data.instances;
-      } else {
-        return [];
-      }
-    })();
 
-    if (this.instances.length === 0) {
-      if (data.count > 0) {
-        this.addInstances(data.count);
-      } else if (this.count <= 0) {
-        this.addInstances(1);
+    const maxIndex = store.state[data.type].reduce((maxIndex, baddie) => {
+      if (baddie.index >= maxIndex && data.name === baddie.name) {
+        return baddie.index + 1;
       }
-    }
-    this.tempCount = this.count; //this has to be after adding instances
+      return maxIndex;
+    }, 1);
+
+    this.index = maxIndex;
   }
 
   get owner() {
     return store.getters.byID(this._owner);
-  }
-  get count() {
-    return this.instances.length;
-  }
-  set count(val) {
-    const diff = val - this.count;
-    if (diff > 0) {
-      this.addInstances(diff);
-    } else {
-      this.removeInstance(null, Math.abs(diff));
-    }
-    this.tempCount = val;
-    this.save();
   }
   get allowEdit() {
     return !this.editing;
@@ -60,28 +37,14 @@ class Baddie extends Actor {
     return true;
   }
 
-  demote(id) {
-    this.changeSize(this.size - 2, id);
+  demote() {
+    this.changeSize(this.size - 2);
   }
-  promote(id) {
-    this.changeSize(this.size + 2, id);
+  promote() {
+    this.changeSize(this.size + 2);
   }
-  changeSize(newSize, id) {
-    const copy = this.copy(true);
-    copy.id = uuid();
-    copy.size = newSize;
-    if (copy.size >= 4 && copy.size <= 12) {
-      if (id) {
-        const match = this.instances.find((x) => x.id === id);
-        copy.instances.push(match);
-        this.removeInstance(id);
-      } else {
-        const x = this.instances[this.instances.length - 1];
-        copy.instances.push(unvue(x));
-        this.count--;
-      }
-      store.dispatch("upsertBaddie", copy);
-    }
+  changeSize(newSize) {
+    this.size = newSize;
   }
   addModifier(modifierData) {
     if (!modifierData.name) return;
@@ -102,20 +65,7 @@ class Baddie extends Actor {
     }
   }
   removeModifier(type, index) {
-    const remove = () => {
-      const copy = this.copy(false, true);
-      copy[type].splice(index, 1);
-      copy.id = uuid();
-      copy.instances.splice(1);
-      this.count--; //todo use id to remove it
-      if (copy.instances.length > 0) store.dispatch("upsertBaddie", copy);
-      this.save();
-    };
-
-    if (this[type][index].exclusive || this[type][index].persistent) {
-    } else {
-      remove();
-    }
+    this[type].splice(index, 1);
   }
   takenAction(status) {
     this.acted = status === undefined ? !this.acted : status;
@@ -129,72 +79,58 @@ class Baddie extends Actor {
     }
   }
   export(id, excludeInstances, rawInstances) {
-    let instances = [];
-    if (!id || this.id === id) {
-      const modifiers = [
-        ...this.bonuses.map((x) => x.export(this.id)),
-        ...this.penalties.map((x) => x.export(this.id)),
-        ...this.defends.map((x) => x.export(this.id)),
-      ];
+    console.log("todo export in baddie.js");
+    // let instances = [];
+    // if (!id || this.id === id) {
+    //   const modifiers = [
+    //     ...this.bonuses.map((x) => x.export(this.id)),
+    //     ...this.penalties.map((x) => x.export(this.id)),
+    //     ...this.defends.map((x) => x.export(this.id)),
+    //   ];
 
-      if (!excludeInstances) {
-        instances = rawInstances
-          ? JSON.parse(JSON.stringify(this.instances))
-          : JSON.stringify(this.instances);
-      }
+    //   if (!excludeInstances) {
+    //     instances = rawInstances
+    //       ? JSON.parse(JSON.stringify(this.instances))
+    //       : JSON.stringify(this.instances);
+    //   }
 
-      const baddie = {
-        name: this.name,
-        type: this.type,
-        parent: this._owner,
-        id: this.id,
-        size: this.size,
-        acted: this.acted,
-        instances,
-      };
+    //   const baddie = {
+    //     name: this.name,
+    //     type: this.type,
+    //     parent: this._owner,
+    //     id: this.id,
+    //     size: this.size,
+    //     acted: this.acted,
+    //     instances,
+    //   };
 
-      return {
-        baddie,
-        modifiers,
-      };
-    } else return {};
+    //   return {
+    //     baddie,
+    //     modifiers,
+    //   };
+    // } else return {};
   }
   copy(excludeInstances, rawInstances) {
-    return Object.assign(
-      {
-        bonuses: this.bonuses.map((x) => x.export(this.id)),
-        penalties: this.penalties.map((x) => x.export(this.id)),
-        defends: this.defends.map((x) => x.export(this.id)),
-      },
-      this.export(null, excludeInstances, rawInstances).baddie
-    );
+    console.log("todo copy baddie.js");
+    // return Object.assign(
+    //   {
+    //     bonuses: this.bonuses.map((x) => x.export(this.id)),
+    //     penalties: this.penalties.map((x) => x.export(this.id)),
+    //     defends: this.defends.map((x) => x.export(this.id)),
+    //   },
+    //   this.export(null, excludeInstances, rawInstances).baddie
+    // );
   }
   saveEdit() {
     this._owner = this.tempOwner;
     this.size = this.tempSize;
-    this.count = this.tempCount;
     this.bonuses.forEach((b) => b.saveEdit());
     this.penalties.forEach((p) => p.saveEdit());
     this.defends.forEach((d) => d.saveEdit());
     super.saveEdit();
   }
-  addInstances(amount) {
-    for (let i = 1; i <= amount; i++) {
-      this.instances.push({ id: uuid(), top: null, left: null });
-    }
-  }
-  removeInstance(id, amount) {
-    if (id) {
-      const index = this.instances.findIndex((x) => x.id === id);
-      if (index > -1) {
-        this.instances.splice(index, 1);
-      }
-    } else if (amount) {
-      for (let i = 1; i <= amount; i++) {
-        this.instances.pop();
-      }
-    }
-    this.save();
+  remove() {
+    store.dispatch("removeBaddie", { id: this.id, type: this.type });
   }
 }
 
@@ -308,66 +244,6 @@ class Villain extends Actor {
   }
   remove() {
     store.dispatch("removeBaddie", { id: this.id, type: this.type });
-  }
-}
-
-class Modifier {
-  constructor(data) {
-    this.id = data.id || uuid();
-    this.name = data.name;
-    this.tempName = this.name;
-    this.amount = data.amount;
-    this.tempAmount = this.amount;
-    this.exclusive = data.exclusive || false;
-    this.tempExclusive = this.exclusive;
-    this.persistent = data.persistent || false;
-    this.tempPersistent = this.persistent;
-    this.type = data.type;
-  }
-
-  get min() {
-    switch (this.type.toLowerCase()) {
-      case "bonus":
-        return 1;
-      case "hinder":
-        return -4;
-      case "defend":
-        return 100;
-      default:
-        console.warning("Unknown modifier type", this.type);
-        return 100;
-    }
-  }
-  get max() {
-    switch (this.type.toLowerCase()) {
-      case "bonus":
-        return 4;
-      case "hinder":
-        return -1;
-      case "defend":
-        return 1;
-      default:
-        console.warning("Unknown modifier type", this.type);
-        return 1;
-    }
-  }
-
-  export(parent) {
-    return {
-      id: this.id,
-      type: this.type,
-      name: this.name,
-      amount: this.amount,
-      exclusive: this.exclusive,
-      persistent: this.persistent,
-      parent,
-    };
-  }
-  saveEdit() {
-    this.name = this.tempName;
-    this.amount = this.tempAmount;
-    this.persistent = this.tempPersistent;
-    this.exclusive = this.tempExclusive;
   }
 }
 

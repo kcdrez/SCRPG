@@ -19,7 +19,6 @@ const store = createStore({
     scene: new Scene({}),
     selection: {
       id: null,
-      instance: null,
       type: null,
     },
   },
@@ -44,14 +43,6 @@ const store = createStore({
     },
     CREATE_BADDIE(state, baddie) {
       state[baddie.type].push(baddie);
-    },
-    UPSERT_BADDIE(state, baddie) {
-      const match = state[baddie.type].find((x) => sameBaddies(baddie, x));
-      if (match && baddie.type !== "villains") {
-        match.instances.push(...baddie.instances);
-      } else {
-        state[baddie.type].push(baddie);
-      }
     },
     DELETE_BADDIE(state, { type, index }) {
       state[type].splice(index, 1);
@@ -83,7 +74,6 @@ const store = createStore({
     },
     SELECT_CANVAS_EL(state, data) {
       state.selection.id = data.id || null;
-      state.selection.instance = data.instanceId || null;
       state.selection.type = data.actorType || null;
     },
   },
@@ -99,20 +89,21 @@ const store = createStore({
       }
     },
     saveData(ctx, saveData) {
-      const type = typeof saveData === "string" ? saveData : saveData.type;
-      const data = typeof saveData === "string" ? null : saveData.data;
-      if (!type) return;
-      else if (type in ctx.rootState) {
-        const dataToSave = ctx.rootState[type];
-        if (data && data.id) {
-          dataToSave.forEach((x) => {
-            if (x.id === data.id) {
-              x = data;
-            }
-          });
-        }
-        Cookies.set(type, dataToSave, { sameSite: "strict" });
-      }
+      // const type = typeof saveData === "string" ? saveData : saveData.type;
+      // const data = typeof saveData === "string" ? null : saveData.data;
+      // if (!type) return;
+      // else if (type in ctx.rootState) {
+      //   const dataToSave = ctx.rootState[type];
+      //   if (data && data.id) {
+      //     dataToSave.forEach((x) => {
+      //       if (x.id === data.id) {
+      //         x = data;
+      //       }
+      //     });
+      //   }
+      //   console.log("saving", dataToSave);
+      //   Cookies.set(type, dataToSave, { sameSite: "strict" });
+      // }
     },
     resetEnvironment(ctx) {
       ctx.commit("RESET_ENVIRONMENT");
@@ -129,42 +120,20 @@ const store = createStore({
         baddieData.type === "villains"
           ? new Villain(baddieData)
           : new Baddie(baddieData);
-      if (baddieData.forceCreate) {
-        ctx.commit("CREATE_BADDIE", baddie);
-      } else {
-        ctx.commit("UPSERT_BADDIE", baddie);
-      }
+      ctx.commit("CREATE_BADDIE", baddie);
       ctx.dispatch("saveData", baddieData.type);
     },
     modifyBaddie(ctx, { modifier, type }) {
-      const match = ctx.state[type].find((x) => x.id === modifier.target.id);
+      console.log(modifier, type);
+      const match = ctx.state[type].find((x) => x.id === modifier.targetId);
       if (match) {
-        if (modifier.applyTo === "row" || match.count === 1) {
-          match.addModifier(modifier);
-        } else if (modifier.applyTo === "name") {
-          ctx.state[type].forEach((x) => {
-            if (x.name === match.name) {
-              x.addModifier(modifier);
-            }
-          });
-        } else {
-          const copy = match.copy(true);
-          copy.id = uuid();
-          if (modifier.target.instanceId) {
-            const instance = match.instances.find(
-              (x) => x.id === modifier.target.instanceId
-            );
-            copy.instances.push(unvue(instance));
-            match.removeInstance(modifier.target.instanceId);
-          } else {
-            copy.count = modifier.applyTo === "single" ? 1 : match.count;
-            match.count--;
-          }
-          const baddie = new Baddie(copy);
-          baddie.addModifier(modifier);
-          ctx.commit("UPSERT_BADDIE", baddie);
-        }
-        ctx.dispatch("saveData", type);
+        match.addModifier(modifier);
+      }
+    },
+    modifyPlayer(ctx, { modifier }) {
+      const match = ctx.state.players.find((x) => x.id === modifier.targetId);
+      if (match) {
+        match.addModifier(modifier);
       }
     },
     removeBaddie(ctx, { id, type }) {
@@ -175,6 +144,10 @@ const store = createStore({
       }
     },
     addPlayer(ctx, playerData) {
+      if (!playerData.id) {
+        playerData.id = uuid();
+      }
+
       if (!ctx.state.players.find((x) => x.id === playerData.id)) {
         ctx.commit("ADD_PLAYER", playerData);
         ctx.dispatch("saveData", "players");
@@ -189,15 +162,15 @@ const store = createStore({
       ctx.dispatch("saveData", "players");
     },
     reconcile(ctx, type) {
-      const baddiesList = ctx.state[type];
-      for (let i = 0; i < baddiesList.length - 1; i++) {
-        if (sameBaddies(baddiesList[i], baddiesList[i + 1])) {
-          baddiesList[i].instances.push(...baddiesList[i + 1].instances);
-          baddiesList[i + 1].instances = [];
-        }
-      }
-      ctx.state[type] = baddiesList.filter((x) => x.count > 0);
-      ctx.dispatch("saveData", type);
+      // const baddiesList = ctx.state[type];
+      // for (let i = 0; i < baddiesList.length - 1; i++) {
+      //   if (sameBaddies(baddiesList[i], baddiesList[i + 1])) {
+      //     baddiesList[i].instances.push(...baddiesList[i + 1].instances);
+      //     baddiesList[i + 1].instances = [];
+      //   }
+      // }
+      // ctx.state[type] = baddiesList.filter((x) => x.count > 0);
+      // ctx.dispatch("saveData", type);
     },
     export(ctx, options) {
       const { type, fileName, id } = options || {};
@@ -279,10 +252,7 @@ const store = createStore({
           case "lieutenants":
           case "villain":
           case "villains":
-            ctx.dispatch(
-              "upsertBaddie",
-              Object.assign({ forceCreate: true }, row)
-            );
+            ctx.dispatch("upsertBaddie", row);
             break;
           case "challenge":
             ctx.state.scene.addChallenge(row, true);
@@ -316,28 +286,17 @@ const store = createStore({
     moveObject(ctx, data) {
       if (data.id && data.actorType) {
         let match = null;
-        let instance = null;
         switch (data.actorType) {
           case "player":
             match = ctx.state.players.find((player) => player.id === data.id);
             break;
           case "minion":
             match = ctx.state.minions.find((minion) => minion.id === data.id);
-            instance = match
-              ? match.instances.find(
-                  (instance) => instance.id === data.instanceId
-                )
-              : null;
             break;
           case "lieutenant":
             match = ctx.state.lieutenants.find(
               (lieutenant) => lieutenant.id === data.id
             );
-            instance = match
-              ? match.instances.find(
-                  (instance) => instance.id === data.instanceId
-                )
-              : null;
             break;
           case "villain":
             match = ctx.state.villains.find(
@@ -357,13 +316,8 @@ const store = createStore({
         }
 
         if (match) {
-          if (instance) {
-            instance.top = data.top;
-            instance.left = data.left;
-          } else {
-            match.top = data.top;
-            match.left = data.left;
-          }
+          match.top = data.top;
+          match.left = data.left;
           match.save();
         }
       }

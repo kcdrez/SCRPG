@@ -3,12 +3,13 @@
     <div class="row baddie-list-header">
       <div class="col">
         <h2 class="section-header">
-          <a href="#villain-Data" data-toggle="collapse">Villains</a>
+          Villans
+          <!-- <a href="#villain-Data" data-toggle="collapse">Villains</a> -->
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
-            @click="modal('show')"
+            @click="showCreateModal = true"
           >
             Create
           </button>
@@ -58,7 +59,7 @@
         :id="villain.id"
       >
         <div class="card">
-          <div class="card-header">
+          <div class="card-header d-flex justify-content-between">
             <input
               type="text"
               v-model.trim="villain.tempName"
@@ -69,7 +70,7 @@
               ref="editName"
             />
             <h3 class="villain-name" v-else>{{ villain.name }}</h3>
-            <div class="btn-group btn-group-sm float-right">
+            <div class="btn-group btn-group-sm">
               <button
                 class="btn btn-secondary border-dark"
                 title="Edit this Villain"
@@ -183,125 +184,95 @@
         </div>
       </div>
     </div>
-    <div id="createModal-villain" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Create a Villain</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Name</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.trim="name"
-                type="text"
-                ref="villainName"
-                @keydown.enter="createVillain()"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-primary border-dark"
-              type="button"
-              data-dismiss="modal"
-              @click="createVillain()"
-            >
-              Create
-            </button>
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+    <Modal :isOpen="showCreateModal">
+      <template v-slot:header>Create a Villain</template>
+      <template v-slot:body>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Name</div>
+          <input
+            class="form-control border-dark"
+            v-model.trim="name"
+            type="text"
+            ref="villainName"
+            @keydown.enter="createVillain()"
+          />
         </div>
-      </div>
-    </div>
-    <div id="modifierModal-villain" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add a {{ modifier.type }}</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Name</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                type="text"
-                v-model.trim="modifier.name"
-                @keydown.enter="target.addModifier(modifier)"
-                ref="modifierName"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-prepend">
-                <div class="input-group-text border-dark">Amount</div>
-              </div>
-              <input
-                class="form-control border-dark"
-                v-model.number="modifier.amount"
-                type="number"
-                :max="modifier.max"
-                :min="modifier.min"
-                @keydown.enter="target.addModifier(modifier)"
-              />
-            </div>
-            <div class="d-inline" v-if="modifier.type !== 'Defend'">
-              <label for="mod-villain-persistent" class="c-pointer"
-                >Persistent?</label
-              >
-              <input
-                type="checkbox"
-                v-model="modifier.persistent"
-                id="mod-villain-persistent"
-              />
-            </div>
-            <div class="d-inline mx-3" v-if="modifier.type !== 'Defend'">
-              <label for="mod-villain-exclusive" class="c-pointer"
-                >Exclusive?</label
-              >
-              <input
-                type="checkbox"
-                v-model="modifier.exclusive"
-                id="mod-villain-exclusive"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-primary border-dark"
-              @click="target.addModifier(modifier)"
-              data-dismiss="modal"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary border-dark"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-primary border-dark"
+          type="button"
+          @click="createVillain()"
+        >
+          Create
+        </button>
+        <button class="btn btn-secondary border-dark" type="button">
+          Close
+        </button>
+      </template>
+    </Modal>
+    <Modal :isOpen="showModifierModal">
+      <template v-slot:header>Add a {{ modifier.type }}</template>
+      <template v-slot:body>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Name</div>
+          <input
+            class="form-control border-dark"
+            type="text"
+            v-model.trim="modifier.name"
+            @keydown.enter="target.addModifier(modifier)"
+            ref="modifierName"
+          />
         </div>
-      </div>
-    </div>
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-text border-dark">Amount</div>
+          <input
+            class="form-control border-dark"
+            v-model.number="modifier.amount"
+            type="number"
+            :max="modifier.max"
+            :min="modifier.min"
+            @keydown.enter="target.addModifier(modifier)"
+          />
+        </div>
+        <div class="d-inline" v-if="modifier.type !== 'Defend'">
+          <label for="mod-villain-persistent" class="c-pointer"
+            >Persistent?</label
+          >
+          <input
+            type="checkbox"
+            v-model="modifier.persistent"
+            id="mod-villain-persistent"
+          />
+        </div>
+        <div class="d-inline mx-3" v-if="modifier.type !== 'Defend'">
+          <label for="mod-villain-exclusive" class="c-pointer"
+            >Exclusive?</label
+          >
+          <input
+            type="checkbox"
+            v-model="modifier.exclusive"
+            id="mod-villain-exclusive"
+          />
+        </div>
+      </template>
+      <template v-slot:footer>
+        <button
+          type="button"
+          class="btn btn-primary border-dark"
+          @click="target.addModifier(modifier)"
+        >
+          Add
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary border-dark"
+          @click="showModifierModal = false"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -309,13 +280,14 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import { Villain } from "../scripts/baddie";
 import Modifier from "./modifier.vue";
+import Modal from "components/general/modal.vue";
 
 export default defineComponent({
   name: "Villains",
   components: {
     Modifier,
+    Modal,
   },
   data() {
     return {
@@ -329,6 +301,8 @@ export default defineComponent({
         persistent: false,
         exclusive: false,
       },
+      showCreateModal: false,
+      showModifierModal: false,
     };
   },
   computed: {
@@ -341,7 +315,7 @@ export default defineComponent({
           name: this.name,
           type: "villains",
         });
-        this.modal("hide");
+        this.showCreateModal = false;
       }
     },
     modifyVillain(villain, type) {
@@ -364,18 +338,7 @@ export default defineComponent({
         return;
       }
       this.target = villain;
-      $("#modifierModal-villain").modal("show");
-      this.$nextTick(() => {
-        this.$refs.modifierName.focus();
-      });
-    },
-    modal(type) {
-      $("#createModal-villain").modal(type);
-      if (type === "show") {
-        this.$nextTick(() => {
-          this.$refs.villainName.focus();
-        });
-      }
+      this.showModifierModal = true;
     },
     editVillain(villain, index) {
       villain.beginEdit();

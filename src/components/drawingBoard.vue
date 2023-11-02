@@ -37,7 +37,7 @@
       <button
         class="btn btn-warning border-dark"
         @click="demote()"
-        v-if="selection.instance"
+        v-if="selection.type === 'minion' || selection.type === 'lieutenant'"
         :title="`Demote selected ${selection.type}`"
       >
         <i class="fas fa-level-down-alt"></i>
@@ -45,7 +45,7 @@
       <button
         class="btn btn-success border-dark"
         @click="promote()"
-        v-if="selection.instance"
+        v-if="selection.type === 'minion' || selection.type === 'lieutenant'"
         :title="`Promote selected ${selection.type}`"
       >
         <i class="fas fa-level-up-alt"></i>
@@ -53,7 +53,7 @@
       <button
         class="btn btn-success border-dark"
         @click="$emit('modifySelected', 'boost')"
-        v-if="selection.instance || selection.type === 'villain'"
+        v-if="selection.type === 'villain'"
         :title="`Boost selected ${selection.type}`"
       >
         <img src="images/boost.png" />
@@ -61,7 +61,11 @@
       <button
         class="btn btn-warning border-dark"
         @click="$emit('modifySelected', 'hinder')"
-        v-if="selection.instance || selection.type === 'villain'"
+        v-if="
+          selection.type === 'villain' ||
+          selection.type === 'minion' ||
+          selection.type === 'lieutenant'
+        "
         :title="`Hinder selected ${selection.type}`"
       >
         <img src="images/hinder.png" />
@@ -69,7 +73,11 @@
       <button
         class="btn btn-success border-dark"
         @click="$emit('modifySelected', 'defend')"
-        v-if="selection.instance || selection.type === 'villain'"
+        v-if="
+          selection.type === 'villain' ||
+          selection.type === 'minion' ||
+          selection.type === 'lieutenant'
+        "
         :title="`Defend selected ${selection.type}`"
       >
         <img src="images/defend.png" />
@@ -81,9 +89,8 @@
 
 <script>
 import { defineComponent } from "vue";
-import { fabric } from "fabric";
 import _ from "lodash";
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import {
   addBaddie,
   addPlayer,
@@ -92,7 +99,6 @@ import {
 import { addLocation, addChallenge } from "../scripts/fabric/fabric.scene";
 import { initCanvas } from "../scripts/fabric/fabric.common";
 import Legend from "./legend.vue";
-import { unvue } from "../scripts/utilities";
 
 export default defineComponent({
   name: "DrawingBoard",
@@ -117,44 +123,19 @@ export default defineComponent({
     async refreshCanvas(array, type, callback) {
       return new Promise(async (resolve, reject) => {
         this.canvas.getObjects().forEach((canvasEl) => {
-          const match = array.find((el) => el.id === canvasEl.id);
-          if (match) {
-            if ("instances" in match) {
-              const matchInstance = match.instances.find((instance) => {
-                return instance.id === canvasEl.instanceId;
-              });
-              if (!matchInstance) {
-                this.canvas.remove(canvasEl);
-              }
-            }
-          } else if (canvasEl.actorType === type) {
+          if (canvasEl.actorType === type) {
             this.canvas.remove(canvasEl);
           }
         });
 
         for (let i = 0; i < array.length; i++) {
           const el = array[i];
-          if ("instances" in el) {
-            for (let j = 0; j < el.instances.length; j++) {
-              const instance = el.instances[j];
-              const canvasMatch = this.canvas.getObjects().find((canvasEl) => {
-                return (
-                  canvasEl.id === el.id && canvasEl.instanceId === instance.id
-                );
-              });
-              if (!canvasMatch || el.updateCanvas) {
-                el.updateCanvas = false;
-                await callback(this.canvas, el, instance, j);
-              }
-            }
-          } else {
-            const canvasMatch = this.canvas
-              .getObjects()
-              .find((canvasEl) => canvasEl.id === el.id);
-            if (!canvasMatch || el.updateCanvas) {
-              el.updateCanvas = false;
-              await callback(this.canvas, el);
-            }
+          const canvasMatch = this.canvas
+            .getObjects()
+            .find((canvasEl) => canvasEl.id === el.id);
+          if (!canvasMatch || el.updateCanvas) {
+            el.updateCanvas = false;
+            await callback(this.canvas, el);
           }
         }
         resolve();
@@ -166,12 +147,12 @@ export default defineComponent({
         switch (el.actorType) {
           case "minion": {
             const match = this.minions.find((x) => x.id === el.id);
-            match.removeInstance(el.instanceId);
+            match.remove();
             break;
           }
           case "lieutenant": {
             const match = this.lieutenants.find((x) => x.id === el.id);
-            match.removeInstance(el.instanceId);
+            match.remove();
             break;
           }
           case "player": {
@@ -210,7 +191,7 @@ export default defineComponent({
           );
           break;
       }
-      if (match) match.demote(this.selection.instance);
+      if (match) match.demote();
     },
     promote() {
       let match = null;
@@ -226,7 +207,7 @@ export default defineComponent({
           );
           break;
       }
-      if (match) match.promote(this.selection.instance);
+      if (match) match.promote();
     },
     undo() {
       if (this.mod < this.states.length) {
@@ -323,7 +304,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../styles/mixins";
-@import "../styles/variables";
+@import "../styles/variables.module.scss";
 
 #canvas {
   border: 1px black solid;

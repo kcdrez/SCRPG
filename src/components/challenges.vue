@@ -237,17 +237,15 @@
                         v-model.trim="newChallenge.name"
                         @keypress.enter="challenge.add(newChallenge)"
                       />
-                      <div class="input-group-append">
-                        <button
-                          class="btn btn-success border-dark"
-                          type="button"
-                          title="Add a new entry to this Challenge"
-                          @click="challenge.add(newChallenge)"
-                          :disabled="newChallenge.name === ''"
-                        >
-                          Add Entry
-                        </button>
-                      </div>
+                      <button
+                        class="btn btn-success border-dark"
+                        type="button"
+                        title="Add a new entry to this Challenge"
+                        @click="challenge.add(newChallenge)"
+                        :disabled="newChallenge.name === ''"
+                      >
+                        Add Entry
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -284,7 +282,7 @@
           </textarea>
         </div>
         <div>
-          <h6 class="text-light">Add some challenge entries (optional)</h6>
+          <h6 class="text-light">Add some challenge entries (optional):</h6>
           <div class="input-group input-group-sm mb-3">
             <input
               type="text"
@@ -293,16 +291,14 @@
               v-model.trim="newChallenge.entry"
               @keydown.enter="addTempChallenge"
             />
-            <div class="input-group-append">
-              <button
-                class="btn btn-primary border-dark"
-                type="button"
-                @click="addTempChallenge"
-                :disabled="newChallenge.entry === ''"
-              >
-                Add
-              </button>
-            </div>
+            <button
+              class="btn btn-primary border-dark"
+              type="button"
+              @click="addTempChallenge"
+              :disabled="newChallenge.entry === ''"
+            >
+              Add
+            </button>
           </div>
           <div
             class="input-group input-group-sm mb-1"

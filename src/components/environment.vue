@@ -3,7 +3,8 @@
     <div class="row">
       <div class="col environment-header">
         <h2 class="section-header">
-          <a href="#environmentData" data-toggle="collapse">Environment</a>
+          Environment
+          <!-- <a href="#environmentData" data-toggle="collapse">Environment</a> -->
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button

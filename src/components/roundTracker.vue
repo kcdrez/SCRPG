@@ -66,7 +66,7 @@
           <thead class="text-center">
             <tr>
               <th width="28%">Name (Owner)</th>
-              <th width="22%">Type (Count)</th>
+              <th width="22%">Type</th>
               <th width="20%">HP/Die Size</th>
               <th width="30%">Actions</th>
             </tr>
@@ -138,28 +138,15 @@
                     </sup>
                   </div>
                 </td>
-                <!-- Type/Count -->
+                <!-- Type -->
                 <td class="text-capitalize c-pointer align-middle">
                   <div
-                    v-if="!actor.count || (!actor.editing && actor.count)"
+                    v-if="!actor.editing"
                     @click="actor.takenAction()"
                     :title="`Click to toggle this ${actor.typeLabel} to have acted already in the current round`"
                   >
                     {{ actor.typeLabel }}
-                    <template v-if="actor.count">
-                      ({{ actor.count }})
-                    </template>
                   </div>
-                  <input
-                    type="number"
-                    class="form-control form-control-sm border-dark"
-                    v-model="actor.tempCount"
-                    v-if="actor.count && actor.editing"
-                    min="1"
-                    max="100"
-                    @keypress.enter="actor.saveEdit()"
-                    @keydown.esc="actor.cancelEdit()"
-                  />
                 </td>
                 <!-- HP/Die Size -->
                 <td class="align-middle">
@@ -301,9 +288,7 @@
             min="17"
             max="40"
           />
-          <div class="input-group-prepend">
-            <span class="input-group-text border-dark">Current HP</span>
-          </div>
+          <span class="input-group-text border-dark">Current HP</span>
           <input
             type="number"
             v-model.number="newPlayer.hp"
@@ -408,7 +393,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables";
+@import "../styles/variables.module.scss";
 
 img {
   max-width: 20px;
@@ -428,8 +413,12 @@ img {
   color: $gray-6;
 }
 
-.change-hp:hover {
-  transform: translate(0px, -1px);
+.change-hp {
+  margin-left: 0.25rem;
+
+  &:hover {
+    transform: translate(0px, -1px);
+  }
 }
 
 .add-minion {

@@ -69,20 +69,80 @@ class Actor extends GenericObject {
     this.save();
   }
   sortModifiers(list) {
-    list.sort((a, b) => {
-      if (a.name !== b.name) {
-        return a.name > b.name ? 1 : -1;
-      } else if (a.amount !== b.amount) {
-        return a.amount > b.amount ? 1 : -1;
-      } else if (a.persistent !== b.persistent) {
-        return a.persistent ? -1 : 1;
-      } else if (a.exclusive !== b.exclusive) {
-        return a.exclusive ? -1 : 1;
-      } else {
-        return 0;
-      }
-    });
-    this.save();
+    // list.sort((a, b) => {
+    //   if (a.name !== b.name) {
+    //     return a.name > b.name ? 1 : -1;
+    //   } else if (a.amount !== b.amount) {
+    //     return a.amount > b.amount ? 1 : -1;
+    //   } else if (a.persistent !== b.persistent) {
+    //     return a.persistent ? -1 : 1;
+    //   } else if (a.exclusive !== b.exclusive) {
+    //     return a.exclusive ? -1 : 1;
+    //   } else {
+    //     return 0;
+    //   }
+    // });
+    // this.save();
+  }
+}
+
+class Modifier {
+  constructor(data) {
+    this.id = data.id || uuid();
+    this.name = data.name;
+    this.tempName = this.name;
+    this.amount = data.amount;
+    this.tempAmount = this.amount;
+    this.exclusive = data.exclusive || false;
+    this.tempExclusive = this.exclusive;
+    this.persistent = data.persistent || false;
+    this.tempPersistent = this.persistent;
+    this.type = data.type;
+  }
+
+  get min() {
+    switch (this.type.toLowerCase()) {
+      case "bonus":
+        return 1;
+      case "hinder":
+        return -4;
+      case "defend":
+        return 100;
+      default:
+        console.warning("Unknown modifier type", this.type);
+        return 100;
+    }
+  }
+  get max() {
+    switch (this.type.toLowerCase()) {
+      case "bonus":
+        return 4;
+      case "hinder":
+        return -1;
+      case "defend":
+        return 1;
+      default:
+        console.warning("Unknown modifier type", this.type);
+        return 1;
+    }
+  }
+
+  export(parent) {
+    return {
+      id: this.id,
+      type: this.type,
+      name: this.name,
+      amount: this.amount,
+      exclusive: this.exclusive,
+      persistent: this.persistent,
+      parent,
+    };
+  }
+  saveEdit() {
+    this.name = this.tempName;
+    this.amount = this.tempAmount;
+    this.persistent = this.tempPersistent;
+    this.exclusive = this.tempExclusive;
   }
 }
 
@@ -105,4 +165,4 @@ function sortActors(a, b) {
 }
 
 export default Actor;
-export { Actor, GenericObject, sortActors };
+export { Actor, GenericObject, Modifier, sortActors };

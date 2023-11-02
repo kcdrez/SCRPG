@@ -3,7 +3,8 @@
     <div class="row baddie-list-header">
       <div class="col">
         <h2 class="section-header">
-          <a :href="`#${label}-Data`" data-toggle="collapse">{{ label }}</a>
+          {{ label }}
+          <!-- <a :href="`#${label}-Data`" data-bs-toggle="collapse">{{ label }}</a> -->
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button
@@ -57,9 +58,8 @@
       >
         <thead class="text-center">
           <tr>
-            <th width="15%">Name (Owner)</th>
-            <th width="10%">Die Size</th>
-            <th width="10%">Count</th>
+            <th width="25%">Name (Owner)</th>
+            <th width="20%">Die Size</th>
             <th width="25%">Modifiers</th>
             <th width="30%">Actions</th>
           </tr>
@@ -111,8 +111,11 @@
                   </div>
                 </template>
                 <template v-else>
-                  <div>{{ baddie.name }}</div>
-                  <div v-if="baddie.owner">({{ baddie.owner.name }})</div>
+                  <div class="d-inline me-2">{{ baddie.name }}</div>
+                  <div class="d-inline me-2" v-if="baddie.owner">
+                    ({{ baddie.owner.name }})
+                  </div>
+                  <div class="d-inline">[{{ baddie.index }}]</div>
                 </template>
               </td>
               <!-- Die Size -->
@@ -133,19 +136,6 @@
                   :title="`This minion uses a d${baddie.size}`"
                   v-else
                 />
-              </td>
-              <!-- Count -->
-              <td class="text-center align-middle">
-                <input
-                  type="number"
-                  class="form-control form-control-sm border-dark"
-                  v-model="baddie.tempCount"
-                  v-if="baddie.editing"
-                  min="1"
-                  @keypress.enter="baddie.saveEdit()"
-                  @keydown.esc="baddie.cancelEdit()"
-                />
-                <template v-else>{{ baddie.count }}</template>
               </td>
               <!-- Modifiers -->
               <td>
@@ -186,21 +176,21 @@
                   <button
                     class="btn btn-success border-dark"
                     :title="`Add a Bonus to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('boost', baddie.id)"
+                    @click="modifyBaddie('boost', baddie)"
                   >
                     <img src="images/boost.png" />
                   </button>
                   <button
                     class="btn btn-warning border-dark"
                     :title="`Add a Penalty to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('hinder', baddie.id)"
+                    @click="modifyBaddie('hinder', baddie)"
                   >
                     <img src="images/hinder.png" />
                   </button>
                   <button
                     class="btn btn-success border-dark"
                     :title="`Add a Defend to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('defend', baddie.id)"
+                    @click="modifyBaddie('defend', baddie)"
                   >
                     <img src="images/defend.png" />
                   </button>
@@ -223,16 +213,9 @@
                     <i class="fas fa-level-up-alt"></i>
                   </button>
                   <button
-                    class="btn btn-info border-dark text-dark"
-                    :title="`Add another ${baddie.typeLabel} to this row`"
-                    @click="baddie.count++"
-                  >
-                    <i class="fas fa-plus-square"></i>
-                  </button>
-                  <button
                     class="btn btn-danger border-dark text-dark"
-                    :title="`Remove one ${baddie.typeLabel} from this group from the scene`"
-                    @click="baddie.count--"
+                    :title="`Remove this ${baddie.typeLabel} from the scene`"
+                    @click="removeBaddie(baddie)"
                   >
                     <i class="fas fa-trash-alt"></i>
                   </button>
@@ -372,7 +355,7 @@
             class="form-control border-dark"
             type="text"
             v-model.trim="baddieData.modifier.name"
-            @keydown.enter="addModifier"
+            @keydown.enter="addModifier()"
             ref="modName"
           />
         </div>
@@ -384,24 +367,8 @@
             type="number"
             :max="baddieData.modifier.max"
             :min="baddieData.modifier.min"
-            @keydown.enter="addModifier"
+            @keydown.enter="addModifier()"
           />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Apply To</div>
-          <select
-            class="form-control border-dark"
-            v-model.number="baddieData.modifier.applyTo"
-            @keydown.enter="addModifier"
-          >
-            <option value="single">Just one</option>
-            <option value="row">
-              All of the {{ label.toLowerCase() }} in this row
-            </option>
-            <option value="name">
-              All of the {{ label.toLowerCase() }} with the same name
-            </option>
-          </select>
         </div>
         <div class="d-inline" v-if="baddieData.modifier.type !== 'Defend'">
           <label :for="`persistent-${labelSingle}`" class="c-pointer"
@@ -410,7 +377,7 @@
           <input
             type="checkbox"
             v-model="baddieData.modifier.persistent"
-            @keydown.enter="addModifier"
+            @keydown.enter="addModifier()"
             :id="`persistent-${labelSingle}`"
           />
         </div>
@@ -421,7 +388,7 @@
           <input
             type="checkbox"
             v-model="baddieData.modifier.exclusive"
-            @keydown.enter="addModifier"
+            @keydown.enter="addModifier()"
             :id="`exclusive-${labelSingle}`"
           /></div
       ></template>
@@ -444,110 +411,12 @@
         </button></template
       >
     </Modal>
-    <div
-      :id="`modifierModal-${label}`"
-      class="modal"
-      tabindex="-1"
-      role="dialog"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add a {{ baddieData.modifier.type }}</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-text border-dark">Name</div>
-              <input
-                class="form-control border-dark"
-                type="text"
-                v-model.trim="baddieData.modifier.name"
-                @keydown.enter="addModifier"
-                ref="modName"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-text border-dark">Amount</div>
-              <input
-                class="form-control border-dark"
-                v-model.number="baddieData.modifier.amount"
-                type="number"
-                :max="baddieData.modifier.max"
-                :min="baddieData.modifier.min"
-                @keydown.enter="addModifier"
-              />
-            </div>
-            <div class="input-group input-group-sm mb-3">
-              <div class="input-group-text border-dark">Apply To</div>
-              <select
-                class="form-control border-dark"
-                v-model.number="baddieData.modifier.applyTo"
-                @keydown.enter="addModifier"
-              >
-                <option value="single">Just one</option>
-                <option value="row">
-                  All of the {{ label.toLowerCase() }} in this row
-                </option>
-                <option value="name">
-                  All of the {{ label.toLowerCase() }} with the same name
-                </option>
-              </select>
-            </div>
-            <div class="d-inline" v-if="baddieData.modifier.type !== 'Defend'">
-              <label :for="`persistent-${labelSingle}`" class="c-pointer"
-                >Persistent?</label
-              >
-              <input
-                type="checkbox"
-                v-model="baddieData.modifier.persistent"
-                @keydown.enter="addModifier"
-                :id="`persistent-${labelSingle}`"
-              />
-            </div>
-            <div
-              class="d-inline mx-3"
-              v-if="baddieData.modifier.type !== 'Defend'"
-            >
-              <label :for="`exclusive-${labelSingle}`" class="c-pointer"
-                >Exclusive?</label
-              >
-              <input
-                type="checkbox"
-                v-model="baddieData.modifier.exclusive"
-                @keydown.enter="addModifier"
-                :id="`exclusive-${labelSingle}`"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-primary border-dark"
-              @click="addModifier"
-              :disabled="baddieData.modifier.name === ''"
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary border-dark"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
 import { sortActors } from "../scripts/actor";
@@ -584,10 +453,7 @@ export default defineComponent({
           max: 0,
           min: 0,
           type: "",
-          target: {
-            id: null,
-            instanceId: null,
-          },
+          targetId: null,
           persistent: false,
           exclusive: false,
           applyTo: "single",
@@ -611,18 +477,21 @@ export default defineComponent({
     },
   },
   methods: {
-    createBaddie(baddie) {
-      this.$store.dispatch(
-        "upsertBaddie",
-        Object.assign({ type: this.label.toLowerCase() }, this.baddieData)
-      );
+    ...mapActions(["upsertBaddie", "removeBaddie", "modifyBaddie"]),
+    createBaddie() {
+      for (let i = 0; i < this.baddieData.count; i++) {
+        this.upsertBaddie({
+          type: this.label.toLowerCase(),
+          ...this.baddieData,
+        });
+      }
       this.showCreateModal = false;
     },
     addBaddie(name) {
       this.baddieData.name = name;
       this.showCreateModal = true;
     },
-    modifyBaddie(type, id, instanceId) {
+    modifyBaddie(type, baddie) {
       if (type === "boost") {
         this.baddieData.modifier.max = 4;
         this.baddieData.modifier.min = 1;
@@ -643,20 +512,18 @@ export default defineComponent({
       } else {
         return;
       }
-      this.baddieData.modifier.target.id = id;
-      this.baddieData.modifier.target.instanceId = instanceId;
+      this.baddieData.modifier.targetId = baddie.id;
       this.showModifierModal = true;
 
-      this.$nextTick(() => {
-        this.$refs.modName.focus();
-      });
+      console.log(this.baddieData.modifier);
     },
     addModifier() {
-      if (this.baddieData.modifier.name !== "") {
-        this.$store.dispatch("modifyBaddie", {
-          type: this.label.toLowerCase(),
-          modifier: this.baddieData.modifier,
-        });
+      const baddie = this.list.find(
+        (x) => x.id === this.baddieData.modifier.targetId
+      );
+
+      if (this.baddieData.modifier.name !== "" && baddie) {
+        baddie.addModifier(this.baddieData.modifier);
         this.showModifierModal = false;
       }
     },

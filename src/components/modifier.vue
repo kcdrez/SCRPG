@@ -19,9 +19,7 @@
       </div>
       <div v-if="editing" class="m-1">
         <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text border-dark">Name</div>
-          </div>
+          <div class="input-group-text border-dark">Name</div>
           <input
             class="form-control border-dark"
             v-model.trim="modifier.tempName"
@@ -31,9 +29,7 @@
           />
         </div>
         <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <div class="input-group-text border-dark">Amount</div>
-          </div>
+          <div class="input-group-text border-dark">Amount</div>
           <input
             class="form-control border-dark"
             v-model.number="modifier.tempAmount"
