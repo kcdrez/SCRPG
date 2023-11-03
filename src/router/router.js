@@ -17,29 +17,14 @@ const routes = [
   },
 ];
 
-// const router = new VueRouter({
-//   // mode: 'history',
-//   routes
-// });
-
-// router.beforeEach((to, from, next) => {
-//   isInitialized(next);
-// });
-
-// function isInitialized(next) {
-//   if (store.state.initialized) next();
-//   else {
-//     store.watch(
-//       (state) => state.initialized,
-//       (newVal) => { if (newVal) next() }
-//     )
-//   }
-// }
-// export default router;
-
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  store.dispatch("initialize");
+  next();
 });
 
 export default router;

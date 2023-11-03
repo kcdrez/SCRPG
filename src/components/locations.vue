@@ -188,7 +188,7 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import Modal from "components/general/modal.vue";
+import Modal from "components/modals/modal.vue";
 
 export default defineComponent({
   name: "LocationsTracker",

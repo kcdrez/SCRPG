@@ -2,14 +2,11 @@
   <div>
     <h1 class="text-center">GM Management</h1>
     <div class="container admin-page">
-      <Environment @add-minion="$refs.minions.modal('show', $event)" />
+      <Environment />
       <Players ref="players" />
-      <Baddies label="Minions" :allowOwner="true" ref="minions" />
+      <Baddies label="Minions" allowOwner ref="minions" />
       <Baddies label="Lieutenants" ref="lieutenants" />
-      <Villains
-        ref="villains"
-        @add-minion="$refs.minions.modal('show', $event)"
-      />
+      <Villains ref="villains" />
     </div>
     <DrawingBoard @modifySelected="modifySelected($event)" />
     <div
@@ -26,22 +23,22 @@
         <div class="modal-content">
           <div class="modal-header">
             <h3 class="modal-title">Overcome Chart</h3>
-            <button type="button" class="close" data-dismiss="modal">
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal">
               <span>&times;</span>
-            </button>
+            </button> -->
           </div>
           <div class="modal-body">
             <img
               src="images/overcome.jpeg"
               class="img-fluid"
-              data-dismiss="modal"
+              data-bs-dismiss="modal"
             />
           </div>
           <div class="modal-footer">
             <button
               class="btn btn-secondary border-dark"
               type="button"
-              data-dismiss="modal"
+              data-bs-dismiss="modal"
             >
               Close
             </button>
@@ -89,10 +86,11 @@ import Environment from "../components/environment.vue";
 import Villains from "../components/villain.vue";
 import Players from "components/player.vue";
 import DrawingBoard from "../components/drawingBoard.vue";
+import Modal from "components/modal/modal.vue"; //todo implement modal component
 
 export default defineComponent({
   name: "GMTools",
-  components: { Baddies, Environment, Villains, Players, DrawingBoard },
+  components: { Baddies, Environment, Villains, Players, DrawingBoard, Modal },
   data() {
     return {
       showScrollWidget: false,

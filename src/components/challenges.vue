@@ -346,7 +346,7 @@
 import { mapState } from "vuex";
 import { defineComponent } from "vue";
 
-import Modal from "components/general/modal.vue";
+import Modal from "components/modals/modal.vue";
 
 export default defineComponent({
   name: "ChallengesTracker",

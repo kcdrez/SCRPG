@@ -39,6 +39,7 @@
         @click="demote()"
         v-if="selection.type === 'minion' || selection.type === 'lieutenant'"
         :title="`Demote selected ${selection.type}`"
+        :disabled="!canDemote(selection)"
       >
         <i class="fas fa-level-down-alt"></i>
       </button>
@@ -47,24 +48,31 @@
         @click="promote()"
         v-if="selection.type === 'minion' || selection.type === 'lieutenant'"
         :title="`Promote selected ${selection.type}`"
+        :disabled="!canPromote(selection)"
       >
         <i class="fas fa-level-up-alt"></i>
       </button>
       <button
         class="btn btn-success border-dark"
-        @click="$emit('modifySelected', 'boost')"
-        v-if="selection.type === 'villain'"
+        @click="modify(selection, 'Bonus')"
+        v-if="
+          selection.type === 'villain' ||
+          selection.type === 'player' ||
+          selection.type === 'minion' ||
+          selection.type === 'lieutenant'
+        "
         :title="`Boost selected ${selection.type}`"
       >
         <img src="images/boost.png" />
       </button>
       <button
         class="btn btn-warning border-dark"
-        @click="$emit('modifySelected', 'hinder')"
+        @click="modify(selection, 'Penalty')"
         v-if="
           selection.type === 'villain' ||
           selection.type === 'minion' ||
-          selection.type === 'lieutenant'
+          selection.type === 'lieutenant' ||
+          selection.type === 'player'
         "
         :title="`Hinder selected ${selection.type}`"
       >
@@ -72,11 +80,12 @@
       </button>
       <button
         class="btn btn-success border-dark"
-        @click="$emit('modifySelected', 'defend')"
+        @click="modify(selection, 'Defend')"
         v-if="
           selection.type === 'villain' ||
           selection.type === 'minion' ||
-          selection.type === 'lieutenant'
+          selection.type === 'lieutenant' ||
+          selection.type === 'player'
         "
         :title="`Defend selected ${selection.type}`"
       >
@@ -84,6 +93,13 @@
       </button>
     </div>
     <canvas id="canvas"></canvas>
+    <ModifierModal
+      v-if="modifierTarget"
+      :target="modifierTarget"
+      :type="modifierType"
+      :show="showModifierModal"
+      @close="showModifierModal = false"
+    />
   </div>
 </template>
 
@@ -99,15 +115,19 @@ import {
 import { addLocation, addChallenge } from "../scripts/fabric/fabric.scene";
 import { initCanvas } from "../scripts/fabric/fabric.common";
 import Legend from "./legend.vue";
+import ModifierModal from "components/modals/modifyModal.vue";
 
 export default defineComponent({
   name: "DrawingBoard",
-  components: { Legend },
+  components: { Legend, ModifierModal },
   data() {
     return {
       canvas: null,
       states: [],
       mod: 0,
+      showModifierModal: false,
+      modifierTarget: null,
+      modifierType: "Bonus",
     };
   },
   methods: {
@@ -228,6 +248,48 @@ export default defineComponent({
     },
     update() {
       this.states.push(JSON.stringify(this.canvas));
+    },
+    modify(target, modifierType) {
+      let match;
+      if (target.type === "player") {
+        match = this.players.find((x) => x.id === target.id);
+      } else if (target.type === "villain") {
+        match = this.villains.find((x) => x.id === target.id);
+      } else if (target.type === "minion") {
+        match = this.minions.find((x) => x.id === target.id);
+      } else if (target.type === "lieutenant") {
+        match = this.lieutenants.find((x) => x.id === target.id);
+      }
+
+      if (match) {
+        this.modifierTarget = match;
+        this.modifierType = modifierType;
+        this.showModifierModal = true;
+      }
+    },
+    canPromote(target) {
+      let match;
+      if (target.type === "minion") {
+        match = this.minions.find((x) => x.id === target.id);
+      } else if (target.type === "lieutenant") {
+        match = this.minions.find((x) => x.id === target.id);
+      }
+      if (match) {
+        return match?.size < 12;
+      }
+      return false;
+    },
+    canDemote(target) {
+      let match;
+      if (target.type === "minion") {
+        match = this.minions.find((x) => x.id === target.id);
+      } else if (target.type === "lieutenant") {
+        match = this.minions.find((x) => x.id === target.id);
+      }
+      if (match) {
+        return match?.size > 4;
+      }
+      return false;
     },
   },
   computed: {

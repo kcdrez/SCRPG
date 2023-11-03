@@ -15,7 +15,7 @@
           <button
             class="btn btn-success border-dark"
             title="Add a new player to the scene"
-            @click="showCreateModal = true"
+            @click="addPlayer()"
           >
             Add
           </button>
@@ -78,7 +78,7 @@
                 :key="actor.id"
                 :id="actor.type === 'player' ? actor.id : ''"
               >
-                <!-- Name/Owner -->
+                <!-- Name -->
                 <td class="text-capitalize c-pointer align-middle">
                   <input
                     class="form-control form-control-sm border-dark"
@@ -97,6 +97,9 @@
                       <i class="fas fa-check text-success"></i>
                     </span>
                     {{ actor.name }}
+                    <div class="d-inline" v-if="actor.index">
+                      [{{ actor.index }}]
+                    </div>
                     <sup
                       v-if="actor.owner"
                       :title="`This ${actor.typeLabel} belongs to ${actor.owner.name}`"
@@ -227,7 +230,7 @@
                     <button
                       class="btn btn-primary border-dark add-minion"
                       title="Add a Minion"
-                      @click="$emit('add-minion', actor.id)"
+                      @click="addMinion(actor.id)"
                       v-if="actor.allowAddMinion"
                     >
                       <span class="fa-stack">
@@ -263,7 +266,7 @@
         <div v-else class="text-center">There are no actors in the scene.</div>
       </div>
     </div>
-    <Modal :isOpen="showCreateModal">
+    <!-- <Modal :isOpen="showCreateModal">
       <template v-slot:header
         ><h5 class="modal-title">Add a Player</h5></template
       >
@@ -317,7 +320,13 @@
           Close
         </button>
       </template>
-    </Modal>
+    </Modal> -->
+    <CreateActorModal
+      :show="showCreateModal"
+      :type="modalType"
+      :ownerId="modalOwner"
+      @close="showCreateModal = false"
+    />
   </div>
 </template>
 
@@ -325,11 +334,11 @@
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
 
-import Modal from "components/general/modal.vue";
+import CreateActorModal from "components/modals/createActorModal.vue";
 
 export default defineComponent({
   name: "RoundTracker",
-  components: { Modal },
+  components: { CreateActorModal },
   data() {
     return {
       newPlayer: {
@@ -338,6 +347,8 @@ export default defineComponent({
         maxHp: 30,
       },
       showCreateModal: false,
+      modalType: "Player",
+      modalOwner: null,
     };
   },
   computed: {
@@ -345,10 +356,14 @@ export default defineComponent({
   },
   methods: {
     addPlayer() {
-      if (this.newPlayer.name !== "") {
-        this.$store.dispatch("addPlayer", this.newPlayer);
-        this.showCreateModal = false;
-      }
+      this.modalType = "Player";
+      this.modalOwner = null;
+      this.showCreateModal = true;
+    },
+    addMinion(ownerId) {
+      this.modalType = "Minion";
+      this.modalOwner = ownerId;
+      this.showCreateModal = true;
     },
     clearPlayers() {
       // this.$dialog

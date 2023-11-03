@@ -38,13 +38,18 @@ class Baddie extends Actor {
   }
 
   demote() {
-    this.changeSize(this.size - 2);
+    if (this.size > 4) {
+      this.changeSize(this.size - 2);
+    }
   }
   promote() {
-    this.changeSize(this.size + 2);
+    if (this.size < 12) {
+      this.changeSize(this.size + 2);
+    }
   }
   changeSize(newSize) {
     this.size = newSize;
+    this.save();
   }
   addModifier(modifierData) {
     if (!modifierData.name) return;
@@ -66,17 +71,11 @@ class Baddie extends Actor {
   }
   removeModifier(type, index) {
     this[type].splice(index, 1);
+    this.save();
   }
   takenAction(status) {
     this.acted = status === undefined ? !this.acted : status;
     this.save();
-  }
-  save() {
-    if (this.count <= 0) {
-      store.dispatch("removeBaddie", { type: this.type, id: this.id });
-    } else {
-      store.dispatch("reconcile", this.type);
-    }
   }
   export(id, excludeInstances, rawInstances) {
     console.log("todo export in baddie.js");
@@ -177,11 +176,14 @@ class Villain extends Actor {
       this[type].splice(index, 1);
       this.save();
     };
+
     if (this[type][index].exclusive || this[type][index].persistent) {
       // Vue.dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
       // .then(() => {
       //   remove();
       // });
+      //todo
+      remove();
     } else {
       remove();
     }

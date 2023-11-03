@@ -154,21 +154,21 @@
                   <button
                     class="btn btn-success border-dark"
                     title="Add a Bonus to this Player"
-                    @click="modifyPlayer('boost', player.id)"
+                    @click="modifyPlayer('Bonus', player)"
                   >
                     <img src="images/boost.png" />
                   </button>
                   <button
                     class="btn btn-warning border-dark"
                     title="Add a Penalty to this Player"
-                    @click="modifyPlayer('hinder', player.id)"
+                    @click="modifyPlayer('Penalty', player)"
                   >
                     <img src="images/hinder.png" />
                   </button>
                   <button
                     class="btn btn-success border-dark"
                     title="Add a Defend to this Player"
-                    @click="modifyPlayer('defend', player.id)"
+                    @click="modifyPlayer('Defend', player)"
                   >
                     <img src="images/defend.png" />
                   </button>
@@ -273,67 +273,13 @@
         </button>
       </template>
     </Modal>
-    <Modal :isOpen="showModifierModal">
-      <template v-slot:header>Add a {{ modifier.type }}</template>
-      <template v-slot:body>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Name</div>
-          <input
-            class="form-control border-dark"
-            type="text"
-            v-model.trim="modifier.name"
-            @keydown.enter="addModifier"
-            ref="modName"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Amount</div>
-          <input
-            class="form-control border-dark"
-            v-model.number="modifier.amount"
-            type="number"
-            :max="modifier.max"
-            :min="modifier.min"
-            @keydown.enter="addModifier"
-          />
-        </div>
-        <div class="d-inline" v-if="modifier.type !== 'Defend'">
-          <label for="persistent-Player" class="c-pointer">Persistent?</label>
-          <input
-            type="checkbox"
-            v-model="modifier.persistent"
-            @keydown.enter="addModifier"
-            id="persistent-Player"
-          />
-        </div>
-        <div class="d-inline mx-3" v-if="modifier.type !== 'Defend'">
-          <label for="exclusive-Player" class="c-pointer">Exclusive?</label>
-          <input
-            type="checkbox"
-            v-model="modifier.exclusive"
-            @keydown.enter="addModifier"
-            id="exclusive-Player"
-          /></div
-      ></template>
-      <template v-slot:footer>
-        <button
-          type="button"
-          class="btn btn-primary border-dark"
-          @click="addModifier"
-          :disabled="modifier.name === ''"
-        >
-          Add
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary border-dark"
-          data-dismiss="modal"
-          @click="showModifierModal = false"
-        >
-          Close
-        </button></template
-      >
-    </Modal>
+    <ModifierModal
+      v-if="modifierTarget"
+      :target="modifierTarget"
+      :type="modifierType"
+      :show="showModifierModal"
+      @close="showModifierModal = false"
+    />
   </div>
 </template>
 
@@ -343,7 +289,8 @@ import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
 import { sortActors } from "../scripts/actor";
-import Modal from "components/general/modal.vue";
+import Modal from "components/modals/modal.vue";
+import ModifierModal from "components/modals/modifyModal.vue";
 import { unvue } from "../scripts/utilities.js";
 
 export default defineComponent({
@@ -351,6 +298,7 @@ export default defineComponent({
   components: {
     Modifier,
     Modal,
+    ModifierModal,
   },
   data() {
     return {
@@ -361,16 +309,8 @@ export default defineComponent({
         hp: 30,
         maxHp: 30,
       },
-      modifier: {
-        amount: 0,
-        name: "",
-        max: 0,
-        min: 0,
-        type: "",
-        persistent: false,
-        exclusive: false,
-        target: null,
-      },
+      modifierType: "Bonus",
+      modifierTarget: null,
     };
   },
   computed: {
@@ -382,37 +322,10 @@ export default defineComponent({
       this.addPlayer(unvue(this.newPlayer));
       this.showCreateModal = false;
     },
-    modifyPlayer(type, playerId) {
-      if (type === "boost") {
-        this.modifier.max = 4;
-        this.modifier.min = 1;
-        this.modifier.amount = 1;
-        this.modifier.type = "Bonus";
-      } else if (type === "hinder") {
-        this.modifier.max = -1;
-        this.modifier.min = -4;
-        this.modifier.amount = -1;
-        this.modifier.type = "Penalty";
-      } else if (type === "defend") {
-        this.modifier.max = 100;
-        this.modifier.min = 1;
-        this.modifier.amount = 1;
-        this.modifier.type = "Defend";
-        this.modifier.persistent = false;
-        this.modifier.exclusive = false;
-      } else {
-        return;
-      }
-      this.modifier.targetId = playerId;
+    modifyPlayer(type, player) {
+      this.modifierTarget = player;
+      this.modifierType = type;
       this.showModifierModal = true;
-    },
-    addModifier() {
-      if (this.modifier.name !== "") {
-        this.$store.dispatch("modifyPlayer", {
-          modifier: this.modifier,
-        });
-        this.showModifierModal = false;
-      }
     },
     editPlayer(player, index) {
       player.beginEdit();

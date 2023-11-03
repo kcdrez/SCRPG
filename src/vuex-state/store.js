@@ -1,13 +1,12 @@
 import { createStore } from "vuex";
 import { v4 as uuid } from "uuid";
-import Cookies from "js-cookie";
 import { writeFile, utils } from "xlsx";
 
 import { Baddie, Villain, sameBaddies } from "../scripts/baddie";
 import { Player } from "../scripts/player";
 import { Scene } from "../scripts/scene";
 import { sortActors } from "../scripts/actor";
-import { unvue, processXlsxFiles } from "../scripts/utilities";
+import { processXlsxFiles } from "../scripts/utilities";
 
 const store = createStore({
   state: {
@@ -73,37 +72,46 @@ const store = createStore({
       state.players = [];
     },
     SELECT_CANVAS_EL(state, data) {
-      state.selection.id = data.id || null;
-      state.selection.type = data.actorType || null;
+      state.selection.id = data?.id || null;
+      state.selection.type = data?.actorType || null;
     },
   },
   actions: {
     async initialize(ctx) {
       if (!ctx.state.initialized) {
-        const minions = Cookies.getJSON("minions");
-        const lieutenants = Cookies.getJSON("lieutenants");
-        const villains = Cookies.getJSON("villains");
-        const players = Cookies.getJSON("players");
-        const scene = Cookies.getJSON("scene");
+        const minions = JSON.parse(
+          window.localStorage.getItem("minions") || "[]"
+        );
+        const lieutenants = JSON.parse(
+          window.localStorage.getItem("lieutenants") || "[]"
+        );
+        const villains = JSON.parse(
+          window.localStorage.getItem("villains") || "[]"
+        );
+        const players = JSON.parse(
+          window.localStorage.getItem("players") || "[]"
+        );
+        const scene = JSON.parse(window.localStorage.getItem("scene") || "{}");
+
         ctx.commit("INIT", { minions, lieutenants, villains, players, scene });
       }
     },
     saveData(ctx, saveData) {
-      // const type = typeof saveData === "string" ? saveData : saveData.type;
-      // const data = typeof saveData === "string" ? null : saveData.data;
-      // if (!type) return;
-      // else if (type in ctx.rootState) {
-      //   const dataToSave = ctx.rootState[type];
-      //   if (data && data.id) {
-      //     dataToSave.forEach((x) => {
-      //       if (x.id === data.id) {
-      //         x = data;
-      //       }
-      //     });
-      //   }
-      //   console.log("saving", dataToSave);
-      //   Cookies.set(type, dataToSave, { sameSite: "strict" });
-      // }
+      const type = typeof saveData === "string" ? saveData : saveData.type;
+      const data = typeof saveData === "string" ? null : saveData.data;
+      if (!type) return;
+      else if (type in ctx.rootState) {
+        const dataToSave = ctx.rootState[type];
+        if (data && data.id) {
+          dataToSave.forEach((x) => {
+            if (x.id === data.id) {
+              x = data;
+            }
+          });
+        }
+        window.localStorage.setItem(type, JSON.stringify(dataToSave));
+        console.log("saving", dataToSave);
+      }
     },
     resetEnvironment(ctx) {
       ctx.commit("RESET_ENVIRONMENT");
@@ -124,14 +132,7 @@ const store = createStore({
       ctx.dispatch("saveData", baddieData.type);
     },
     modifyBaddie(ctx, { modifier, type }) {
-      console.log(modifier, type);
       const match = ctx.state[type].find((x) => x.id === modifier.targetId);
-      if (match) {
-        match.addModifier(modifier);
-      }
-    },
-    modifyPlayer(ctx, { modifier }) {
-      const match = ctx.state.players.find((x) => x.id === modifier.targetId);
       if (match) {
         match.addModifier(modifier);
       }

@@ -182,6 +182,7 @@ class Player extends Actor {
   }
   removeModifier(type, index) {
     this[type].splice(index, 1);
+    this.save();
   }
   takenAction() {
     const minions = store.getters.childMinions(this.id);

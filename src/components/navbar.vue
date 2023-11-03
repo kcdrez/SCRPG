@@ -16,8 +16,8 @@
         <li class="nav-item">
           <div
             class="nav-link c-pointer"
-            data-toggle="modal"
-            data-target="#overcomeChartModal"
+            data-bs-toggle="modal"
+            data-bs-target="#overcomeChartModal"
           >
             Overcome Chart
           </div>
@@ -25,8 +25,8 @@
         <li class="nav-item">
           <div
             class="nav-link c-pointer"
-            data-toggle="modal"
-            data-target="#boostsChartModal"
+            data-bs-toggle="modal"
+            data-bs-target="#boostsChartModal"
           >
             Boost/Hinder Chart
           </div>

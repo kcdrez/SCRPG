@@ -69,20 +69,20 @@ class Actor extends GenericObject {
     this.save();
   }
   sortModifiers(list) {
-    // list.sort((a, b) => {
-    //   if (a.name !== b.name) {
-    //     return a.name > b.name ? 1 : -1;
-    //   } else if (a.amount !== b.amount) {
-    //     return a.amount > b.amount ? 1 : -1;
-    //   } else if (a.persistent !== b.persistent) {
-    //     return a.persistent ? -1 : 1;
-    //   } else if (a.exclusive !== b.exclusive) {
-    //     return a.exclusive ? -1 : 1;
-    //   } else {
-    //     return 0;
-    //   }
-    // });
-    // this.save();
+    list.sort((a, b) => {
+      if (a.name !== b.name) {
+        return a.name > b.name ? 1 : -1;
+      } else if (a.amount !== b.amount) {
+        return a.amount > b.amount ? 1 : -1;
+      } else if (a.persistent !== b.persistent) {
+        return a.persistent ? -1 : 1;
+      } else if (a.exclusive !== b.exclusive) {
+        return a.exclusive ? -1 : 1;
+      } else {
+        return 0;
+      }
+    });
+    this.save();
   }
 }
 

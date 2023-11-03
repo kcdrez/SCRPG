@@ -9,7 +9,7 @@
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
-            @click="showCreateModal = true"
+            @click="addVillain"
           >
             Create
           </button>
@@ -122,28 +122,28 @@
               <div class="btn-group btn-group-sm w-50">
                 <button
                   class="btn btn-success border-dark"
-                  @click="modifyVillain(villain, 'boost')"
+                  @click="modifyVillain(villain, 'Bonus')"
                   title="Add a Bonus to this Villain"
                 >
                   <img src="images/boost.png" />
                 </button>
                 <button
                   class="btn btn-warning border-dark"
-                  @click="modifyVillain(villain, 'hinder')"
+                  @click="modifyVillain(villain, 'Penalty')"
                   title="Add a Penalty to this Villain"
                 >
                   <img src="images/hinder.png" />
                 </button>
                 <button
                   class="btn btn-secondary border-dark"
-                  @click="modifyVillain(villain, 'defend')"
+                  @click="modifyVillain(villain, 'Defend')"
                   title="Add a Defend to this Villain"
                 >
                   <img src="images/defend.png" />
                 </button>
                 <button
                   class="btn btn-primary border-dark"
-                  @click="$emit('add-minion', villain.id)"
+                  @click="addMinion(villain.id)"
                   title="Add a Minion to this Villain"
                 >
                   <span class="fa-stack">
@@ -184,95 +184,19 @@
         </div>
       </div>
     </div>
-    <Modal :isOpen="showCreateModal">
-      <template v-slot:header>Create a Villain</template>
-      <template v-slot:body>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Name</div>
-          <input
-            class="form-control border-dark"
-            v-model.trim="name"
-            type="text"
-            ref="villainName"
-            @keydown.enter="createVillain()"
-          />
-        </div>
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-primary border-dark"
-          type="button"
-          @click="createVillain()"
-        >
-          Create
-        </button>
-        <button class="btn btn-secondary border-dark" type="button">
-          Close
-        </button>
-      </template>
-    </Modal>
-    <Modal :isOpen="showModifierModal">
-      <template v-slot:header>Add a {{ modifier.type }}</template>
-      <template v-slot:body>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Name</div>
-          <input
-            class="form-control border-dark"
-            type="text"
-            v-model.trim="modifier.name"
-            @keydown.enter="target.addModifier(modifier)"
-            ref="modifierName"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Amount</div>
-          <input
-            class="form-control border-dark"
-            v-model.number="modifier.amount"
-            type="number"
-            :max="modifier.max"
-            :min="modifier.min"
-            @keydown.enter="target.addModifier(modifier)"
-          />
-        </div>
-        <div class="d-inline" v-if="modifier.type !== 'Defend'">
-          <label for="mod-villain-persistent" class="c-pointer"
-            >Persistent?</label
-          >
-          <input
-            type="checkbox"
-            v-model="modifier.persistent"
-            id="mod-villain-persistent"
-          />
-        </div>
-        <div class="d-inline mx-3" v-if="modifier.type !== 'Defend'">
-          <label for="mod-villain-exclusive" class="c-pointer"
-            >Exclusive?</label
-          >
-          <input
-            type="checkbox"
-            v-model="modifier.exclusive"
-            id="mod-villain-exclusive"
-          />
-        </div>
-      </template>
-      <template v-slot:footer>
-        <button
-          type="button"
-          class="btn btn-primary border-dark"
-          @click="target.addModifier(modifier)"
-        >
-          Add
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary border-dark"
-          @click="showModifierModal = false"
-        >
-          Close
-        </button>
-      </template>
-    </Modal>
+    <CreateActorModal
+      :show="showCreateModal"
+      :type="createData.type"
+      :ownerId="createData.ownerId"
+      @close="showCreateModal = false"
+    />
+    <ModifierModal
+      v-if="modifierData.target"
+      :target="modifierData.target"
+      :type="modifierData.type"
+      :show="showModifierModal"
+      @close="showModifierModal = false"
+    />
   </div>
 </template>
 
@@ -281,25 +205,25 @@ import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
 import Modifier from "./modifier.vue";
-import Modal from "components/general/modal.vue";
+import ModifierModal from "components/modals/modifyModal.vue";
+import CreateActorModal from "components/modals/createActorModal.vue";
 
 export default defineComponent({
   name: "Villains",
   components: {
     Modifier,
-    Modal,
+    ModifierModal,
+    CreateActorModal,
   },
   data() {
     return {
-      name: "",
-      target: null,
-      modifier: {
-        type: "",
-        amount: 0,
-        max: 0,
-        min: 0,
-        persistent: false,
-        exclusive: false,
+      modifierData: {
+        target: null,
+        type: "Bonus",
+      },
+      createData: {
+        type: "Villain",
+        ownerId: null,
       },
       showCreateModal: false,
       showModifierModal: false,
@@ -309,35 +233,19 @@ export default defineComponent({
     ...mapState(["villains"]),
   },
   methods: {
-    createVillain() {
-      if (this.name !== "") {
-        this.$store.dispatch("upsertBaddie", {
-          name: this.name,
-          type: "villains",
-        });
-        this.showCreateModal = false;
-      }
+    addVillain() {
+      this.createData.type = "Villain";
+      this.createData.ownerId = null;
+      this.showCreateModal = true;
+    },
+    addMinion(villainId) {
+      this.createData.type = "Minion";
+      this.createData.ownerId = villainId;
+      this.showCreateModal = true;
     },
     modifyVillain(villain, type) {
-      if (type === "defend") {
-        this.modifier.type = "Defend";
-        this.modifier.max = 100;
-        this.modifier.min = 1;
-        this.modifier.amount = 1;
-      } else if (type === "boost") {
-        this.modifier.max = 4;
-        this.modifier.min = 1;
-        this.modifier.amount = 1;
-        this.modifier.type = "Bonus";
-      } else if (type === "hinder") {
-        this.modifier.max = -1;
-        this.modifier.min = -4;
-        this.modifier.amount = -1;
-        this.modifier.type = "Penalty";
-      } else {
-        return;
-      }
-      this.target = villain;
+      this.modifierData.target = villain;
+      this.modifierData.type = type;
       this.showModifierModal = true;
     },
     editVillain(villain, index) {

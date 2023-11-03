@@ -176,21 +176,21 @@
                   <button
                     class="btn btn-success border-dark"
                     :title="`Add a Bonus to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('boost', baddie)"
+                    @click="modifyBaddie('Bonus', baddie)"
                   >
                     <img src="images/boost.png" />
                   </button>
                   <button
                     class="btn btn-warning border-dark"
                     :title="`Add a Penalty to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('hinder', baddie)"
+                    @click="modifyBaddie('Penalty', baddie)"
                   >
                     <img src="images/hinder.png" />
                   </button>
                   <button
                     class="btn btn-success border-dark"
                     :title="`Add a Defend to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('defend', baddie)"
+                    @click="modifyBaddie('Defend', baddie)"
                   >
                     <img src="images/defend.png" />
                   </button>
@@ -263,154 +263,18 @@
         </tbody>
       </table>
     </div>
-    <Modal :isOpen="showCreateModal">
-      <template v-slot:header>Create a {{ labelSingle }}</template>
-      <template v-slot:body>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Name</div>
-          <input
-            class="form-control border-dark"
-            v-model.trim="baddieData.name"
-            type="text"
-            @keydown.enter="createBaddie()"
-            ref="createName"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Size</div>
-          <input
-            class="form-control border-dark"
-            v-model.number="baddieData.size"
-            type="number"
-            step="2"
-            min="4"
-            max="12"
-            @keydown.enter="createBaddie()"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Count</div>
-          <input
-            class="form-control border-dark"
-            v-model.number="baddieData.count"
-            type="number"
-            min="1"
-            @keydown.enter="createBaddie()"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3" v-if="allowOwner">
-          <div class="input-group-text border-dark">Owner</div>
-          <select
-            class="form-control border-dark"
-            @keydown.enter="createBaddie()"
-            v-model="baddieData.owner"
-          >
-            <option :value="null">-</option>
-            <option
-              v-for="player in players"
-              :key="player.id"
-              :value="player.id"
-            >
-              {{ player.name }}
-            </option>
-            <option
-              v-for="villain in villains"
-              :key="villain.id"
-              :value="villain.id"
-            >
-              {{ villain.name }}
-            </option>
-            <option v-if="scene.name" :value="scene.id">
-              {{ scene.name }}
-            </option>
-          </select>
-        </div>
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-primary border-dark"
-          type="button"
-          data-bs-dismiss="modal"
-          @click="createBaddie()"
-          :disabled="!baddieData.name"
-        >
-          Create
-        </button>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          data-dismiss="modal"
-          @click="showCreateModal = false"
-        >
-          Close
-        </button>
-      </template>
-    </Modal>
-    <Modal :isOpen="showModifierModal">
-      <template v-slot:header>Add a {{ baddieData.modifier.type }}</template>
-      <template v-slot:body>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Name</div>
-          <input
-            class="form-control border-dark"
-            type="text"
-            v-model.trim="baddieData.modifier.name"
-            @keydown.enter="addModifier()"
-            ref="modName"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-text border-dark">Amount</div>
-          <input
-            class="form-control border-dark"
-            v-model.number="baddieData.modifier.amount"
-            type="number"
-            :max="baddieData.modifier.max"
-            :min="baddieData.modifier.min"
-            @keydown.enter="addModifier()"
-          />
-        </div>
-        <div class="d-inline" v-if="baddieData.modifier.type !== 'Defend'">
-          <label :for="`persistent-${labelSingle}`" class="c-pointer"
-            >Persistent?</label
-          >
-          <input
-            type="checkbox"
-            v-model="baddieData.modifier.persistent"
-            @keydown.enter="addModifier()"
-            :id="`persistent-${labelSingle}`"
-          />
-        </div>
-        <div class="d-inline mx-3" v-if="baddieData.modifier.type !== 'Defend'">
-          <label :for="`exclusive-${labelSingle}`" class="c-pointer"
-            >Exclusive?</label
-          >
-          <input
-            type="checkbox"
-            v-model="baddieData.modifier.exclusive"
-            @keydown.enter="addModifier()"
-            :id="`exclusive-${labelSingle}`"
-          /></div
-      ></template>
-      <template v-slot:footer>
-        <button
-          type="button"
-          class="btn btn-primary border-dark"
-          @click="addModifier()"
-          :disabled="baddieData.modifier.name === ''"
-        >
-          Add
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary border-dark"
-          data-dismiss="modal"
-          @click="showModifierModal = false"
-        >
-          Close
-        </button></template
-      >
-    </Modal>
+    <CreateActorModal
+      :show="showCreateModal"
+      :type="labelSingle"
+      @close="showCreateModal = false"
+    />
+    <ModifierModal
+      v-if="modifierData.target"
+      :target="modifierData.target"
+      :type="modifierData.type"
+      :show="showModifierModal"
+      @close="showModifierModal = false"
+    />
   </div>
 </template>
 
@@ -420,13 +284,15 @@ import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
 import { sortActors } from "../scripts/actor";
-import Modal from "components/general/modal.vue";
+import ModifierModal from "components/modals/modifyModal.vue";
+import CreateActorModal from "components/modals/createActorModal.vue";
 
 export default defineComponent({
   name: "BaddieList",
   components: {
     Modifier,
-    Modal,
+    ModifierModal,
+    CreateActorModal,
   },
   props: {
     label: {
@@ -442,22 +308,9 @@ export default defineComponent({
     return {
       showCreateModal: false,
       showModifierModal: false,
-      baddieData: {
-        name: "",
-        size: 8,
-        count: 1,
-        owner: null,
-        modifier: {
-          amount: 0,
-          name: "",
-          max: 0,
-          min: 0,
-          type: "",
-          targetId: null,
-          persistent: false,
-          exclusive: false,
-          applyTo: "single",
-        },
+      modifierData: {
+        target: null,
+        type: "Bonus",
       },
     };
   },
@@ -477,55 +330,11 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(["upsertBaddie", "removeBaddie", "modifyBaddie"]),
-    createBaddie() {
-      for (let i = 0; i < this.baddieData.count; i++) {
-        this.upsertBaddie({
-          type: this.label.toLowerCase(),
-          ...this.baddieData,
-        });
-      }
-      this.showCreateModal = false;
-    },
-    addBaddie(name) {
-      this.baddieData.name = name;
-      this.showCreateModal = true;
-    },
+    ...mapActions(["upsertBaddie", "removeBaddie"]),
     modifyBaddie(type, baddie) {
-      if (type === "boost") {
-        this.baddieData.modifier.max = 4;
-        this.baddieData.modifier.min = 1;
-        this.baddieData.modifier.amount = 1;
-        this.baddieData.modifier.type = "Bonus";
-      } else if (type === "hinder") {
-        this.baddieData.modifier.max = -1;
-        this.baddieData.modifier.min = -4;
-        this.baddieData.modifier.amount = -1;
-        this.baddieData.modifier.type = "Penalty";
-      } else if (type === "defend") {
-        this.baddieData.modifier.max = 100;
-        this.baddieData.modifier.min = 1;
-        this.baddieData.modifier.amount = 1;
-        this.baddieData.modifier.type = "Defend";
-        this.baddieData.modifier.persistent = false;
-        this.baddieData.modifier.exclusive = false;
-      } else {
-        return;
-      }
-      this.baddieData.modifier.targetId = baddie.id;
+      this.modifierData.target = baddie;
+      this.modifierData.type = type;
       this.showModifierModal = true;
-
-      console.log(this.baddieData.modifier);
-    },
-    addModifier() {
-      const baddie = this.list.find(
-        (x) => x.id === this.baddieData.modifier.targetId
-      );
-
-      if (this.baddieData.modifier.name !== "" && baddie) {
-        baddie.addModifier(this.baddieData.modifier);
-        this.showModifierModal = false;
-      }
     },
     editBaddie(baddie, index) {
       baddie.beginEdit();

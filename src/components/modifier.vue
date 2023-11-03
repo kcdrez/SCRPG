@@ -74,8 +74,8 @@
           <b>Amount: </b>
           {{ amountText(modifier.amount) }}
         </div>
-        <div v-if="modifier.persistent" class="font-italic">Persistent</div>
-        <div v-if="modifier.exclusive" class="font-italic">Exclusive</div>
+        <div v-if="modifier.persistent" class="fst-italic">Persistent</div>
+        <div v-if="modifier.exclusive" class="fst-italic">Exclusive</div>
       </template>
     </div>
   </div>

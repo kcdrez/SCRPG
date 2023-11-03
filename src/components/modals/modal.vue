@@ -53,6 +53,9 @@ export default defineComponent({
   created() {
     this.$nextTick(() => {
       this.modal = new Modal(this.$refs.modal);
+      this.$refs.modal.addEventListener("hidden.bs.modal", (event) => {
+        this.$emit("close");
+      });
       this.toggleModal();
     });
   },

@@ -25,10 +25,7 @@
           <ChallengesTracker class="mb-3" />
         </div>
         <div class="col-5">
-          <RoundTracker
-            class="mb-3"
-            @add-minion="$emit('add-minion', $event)"
-          />
+          <RoundTracker class="mb-3" />
           <EnvironmentNotes class="mb-3" />
         </div>
       </div>
@@ -37,10 +34,7 @@
 </template>
 
 <script>
-import Cookies from "js-cookie";
 import { defineComponent } from "vue";
-import { Baddie, Villain } from "../scripts/baddie.js";
-import { unvue } from "../scripts/utilities.js";
 import ChallengesTracker from "./challenges.vue";
 import Locations from "./locations.vue";
 import SceneTracker from "./sceneTracker.vue";
