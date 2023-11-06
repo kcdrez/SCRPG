@@ -3,13 +3,6 @@
     <Legend />
     <DrawingBoardButtons :canvas="canvas" @modify="modify($event)" />
     <canvas ref="canvas"></canvas>
-    <ModifierModal
-      v-if="modifierTarget"
-      :target="modifierTarget"
-      :type="modifierType"
-      :show="showModifierModal"
-      @close="showModifierModal = false"
-    />
   </div>
 </template>
 
@@ -25,12 +18,11 @@ import {
 import { addLocation, addChallenge } from "../scripts/fabric/fabric.scene";
 import { initCanvas } from "../scripts/fabric/fabric.common";
 import Legend from "./legend.vue";
-import ModifierModal from "components/modals/modifyModal.vue";
 import DrawingBoardButtons from "components/drawingBoardButtons.vue";
 
 export default defineComponent({
   name: "DrawingBoard",
-  components: { Legend, ModifierModal, DrawingBoardButtons },
+  components: { Legend, DrawingBoardButtons },
   setup() {
     let canvas = null;
 
@@ -42,15 +34,11 @@ export default defineComponent({
     return {
       states: [],
       mod: 0,
-      showModifierModal: false,
-      modifierTarget: null,
-      modifierType: "Bonus",
     };
   },
   methods: {
-    ...mapActions(["selectObject"]),
+    ...mapActions(["selectObject", "moveObject"]),
     refreshCanvas(array, type, callback) {
-      console.log(this.canvas);
       this.canvas.getObjects().forEach((canvasEl) => {
         if (canvasEl.actorType === type) {
           const exists = array.find((x) => x.id === canvasEl.id);
@@ -85,9 +73,7 @@ export default defineComponent({
       }
 
       if (match) {
-        this.modifierTarget = match;
-        this.modifierType = modifierType;
-        this.showModifierModal = true;
+        this.$dialog.modifyActor({ type: modifierType, target: match });
       }
     },
   },
@@ -98,19 +84,12 @@ export default defineComponent({
   async mounted() {
     this.canvas = initCanvas(this.$refs.canvas);
 
-    // this.canvas.on(
-    //   "object:modified",
-    //   () => this.update(),
-    //   "object:added",
-    //   () => this.update()
-    // );
-
     this.minions.forEach((m) => addBaddie(this.canvas, m));
     this.lieutenants.forEach((l) => addBaddie(this.canvas, l));
     this.players.forEach((p) => addPlayer(this.canvas, p));
     this.villains.forEach((v) => addVillain(this.canvas, v));
     this.locations.forEach((l) => addLocation(this.canvas, l));
-    this.challenges.forEach((c) => addLocation(this.canvas, c));
+    this.challenges.forEach((c) => addChallenge(this.canvas, c));
 
     this.canvas.on({
       "selection:updated": (e) => {
@@ -139,6 +118,17 @@ export default defineComponent({
         } else {
           console.warn("selection:cleared event couldnt find a target", e);
         }
+      },
+      "object:modified": (e) => {
+        if (e?.target) {
+          this.moveObject(e.target);
+          // this.update()
+        } else {
+          console.warn("object:modifed event couldnt find a target", e);
+        }
+      },
+      "object:added": () => {
+        // this.update()
       },
     });
   },

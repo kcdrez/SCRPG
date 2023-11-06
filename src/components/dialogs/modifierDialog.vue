@@ -1,5 +1,5 @@
 <template>
-  <Modal :isOpen="show">
+  <Dialog :isOpen="show">
     <template v-slot:header>Add a {{ type }}</template>
     <template v-slot:body>
       <div class="input-group input-group-sm mb-3">
@@ -59,18 +59,18 @@
         Close
       </button>
     </template>
-  </Modal>
+  </Dialog>
 </template>
 
 <script>
 import { defineComponent } from "vue";
 
-import Modal from "components/modals/modal.vue";
+import Dialog from "components/dialogs/dialog.vue";
 
 export default defineComponent({
-  name: "ModifyModal",
+  name: "ModifierDialog",
   components: {
-    Modal,
+    Dialog,
   },
   props: {
     type: {
@@ -104,11 +104,11 @@ export default defineComponent({
   },
   methods: {
     close() {
-      this.$emit("close");
+      this.$emit("cancel");
     },
     add() {
       this.target.addModifier(this.modifier);
-      this.close();
+      this.$emit("confirm");
     },
     reset(val) {
       this.modifier.type = val;

@@ -3,6 +3,7 @@ import { v4 as uuid } from "uuid";
 import store from "../vuex-state/store";
 import { Actor, Modifier } from "./actor";
 import { unvue } from "./utilities";
+import dialog from "./dialog";
 
 class Baddie extends Actor {
   constructor(data) {
@@ -33,8 +34,11 @@ class Baddie extends Actor {
   get allowEdit() {
     return !this.editing;
   }
-  get viewDetails() {
-    return true;
+  get displayName() {
+    let text = `${this.name}`;
+    text += this.index ? `-${this.index}` : "";
+    text += this.owner ? ` (${this.owner})` : "";
+    return text;
   }
 
   demote() {
@@ -129,7 +133,12 @@ class Baddie extends Actor {
     super.saveEdit();
   }
   remove() {
-    store.dispatch("removeBaddie", { id: this.id, type: this.type });
+    dialog.confirm({
+      body: `Are you sure you want to remove this ${this.type} (${this.displayName})?`,
+      onConfirmDialog: () => {
+        store.dispatch("removeBaddie", { id: this.id, type: this.type });
+      },
+    });
   }
 }
 
@@ -147,9 +156,6 @@ class Villain extends Actor {
     return true;
   }
   get allowEdit() {
-    return true;
-  }
-  get viewDetails() {
     return true;
   }
 
@@ -178,12 +184,12 @@ class Villain extends Actor {
     };
 
     if (this[type][index].exclusive || this[type][index].persistent) {
-      // Vue.dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
-      // .then(() => {
-      //   remove();
-      // });
-      //todo
-      remove();
+      dialog.confirm({
+        body: `This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`,
+        onConfirmDialog: () => {
+          remove();
+        },
+      });
     } else {
       remove();
     }
@@ -196,19 +202,15 @@ class Villain extends Actor {
       ? `Some of this villain's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`
       : `Some of this villain's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      // Vue.dialog.confirm({
-      //   title: 'Warning',
-      //   body: message
-      // },
-      // {
-      //   okText: 'Yes',
-      //   cancelText: 'No'
-      // })
-      // .then(() => {
-      //   minions.forEach(minion => {
-      //     minion.takenAction(newStatus);
-      //   })
-      // });
+      dialog.confirm({
+        title: "Warning",
+        body: message,
+        onConfirmDialog: () => {
+          minions.forEach((minion) => {
+            minion.takenAction(newStatus);
+          });
+        },
+      });
     }
     this.acted = newStatus;
     this.save();
@@ -245,7 +247,12 @@ class Villain extends Actor {
     super.saveEdit();
   }
   remove() {
-    store.dispatch("removeBaddie", { id: this.id, type: this.type });
+    dialog.confirm({
+      body: `Are you sure you want to remove this ${this.type} (${this.name})?`,
+      onConfirmDialog: () => {
+        store.dispatch("removeBaddie", { id: this.id, type: this.type });
+      },
+    });
   }
 }
 

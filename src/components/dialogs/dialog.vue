@@ -21,7 +21,7 @@ import { defineComponent } from "vue";
 import { Modal } from "bootstrap";
 
 export default defineComponent({
-  name: "Modal",
+  name: "Dialog",
   props: {
     isOpen: {
       type: Boolean,
@@ -35,11 +35,11 @@ export default defineComponent({
   },
   watch: {
     isOpen() {
-      this.toggleModal();
+      this.toggleDialog();
     },
   },
   methods: {
-    toggleModal() {
+    toggleDialog() {
       if (this.isOpen) {
         this.modal.show();
       } else {
@@ -56,7 +56,7 @@ export default defineComponent({
       this.$refs.modal.addEventListener("hidden.bs.modal", (event) => {
         this.$emit("close");
       });
-      this.toggleModal();
+      this.toggleDialog();
     });
   },
 });

@@ -2,6 +2,7 @@ import { v4 as uuid } from "uuid";
 
 import store from "../vuex-state/store";
 import { Actor, GenericObject } from "./actor";
+import dialog from "./dialog";
 
 class Scene extends Actor {
   constructor(data) {
@@ -22,9 +23,6 @@ class Scene extends Actor {
       this.red.length === 0
     );
   }
-  get allowAddMinion() {
-    return true;
-  }
 
   takenAction() {
     const minions = store.getters.childMinions(this.id);
@@ -34,19 +32,15 @@ class Scene extends Actor {
       ? `Some of the environment's minions have not acted. Do you also want to mark all of it's minions as having acted too?`
       : `Some of the environment's minions have already acted. Do you also want to mark it's minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      // Vue.dialog.confirm({
-      //   title: 'Warning',
-      //   body: message
-      // },
-      // {
-      //   okText: 'Yes',
-      //   cancelText: 'No'
-      // })
-      // .then(() => {
-      //   minions.forEach(minion => {
-      //     minion.takenAction(newStatus);
-      //   })
-      // });
+      dialog.confirm({
+        title: "Warning",
+        body: message,
+        onConfirmDialog: () => {
+          minions.forEach((minion) => {
+            minion.takenAction(newStatus);
+          });
+        },
+      });
     }
     this.acted = newStatus;
     this.save();
@@ -64,11 +58,8 @@ class Scene extends Actor {
     this.name = name;
     this.save();
   }
-  clear() {
-    const clearScene = () => {
-      minions.forEach((minion) =>
-        store.dispatch("removeBaddie", { id: minion.id, type: minion.type })
-      );
+  clear(force) {
+    if (force) {
       this.green = [];
       this.yellow = [];
       this.red = [];
@@ -78,26 +69,21 @@ class Scene extends Actor {
       this.locations = [];
       this.notes = "";
       this.save();
-    };
-
-    const minions = store.getters.childMinions(this.id);
-    if (minions.length > 0) {
-      // Vue.dialog
-      //   .confirm(
-      //     {
-      //       title: "Warning",
-      //       body: "Clearing the scene will remove all the environment's minions. Do you want to continue?",
-      //     },
-      //     {
-      //       okText: "Yes",
-      //       cancelText: "No",
-      //     }
-      //   )
-      //   .then(() => {
-      //     clearScene();
-      //   });
     } else {
-      clearScene();
+      dialog.confirm({
+        body: `Are you sure you want to clear the Scene? All Challenges, Locations, Scene Tracker, and Notes will be removed.`,
+        onConfirmDialog: () => {
+          this.green = [];
+          this.yellow = [];
+          this.red = [];
+          this.acted = false;
+          this.name = "";
+          this.challenges = [];
+          this.locations = [];
+          this.notes = "";
+          this.save();
+        },
+      });
     }
   }
   progressScene(element) {
@@ -110,13 +96,23 @@ class Scene extends Actor {
   }
   removeLocation(index) {
     if (index >= 0) {
-      this.locations.splice(index, 1);
-      this.save();
+      dialog.confirm({
+        body: `Are you sure you want to remove this location (${this.locations[index].name})?`,
+        onConfirmDialog: () => {
+          this.locations.splice(index, 1);
+          this.save();
+        },
+      });
     }
   }
   resetLocations() {
-    this.locations = [];
-    this.save();
+    dialog.confirm({
+      body: `Are you sure you want to remove all locations?`,
+      onConfirmDialog: () => {
+        this.locations = [];
+        this.save();
+      },
+    });
   }
   addChallenge(challenge, skipInitialize) {
     this.challenges.push(new Challenge(challenge, skipInitialize));
@@ -124,13 +120,23 @@ class Scene extends Actor {
   }
   removeChallenge(index) {
     if (index >= 0) {
-      this.challenges.splice(index, 1);
-      this.save();
+      dialog.confirm({
+        body: `Are you sure you want to remove this challenge (${this.challenges[index].name})?`,
+        onConfirmDialog: () => {
+          this.challenges.splice(index, 1);
+          this.save();
+        },
+      });
     }
   }
   resetChallenges() {
-    this.challenges = [];
-    this.save();
+    dialog.confirm({
+      body: `Are you sure you want to remove all challenges?`,
+      onConfirmDialog: () => {
+        this.challenges = [];
+        this.save();
+      },
+    });
   }
   setNote(note) {
     this.notes = note;
@@ -181,7 +187,7 @@ class Scene extends Actor {
     }, []);
   }
   import(data) {
-    this.clear();
+    this.clear(true);
     const greens = data.green.split("-");
     const yellows = data.yellow.split("-");
     const reds = data.red.split("-");
@@ -212,6 +218,7 @@ class Challenge extends GenericObject {
     this.list = (data.list || []).map((x) => new ChallengeEntry(x));
     this.description = data.description || "";
     this.tempDescription = data.tempDescription || this.description;
+    this.type = "challenge";
     if (!skipInitialize) this.initialize();
   }
 
@@ -230,23 +237,16 @@ class Challenge extends GenericObject {
       this.list.splice(index, 1);
       this.save();
       if (this.list.length === 0) {
-        // Vue.dialog
-        //   .confirm(
-        //     {
-        //       title: "No Challenges",
-        //       body: "This Challenge has no elements. Do you want to remove it?",
-        //     },
-        //     {
-        //       okText: "Yes",
-        //       cancelText: "No",
-        //     }
-        //   )
-        //   .then(() => {
-        //     const thisIndex = store.state.scene.challenges.findIndex(
-        //       (x) => x.id === this.id
-        //     );
-        //     store.state.scene.removeChallenge(thisIndex);
-        //   });
+        dialog.confirm({
+          title: "No Challenges",
+          body: "This Challenge has no elements. Do you want to remove it?",
+          onConfirmDialog: () => {
+            const thisIndex = store.state.scene.challenges.findIndex(
+              (x) => x.id === this.id
+            );
+            store.state.scene.removeChallenge(thisIndex);
+          },
+        });
       }
     }
   }
@@ -297,6 +297,7 @@ class Location extends GenericObject {
     super(data);
     this.description = data.description || "";
     this.tempDescription = data.tempDescription || data.description || "";
+    this.type = "location";
   }
 
   saveEdit() {

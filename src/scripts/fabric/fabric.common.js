@@ -41,73 +41,6 @@ function initCanvas(id) {
 
   canvas.add(group);
 
-  // canvas.on("object:modified", (e) => {
-  //   if (e?.target) {
-  //     store.dispatch("moveObject", e.target);
-  //   } else {
-  //     console.warn("object:modifed event couldnt find a target", e);
-  //   }
-  // });
-
-  // canvas.on("selection:created", (e) => {
-  //   console.log("canvas created");
-  //   // if (e?.selected?.length) {
-  //   //   const { id, actorType } = e.selected[0];
-  //   //   store.dispatch("selectObject", { id, actorType });
-  //   // } else {
-  //   //   console.warn("selection:created event couldnt find a target", e);
-  //   // }
-  // });
-
-  // canvas.on({
-  //   "selection:updated": (e) => {
-  //     if (e?.selected) {
-  //       e.selected.forEach(({ id, actorType }) => {
-  //         store.dispatch("selectObject", { id, actorType });
-  //       });
-  //     } else {
-  //       console.warn("selection:updated event couldnt find a target", e);
-  //     }
-  //   },
-  //   "selection:created": (e) => {
-  //     if (e?.selected) {
-  //       e.selected.forEach(({ id, actorType }) => {
-  //         store.dispatch("selectObject", { id, actorType });
-  //       });
-  //     } else {
-  //       console.warn("selection:created event couldnt find a target", e);
-  //     }
-  //   },
-  //   "selection:cleared": (e) => {
-  //     if (e?.deselected?.length) {
-  //       store.dispatch("selectObject", e.deselected[0]);
-  //     } else if (e.target) {
-  //       store.dispatch("selectObject", e.target);
-  //     } else {
-  //       console.warn("selection:cleared event couldnt find a target", e);
-  //     }
-  //   },
-  // });
-  // canvas.on("selection:updated", (e) => {
-  //   // console.log("canvas updated");
-  //   // if (e?.selected?.length) {
-  //   //   store.dispatch("selectObject", e.selected[0]);
-  //   // } else {
-  //   //   console.warn("selection:updated event couldnt find a target", e);
-  //   // }
-  // });
-
-  // canvas.on("selection:cleared", (e) => {
-  //   console.log("canvas cleared");
-  //   // if (e?.deselected?.length) {
-  //   //   store.dispatch("selectObject", e.deselected[0]);
-  //   // } else if (e.target) {
-  //   //   store.dispatch("selectObject", e.target);
-  //   // } else {
-  //   //   console.warn("selection:cleared event couldnt find a target", e);
-  //   // }
-  // });
-
   fabric.Object.prototype.toObject = (function (toObject) {
     return function (propertiesToInclude) {
       propertiesToInclude = (propertiesToInclude || []).concat([
@@ -144,20 +77,14 @@ function getNextUnusedSpace(canvas, top, left, obj) {
   if (top > canvas.height - 50) {
     return getNextUnusedSpace(canvas, 50, left + 75, obj);
   } else {
-    let match = null;
-    const list = canvas.getObjects();
-    for (let i = 0; i < list.length; i++) {
-      const el = list[i];
-      if (
+    const match = canvas.getObjects().find((el) => {
+      return (
         el.left >= left &&
         el.left < obj.width + left &&
         el.top >= top &&
         el.top < obj.height + top
-      ) {
-        match = el;
-        break;
-      }
-    }
+      );
+    });
     if (match) {
       return getNextUnusedSpace(canvas, top + match.height, left, obj);
     } else {
@@ -293,8 +220,8 @@ function wrapCanvasText(t, canvas, maxW, maxH) {
 
 function addGroup(canvas, group, data) {
   const { top, left } = getNextUnusedSpace(canvas, 50, 0, group);
-  group.top = data ? data.top : top;
-  group.left = data ? data.left : left;
+  group.top = data?.top ?? top;
+  group.left = data?.left ?? left;
 
   canvas.add(group);
 }

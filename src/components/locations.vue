@@ -7,7 +7,7 @@
           <button
             class="btn btn-success border-dark"
             title="Add a new Location to the Scene"
-            @click="showCreateModal = true"
+            @click="$dialog.createActor({ type: 'Location' })"
           >
             Add
           </button>
@@ -71,7 +71,7 @@
             <tr
               v-for="(location, index) in scene.locations"
               :key="'location' + location.id"
-              :id="location.id"
+              :id="location.elementId"
             >
               <td width="30%">
                 <input
@@ -138,49 +138,6 @@
         </table>
       </div>
     </div>
-    <Modal :isOpen="showCreateModal">
-      <template v-slot:header
-        ><h5 class="modal-title">Add a Location</h5></template
-      >
-      <template v-slot:body>
-        <h5>Name</h5>
-        <input
-          type="text"
-          v-model.trim="newLocation.name"
-          class="form-control form-control-sm border-dark"
-          placeholder="Location Name"
-          @keypress.enter="addLocation()"
-          ref="locationName"
-        />
-        <h5>Description</h5>
-        <textarea
-          type="text"
-          v-model.trim="newLocation.description"
-          class="form-control form-control-sm border-dark"
-          placeholder="Location Description"
-          @keypress.enter="addLocation()"
-          ref="locationDescription"
-        >
-        </textarea>
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-success border-dark"
-          type="button"
-          @click="addLocation()"
-          :disabled="newLocation.name === ''"
-        >
-          Save
-        </button>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          @click="showCreateModal = false"
-        >
-          Close
-        </button>
-      </template>
-    </Modal>
   </div>
 </template>
 
@@ -188,30 +145,12 @@
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
-import Modal from "components/modals/modal.vue";
-
 export default defineComponent({
   name: "LocationsTracker",
-  components: { Modal },
-  data() {
-    return {
-      newLocation: {
-        name: "",
-        description: "",
-      },
-      showCreateModal: false,
-    };
-  },
   computed: {
     ...mapState(["scene"]),
   },
   methods: {
-    addLocation() {
-      this.scene.addLocation(this.newLocation);
-      this.newLocation.name = "";
-      this.newLocation.description = "";
-      this.showCreateModal = false;
-    },
     editLocationElement(location, index) {
       location.beginEdit();
       this.$nextTick(() => {

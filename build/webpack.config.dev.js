@@ -95,6 +95,8 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: "jquery",
       jquery: "jquery",
+      "window.jQuery": "jquery",
+      jQuery: "jquery",
     }),
     new CopyPlugin({
       patterns: [{ from: "src/assets/images", to: "images" }],

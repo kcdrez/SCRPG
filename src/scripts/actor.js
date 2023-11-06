@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import $ from "jquery";
 
 import store from "../vuex-state/store";
 
@@ -16,7 +17,14 @@ class GenericObject {
     this.type = data.type;
     this.top = data.top || null;
     this.left = data.left || null;
+    this.angle = data.angle ?? 0;
+    this.scaleX = data.scaleX ?? 1;
+    this.scaleY = data.scaleY ?? 1;
     this.updateCanvas = false;
+  }
+
+  get elementId() {
+    return `${this.type}-${this.id}`;
   }
 
   save(type, data) {
@@ -33,6 +41,12 @@ class GenericObject {
     this.name = this.tempName;
     this.updateCanvas = true;
     this.save();
+  }
+  scrollInView() {
+    console.log(this.elementId);
+    $("html, body").animate({
+      scrollTop: $(`#${this.elementId}`).offset().top - 90,
+    });
   }
 }
 

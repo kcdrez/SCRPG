@@ -14,12 +14,12 @@
     <div class="collapse navbar-collapse" id="navbar-toggler">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <div class="nav-link c-pointer" @click="toggleOvercomeModal(true)">
+          <div class="nav-link c-pointer" @click="toggleOvercomeDialog(true)">
             Overcome Chart
           </div>
         </li>
         <li class="nav-item">
-          <div class="nav-link c-pointer" @click="toggleBoostModal(true)">
+          <div class="nav-link c-pointer" @click="toggleBoostDialog(true)">
             Boost/Hinder Chart
           </div>
         </li>
@@ -79,7 +79,7 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(["toggleBoostModal", "toggleOvercomeModal"]),
+    ...mapActions(["toggleBoostDialog", "toggleOvercomeDialog"]),
   },
 });
 </script>

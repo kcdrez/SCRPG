@@ -4,12 +4,11 @@
       <div class="col">
         <h2 class="section-header">
           {{ label }}
-          <!-- <a :href="`#${label}-Data`" data-bs-toggle="collapse">{{ label }}</a> -->
         </h2>
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
-            @click="showCreateModal = true"
+            @click="$dialog.createActor({ type: labelSingle })"
           >
             Create
           </button>
@@ -66,7 +65,7 @@
         </thead>
         <tbody>
           <template v-for="baddie in list" :key="baddie.id">
-            <tr :id="baddie.id">
+            <tr :id="baddie.elementId">
               <!-- Name (Owner) -->
               <td class="text-center align-middle text-capitalize">
                 <template v-if="baddie.editing">
@@ -111,11 +110,9 @@
                   </div>
                 </template>
                 <template v-else>
-                  <div class="d-inline me-2">{{ baddie.name }}</div>
-                  <div class="d-inline me-2" v-if="baddie.owner">
-                    ({{ baddie.owner.name }})
+                  <div class="d-inline me-2">
+                    {{ baddie.displayName ?? baddie.name }}
                   </div>
-                  <div class="d-inline">[{{ baddie.index }}]</div>
                 </template>
               </td>
               <!-- Die Size -->
@@ -176,21 +173,27 @@
                   <button
                     class="btn btn-success border-dark"
                     :title="`Add a Bonus to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('Bonus', baddie)"
+                    @click="
+                      $dialog.modifyActor({ type: 'Bonus', target: baddie })
+                    "
                   >
                     <img src="images/boost.png" />
                   </button>
                   <button
                     class="btn btn-warning border-dark"
                     :title="`Add a Penalty to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('Penalty', baddie)"
+                    @click="
+                      $dialog.modifyActor({ type: 'Penalty', target: baddie })
+                    "
                   >
                     <img src="images/hinder.png" />
                   </button>
                   <button
                     class="btn btn-success border-dark"
                     :title="`Add a Defend to this ${baddie.typeLabel}`"
-                    @click="modifyBaddie('Defend', baddie)"
+                    @click="
+                      $dialog.modifyActor({ type: 'Defend', target: baddie })
+                    "
                   >
                     <img src="images/defend.png" />
                   </button>
@@ -263,18 +266,6 @@
         </tbody>
       </table>
     </div>
-    <CreateActorModal
-      :show="showCreateModal"
-      :type="labelSingle"
-      @close="showCreateModal = false"
-    />
-    <ModifierModal
-      v-if="modifierData.target"
-      :target="modifierData.target"
-      :type="modifierData.type"
-      :show="showModifierModal"
-      @close="showModifierModal = false"
-    />
   </div>
 </template>
 
@@ -284,15 +275,11 @@ import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
 import { sortActors } from "../scripts/actor";
-import ModifierModal from "components/modals/modifyModal.vue";
-import CreateActorModal from "components/modals/createActorModal.vue";
 
 export default defineComponent({
   name: "BaddieList",
   components: {
     Modifier,
-    ModifierModal,
-    CreateActorModal,
   },
   props: {
     label: {
@@ -305,14 +292,7 @@ export default defineComponent({
     },
   },
   data() {
-    return {
-      showCreateModal: false,
-      showModifierModal: false,
-      modifierData: {
-        target: null,
-        type: "Bonus",
-      },
-    };
+    return {};
   },
   computed: {
     list() {
@@ -331,11 +311,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(["upsertBaddie", "removeBaddie"]),
-    modifyBaddie(type, baddie) {
-      this.modifierData.target = baddie;
-      this.modifierData.type = type;
-      this.showModifierModal = true;
-    },
     editBaddie(baddie, index) {
       baddie.beginEdit();
       this.$nextTick(() => {

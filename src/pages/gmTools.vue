@@ -8,7 +8,7 @@
       <Baddies label="Lieutenants" ref="lieutenants" />
       <Villains ref="villains" />
     </div>
-    <DrawingBoard @modifySelected="modifySelected($event)" />
+    <DrawingBoard />
     <div
       class="scroll-to-top"
       @click="scrollToTop()"
@@ -18,35 +18,7 @@
       <i class="fas fa-arrow-up"></i>
       TOP
     </div>
-    <div id="overcomeChartModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Overcome Chart</h3>
-            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal">
-              <span>&times;</span>
-            </button> -->
-          </div>
-          <div class="modal-body">
-            <img
-              src="images/overcome.jpeg"
-              class="img-fluid"
-              data-bs-dismiss="modal"
-            />
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <Modal :isOpen="modals.showBoostModal" @close="toggleBoostModal(false)">
+    <Dialog :isOpen="dialogs.showBoostDialog" @close="toggleBoostDialog(false)">
       <template v-slot:header>
         <h3 class="modal-title">Boost/Hinder Chart</h3>
       </template>
@@ -57,19 +29,17 @@
         <button
           class="btn btn-secondary border-dark"
           type="button"
-          @click="toggleBoostModal(false)"
+          @click="toggleBoostDialog(false)"
         >
           Close
         </button>
       </template>
-    </Modal>
-    <Modal
-      :isOpen="modals.showOvercomeModal"
-      @close="toggleOvercomeModal(false)"
+    </Dialog>
+    <Dialog
+      :isOpen="dialogs.showOvercomeDialog"
+      @close="toggleOvercomeDialog(false)"
     >
-      <template v-slot:header>
-        <h3 class="modal-title">Overcome Chart</h3>
-      </template>
+      <template v-slot:header>Overcome Chart</template>
       <template v-slot:body>
         <img src="images/overcome.jpeg" class="img-fluid" />
       </template>
@@ -77,12 +47,12 @@
         <button
           class="btn btn-secondary border-dark"
           type="button"
-          @click="toggleOvercomeModal(false)"
+          @click="toggleOvercomeDialog(false)"
         >
           Close
         </button>
       </template>
-    </Modal>
+    </Dialog>
   </div>
 </template>
 
@@ -96,21 +66,28 @@ import Environment from "components/environment.vue";
 import Villains from "components/villain.vue";
 import Players from "components/player.vue";
 import DrawingBoard from "components/drawingBoard.vue";
-import Modal from "components/modals/modal.vue"; //todo implement modal component
+import Dialog from "components/dialogs/dialog.vue";
 
 export default defineComponent({
   name: "GMTools",
-  components: { Baddies, Environment, Villains, Players, DrawingBoard, Modal },
+  components: {
+    Baddies,
+    Environment,
+    Villains,
+    Players,
+    DrawingBoard,
+    Dialog,
+  },
   data() {
     return {
       showScrollWidget: false,
     };
   },
   computed: {
-    ...mapState(["modals"]),
+    ...mapState(["dialogs"]),
   },
   methods: {
-    ...mapActions(["toggleBoostModal", "toggleOvercomeModal"]),
+    ...mapActions(["toggleBoostDialog", "toggleOvercomeDialog"]),
     scrollToTop() {
       $("html").animate({ scrollTop: 0 }, 300);
     },
@@ -118,22 +95,6 @@ export default defineComponent({
       //lodash doesnt like arrow functions for some reason
       this.showScrollWidget = window.scrollY >= 75;
     }, 50),
-    modifySelected(type) {
-      console.log("todo modify Selected in gmTools.vue");
-      // if (this.$store.state.selection.type === "minion") {
-      //   this.$refs.minions.modifyBaddie(
-      //     type,
-      //     this.$store.state.selection.id,
-      //     this.$store.state.selection.instance
-      //   );
-      // } else if (this.$store.state.selection.type === "lieutenant") {
-      //   this.$refs.lieutenants.modifyBaddie(
-      //     type,
-      //     this.$store.state.selection.id,
-      //     this.$store.state.selection.instance
-      //   );
-      // }
-    },
   },
   created() {
     window.addEventListener("scroll", this.scrolling);

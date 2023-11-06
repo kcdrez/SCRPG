@@ -5,7 +5,7 @@
         <h3>Round Tracker</h3>
         <button
           class="btn btn-sm btn-danger border-dark mb-2"
-          @click="$store.dispatch('resetRound')"
+          @click="resetRound()"
           title="Reset the round, marking all actors as not yet acted"
         >
           Reset Round Tracker
@@ -15,14 +15,14 @@
           <button
             class="btn btn-success border-dark"
             title="Add a new player to the scene"
-            @click="addPlayer()"
+            @click="$dialog.createActor({ type: 'Player' })"
           >
             Add
           </button>
           <button
             class="btn btn-warning border-dark"
             title="Remove all players from the scene"
-            @click="clearPlayers"
+            @click="clearPlayers()"
           >
             Clear
           </button>
@@ -36,7 +36,7 @@
             class="btn btn-secondary border-dark"
             title="Export the player data to an xlsx file"
             @click="
-              $store.dispatch('export', {
+              exportData({
                 type: 'players',
                 fileName: 'players',
               })
@@ -51,7 +51,7 @@
           class="d-none"
           ref="import"
           @change="
-            $store.dispatch('import', {
+            importData({
               files: $event.target.files,
               filters: ['player', 'minions', 'bonus', 'penalty', 'defend'],
             })
@@ -73,11 +73,7 @@
           </thead>
           <tbody class="text-center">
             <template v-for="(actor, index) in actors">
-              <tr
-                v-if="!!actor.name"
-                :key="actor.id"
-                :id="actor.type === 'player' ? actor.id : ''"
-              >
+              <tr v-if="!!actor.name" :key="actor.id">
                 <!-- Name -->
                 <td class="text-capitalize c-pointer align-middle">
                   <input
@@ -96,10 +92,7 @@
                     <span v-if="actor.acted">
                       <i class="fas fa-check text-success"></i>
                     </span>
-                    {{ actor.name }}
-                    <div class="d-inline" v-if="actor.index">
-                      [{{ actor.index }}]
-                    </div>
+                    {{ actor.displayName ?? actor.name }}
                     <sup
                       v-if="actor.owner"
                       :title="`This ${actor.typeLabel} belongs to ${actor.owner.name}`"
@@ -230,7 +223,12 @@
                     <button
                       class="btn btn-primary border-dark add-minion"
                       title="Add a Minion"
-                      @click="addMinion(actor.id)"
+                      @click="
+                        $dialog.createActor({
+                          type: 'Minion',
+                          ownerId: actor.id,
+                        })
+                      "
                       v-if="actor.allowAddMinion"
                     >
                       <span class="fa-stack">
@@ -251,9 +249,8 @@
                     </button>
                     <button
                       class="btn btn-secondary border-dark"
-                      @click="scroll(actor)"
+                      @click="actor.scrollInView()"
                       title="See Details"
-                      v-if="actor.viewDetails"
                     >
                       <i class="fas fa-eye" title="View Details" />
                     </button>
@@ -266,24 +263,16 @@
         <div v-else class="text-center">There are no actors in the scene.</div>
       </div>
     </div>
-    <CreateActorModal
-      :show="showCreateModal"
-      :type="modalType"
-      :ownerId="modalOwner"
-      @close="showCreateModal = false"
-    />
   </div>
 </template>
 
 <script>
-import { defineComponent } from "vue";
-import { mapGetters } from "vuex";
-
-import CreateActorModal from "components/modals/createActorModal.vue";
+import { defineComponent, ref } from "vue";
+import { mapGetters, mapActions } from "vuex";
 
 export default defineComponent({
   name: "RoundTracker",
-  components: { CreateActorModal },
+  components: {},
   data() {
     return {
       newPlayer: {
@@ -291,51 +280,25 @@ export default defineComponent({
         hp: 30,
         maxHp: 30,
       },
-      showCreateModal: false,
-      modalType: "Player",
-      modalOwner: null,
     };
   },
   computed: {
     ...mapGetters(["actors"]),
   },
   methods: {
-    addPlayer() {
-      this.modalType = "Player";
-      this.modalOwner = null;
-      this.showCreateModal = true;
-    },
-    addMinion(ownerId) {
-      this.modalType = "Minion";
-      this.modalOwner = ownerId;
-      this.showCreateModal = true;
-    },
+    ...mapActions({
+      exportData: "export",
+      importData: "import",
+      resetRound: "resetRound",
+      resetPlayers: "resetPlayers",
+    }),
     clearPlayers() {
-      // this.$dialog
-      //   .confirm(
-      //     {
-      //       title: "Are You Sure?",
-      //       body: "Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.",
-      //     },
-      //     {
-      //       okText: "Yes",
-      //       cancelText: "No",
-      //     }
-      //   )
-      //   .then((r) => {
-      //     this.$store.dispatch("resetPlayers");
-      //   });
-    },
-    scroll(actor) {
-      $("html, body").animate(
-        {
-          scrollTop: $(`#${actor.type}${actor.id}`).offset().top,
+      this.$dialog.confirm({
+        body: "Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.",
+        onConfirmDialog: () => {
+          this.resetPlayers();
         },
-        800,
-        () => {
-          window.location.hash = actor.id;
-        }
-      );
+      });
     },
     editActor(actor, index) {
       actor.beginEdit();

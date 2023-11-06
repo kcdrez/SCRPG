@@ -2,7 +2,7 @@
   <div class="btn-group btn-group-sm mb-1 mx-1">
     <button
       class="btn btn-primary border-dark"
-      @click="goToSelection()"
+      @click="selectedActor.scrollInView()"
       :title="`Scroll to view details of ${selection.type}`"
       :disabled="!selection.id"
     >
@@ -108,82 +108,92 @@ export default defineComponent({
     return {
       states: [],
       mod: 0,
-      showModifierModal: false,
       modifierTarget: null,
       modifierType: "Bonus",
     };
   },
   computed: {
-    ...mapState(["minions", "lieutenants", "players", "villains", "selection"]),
+    ...mapState([
+      "minions",
+      "lieutenants",
+      "players",
+      "villains",
+      "selection",
+      "scene",
+    ]),
+    selectedActor() {
+      switch (this.selection.type) {
+        case "minion": {
+          return this.minions.find((x) => x.id === this.selection.id);
+        }
+        case "lieutenant": {
+          return this.lieutenants.find((x) => x.id === this.selection.id);
+        }
+        case "player": {
+          return this.players.find((x) => x.id === this.selection.id);
+        }
+        case "villain": {
+          return this.villains.find((x) => x.id === this.selection.id);
+        }
+        case "location": {
+          return this.scene.locations.find((x) => x.id === this.selection.id);
+        }
+        case "challenge": {
+          return this.scene.challenges.find((x) => x.id === this.selection.id);
+        }
+      }
+      return null;
+    },
   },
   methods: {
     removeSelection() {
-      const el = this.canvas.getActiveObject();
-      if (el && el.id) {
-        switch (el.actorType) {
-          case "minion": {
-            const match = this.minions.find((x) => x.id === el.id);
-            match.remove();
-            break;
-          }
-          case "lieutenant": {
-            const match = this.lieutenants.find((x) => x.id === el.id);
-            match.remove();
-            break;
-          }
-          case "player": {
-            const match = this.players.find((x) => x.id === el.id);
-            match.remove();
-            break;
-          }
-          case "villain": {
-            const match = this.villains.find((x) => x.id === el.id);
-            match.remove();
-            break;
-          }
-          case "location": {
-            const index = this.locations.findIndex((x) => x.id === el.id);
-            this.$store.state.scene.removeLocation(index);
-            break;
-          }
-          case "challenge": {
-            const index = this.challenges.findIndex((x) => x.id === el.id);
-            this.$store.state.scene.removeChallenge(index);
-          }
+      switch (this.selection.type) {
+        case "minion": {
+          const match = this.minions.find((x) => x.id === this.selection.id);
+          match.remove();
+          break;
+        }
+        case "lieutenant": {
+          const match = this.lieutenants.find(
+            (x) => x.id === this.selection.id
+          );
+          match.remove();
+          break;
+        }
+        case "player": {
+          const match = this.players.find((x) => x.id === this.selection.id);
+          match.remove();
+          break;
+        }
+        case "villain": {
+          const match = this.villains.find((x) => x.id === this.selection.id);
+          match.remove();
+          break;
+        }
+        case "location": {
+          const index = this.locations.findIndex(
+            (x) => x.id === this.selection.id
+          );
+          this.scene.removeLocation(index);
+          break;
+        }
+        case "challenge": {
+          const index = this.challenges.findIndex(
+            (x) => x.id === this.selection.id
+          );
+          this.scene.removeChallenge(index);
         }
       }
     },
     demote() {
-      let match = null;
-      switch (this.selection.type) {
-        case "minion":
-          match = this.minions.find(
-            (minion) => minion.id === this.selection.id
-          );
-          break;
-        case "lieutenant":
-          match = this.lieutenants.find(
-            (lieutenant) => lieutenant.id === this.selection.id
-          );
-          break;
+      if (this.selectedActor?.demote) {
+        this.selectedActor.demote();
       }
-      if (match) match.demote();
     },
     promote() {
-      let match = null;
-      switch (this.selection.type) {
-        case "minion":
-          match = this.minions.find(
-            (minion) => minion.id === this.selection.id
-          );
-          break;
-        case "lieutenant":
-          match = this.lieutenants.find(
-            (lieutenant) => lieutenant.id === this.selection.id
-          );
-          break;
+      if (this.selectedActor?.promote) {
+        this.selectedActor.promote();
       }
-      if (match) match.promote();
     },
     undo() {
       if (this.mod < this.states.length) {
@@ -209,37 +219,27 @@ export default defineComponent({
       this.$emit("modify", { target, modifierType });
     },
     canPromote(target) {
-      let match;
-      if (target.type === "minion") {
-        match = this.minions.find((x) => x.id === target.id);
-      } else if (target.type === "lieutenant") {
-        match = this.minions.find((x) => x.id === target.id);
-      }
-      if (match) {
-        return match?.size < 12;
+      if (this.selectedActor?.promote) {
+        return this.selectedActor.size < 12;
       }
       return false;
     },
     canDemote(target) {
-      let match;
-      if (target.type === "minion") {
-        match = this.minions.find((x) => x.id === target.id);
-      } else if (target.type === "lieutenant") {
-        match = this.minions.find((x) => x.id === target.id);
-      }
-      if (match) {
-        return match?.size > 4;
+      if (this.selectedActor?.demote) {
+        return this.selectedActor.size > 4;
       }
       return false;
-    },
-    goToSelection() {
-      if (this.selection.id) {
-        const offset = $("#" + this.selection.id).offset();
-        $("html, body").animate({
-          scrollTop: offset.top - 100,
-        });
-      }
     },
   },
 });
 </script>
+
+<style scoped>
+img {
+  width: 20px;
+}
+button {
+  min-width: 50px;
+  font-size: 1.1rem;
+}
+</style>

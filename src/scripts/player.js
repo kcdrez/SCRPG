@@ -2,6 +2,7 @@ import { v4 as uuid } from "uuid";
 
 import store from "../vuex-state/store";
 import { Actor, Modifier } from "./actor";
+import dialog from "./dialog";
 
 class Player extends Actor {
   constructor(data) {
@@ -13,6 +14,7 @@ class Player extends Actor {
       ? data.penalties.map((x) => new Modifier(x))
       : [];
     this.defends = data.defends ? data.defends.map((x) => new Modifier(x)) : [];
+    this.type = "player";
   }
 
   get hp() {
@@ -192,19 +194,15 @@ class Player extends Actor {
       ? `Some of this player's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`
       : `Some of this player's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      // Vue.dialog.confirm({
-      //   title: 'Warning',
-      //   body: message
-      // },
-      // {
-      //   okText: 'Yes',
-      //   cancelText: 'No'
-      // })
-      // .then(() => {
-      //   minions.forEach(minion => {
-      //     minion.takenAction(newStatus);
-      //   })
-      // });
+      dialog.confirm({
+        title: "Warning",
+        body: message,
+        onConfirmDialog: () => {
+          minions.forEach((minion) => {
+            minion.takenAction(newStatus);
+          });
+        },
+      });
     }
     this.acted = newStatus;
     this.save();
@@ -241,17 +239,12 @@ class Player extends Actor {
     };
   }
   remove() {
-    // Vue.dialog.confirm({
-    //   title: 'Are You Sure?',
-    //   body: 'Are you sure you want to remove this player from the scene?'
-    // },
-    // {
-    //   okText: 'Yes',
-    //   cancelText: 'No'
-    // })
-    // .then(() => {
-    //   store.dispatch('removePlayer', this.id);
-    // });
+    dialog.confirm({
+      body: `Are you sure you want to remove this player from the scene (${this.name})?`,
+      onConfirmDialog: () => {
+        store.dispatch("removePlayer", this.id);
+      },
+    });
   }
 }
 

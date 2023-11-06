@@ -7,7 +7,7 @@
           <button
             class="btn btn-success border-dark"
             title="Add a new Challenge to the Scene"
-            @click="addChallengeModal"
+            @click="$dialog.createActor({ type: 'Challenge' })"
           >
             Add
           </button>
@@ -59,7 +59,7 @@
         <div
           v-for="(challenge, challengeIndex) in scene.challenges"
           :key="challenge.name"
-          :id="challenge.id"
+          :id="challenge.elementId"
         >
           <div class="mb-2" v-if="challenge.editing">
             <div class="input-group input-group-sm mb-2">
@@ -255,90 +255,6 @@
         </div>
       </div>
     </div>
-    <Modal :isOpen="showCreateModal">
-      <template v-slot:header
-        ><h5 class="modal-title">Add a Challenge</h5></template
-      >
-      <template v-slot:body>
-        <div class="input-group input-group-sm mb-3">
-          <span class="input-group-text border-dark">Name</span>
-          <input
-            type="text"
-            v-model.trim="newChallenge.name"
-            class="form-control border-dark"
-            placeholder="Challenge Name"
-            @keypress.enter="addChallenge()"
-            ref="challengeName"
-          />
-        </div>
-        <div class="input-group input-group-sm mb-3">
-          <span class="input-group-text border-dark">Description</span>
-          <textarea
-            v-model.trim="newChallenge.description"
-            class="form-control border-dark"
-            placeholder="Add a description of the challenge (optional)"
-            @keypress.enter="addChallenge()"
-          >
-          </textarea>
-        </div>
-        <div>
-          <h6 class="text-light">Add some challenge entries (optional):</h6>
-          <div class="input-group input-group-sm mb-3">
-            <input
-              type="text"
-              class="form-control border-dark"
-              placeholder="Challenge Entry"
-              v-model.trim="newChallenge.entry"
-              @keydown.enter="addTempChallenge"
-            />
-            <button
-              class="btn btn-primary border-dark"
-              type="button"
-              @click="addTempChallenge"
-              :disabled="newChallenge.entry === ''"
-            >
-              Add
-            </button>
-          </div>
-          <div
-            class="input-group input-group-sm mb-1"
-            v-for="(item, index) in newChallenge.list"
-            :key="'challenge' + index"
-          >
-            <input
-              type="text"
-              class="form-control border-dark"
-              placeholder="Challenge Entry Description"
-              v-model.trim="item.name"
-            />
-            <button
-              class="btn btn-danger border-dark"
-              type="button"
-              @click="newChallenge.list.splice(index, 1)"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-success border-dark"
-          type="button"
-          @click="addChallenge()"
-          :disabled="newChallenge.name === ''"
-        >
-          Save
-        </button>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          @click="showCreateModal = false"
-        >
-          Close
-        </button>
-      </template>
-    </Modal>
   </div>
 </template>
 
@@ -346,54 +262,25 @@
 import { mapState } from "vuex";
 import { defineComponent } from "vue";
 
-import Modal from "components/modals/modal.vue";
-
 export default defineComponent({
   name: "ChallengesTracker",
-  components: { Modal },
+  components: {},
   data() {
     return {
       newChallenge: {
         name: "",
-        entry: "",
-        description: "",
-        list: [],
       },
-      showCreateModal: false,
     };
   },
   computed: {
     ...mapState(["scene"]),
   },
   methods: {
-    addChallengeModal() {
-      this.showCreateModal = true;
-      this.$refs.challengeName.focus();
-    },
     editChallenge(challenge, index) {
       challenge.beginEdit();
       this.$nextTick(() => {
         this.$refs.challengeNameEdit[index].focus();
       });
-    },
-    addChallenge(challenge) {
-      if (challenge) {
-        challenge.add();
-      } else if (this.newChallenge.name !== "") {
-        this.scene.addChallenge(this.newChallenge);
-        this.newChallenge.name = "";
-        this.newChallenge.list = [];
-        this.newChallenge.name = "";
-        this.showCreateModal = false;
-      }
-    },
-    addTempChallenge() {
-      if (this.newChallenge.entry !== "") {
-        this.newChallenge.list.push({
-          name: this.newChallenge.entry,
-        });
-        this.newChallenge.entry = "";
-      }
     },
     editChallengeEntry(entry) {
       entry.beginEdit();

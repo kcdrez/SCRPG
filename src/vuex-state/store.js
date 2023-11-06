@@ -20,9 +20,9 @@ const store = createStore({
       id: null,
       type: null,
     },
-    modals: {
-      showBoostModal: false,
-      showOvercomeModal: false,
+    dialogs: {
+      showBoostDialog: false,
+      showOvercomeDialog: false,
     },
   },
   mutations: {
@@ -77,7 +77,6 @@ const store = createStore({
       state.players = [];
     },
     SELECT_CANVAS_EL(state, data) {
-      console.log("select canvas element", data);
       state.selection.id = data?.id || null;
       state.selection.type = data?.actorType || null;
     },
@@ -115,6 +114,7 @@ const store = createStore({
             }
           });
         }
+        console.log(dataToSave);
         window.localStorage.setItem(type, JSON.stringify(dataToSave));
       }
     },
@@ -127,6 +127,9 @@ const store = createStore({
     },
     resetRound(ctx) {
       ctx.commit("RESET_ROUND");
+    },
+    resetScene(ctx) {
+      ctx.commit("RESET_SCENE");
     },
     upsertBaddie(ctx, baddieData) {
       const baddie =
@@ -168,6 +171,7 @@ const store = createStore({
       ctx.dispatch("saveData", "players");
     },
     reconcile(ctx, type) {
+      //todo
       // const baddiesList = ctx.state[type];
       // for (let i = 0; i < baddiesList.length - 1; i++) {
       //   if (sameBaddies(baddiesList[i], baddiesList[i + 1])) {
@@ -324,6 +328,9 @@ const store = createStore({
         if (match) {
           match.top = data.top;
           match.left = data.left;
+          match.angle = data.angle;
+          match.scaleX = data.scaleX;
+          match.scaleY = data.scaleY;
           match.save();
         }
       }
@@ -331,11 +338,11 @@ const store = createStore({
     selectObject(ctx, data) {
       ctx.commit("SELECT_CANVAS_EL", data);
     },
-    toggleBoostModal(ctx, isOpen) {
-      ctx.state.modals.showBoostModal = isOpen;
+    toggleBoostDialog(ctx, isOpen) {
+      ctx.state.dialogs.showBoostDialog = isOpen;
     },
-    toggleOvercomeModal(ctx, isOpen) {
-      ctx.state.modals.showOvercomeModal = isOpen;
+    toggleOvercomeDialog(ctx, isOpen) {
+      ctx.state.dialogs.showOvercomeDialog = isOpen;
     },
   },
   getters: {

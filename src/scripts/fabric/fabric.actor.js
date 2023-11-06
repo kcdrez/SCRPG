@@ -14,7 +14,7 @@ async function addBaddie(canvas, baddie) {
   const size = 65;
 
   const textTemp = new fabric.Text(
-    `${baddie.name} [${baddie.index}]`.replace(/\w+/g, _.capitalize),
+    `${baddie.displayName ?? baddie.name}`.replace(/\w+/g, _.capitalize),
     {
       fontSize,
       originX: "center",
@@ -103,6 +103,9 @@ async function addBaddie(canvas, baddie) {
     cornerColor: css.primary,
     actorType,
     dieSize: baddie.size,
+    scaleX: baddie.scaleX ?? 1,
+    scaleY: baddie.scaleY ?? 1,
+    angle: baddie.angle ?? 0,
   });
 
   // const removed = removeBaddieIfExists(canvas, baddie.id);
@@ -143,6 +146,9 @@ function addPlayer(canvas, playerData) {
       borderColor: css.primary,
       cornerColor: css.primary,
       actorType: "player",
+      scaleX: playerData.scaleX ?? 1,
+      scaleY: playerData.scaleY ?? 1,
+      angle: playerData.angle ?? 0,
     }
   );
   const removed = removeIfExists(canvas, playerData.id);
@@ -183,6 +189,9 @@ function addVillain(canvas, villainData) {
       borderColor: css.primary,
       cornerColor: css.primary,
       actorType: "villain",
+      scaleX: villainData.scaleX ?? 1,
+      scaleY: villainData.scaleY ?? 1,
+      angle: villainData.angle ?? 0,
     }
   );
   const removed = removeIfExists(canvas, villainData.id);

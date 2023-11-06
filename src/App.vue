@@ -2,6 +2,7 @@
   <div>
     <navbar />
     <router-view />
+    <DialogsWrapper />
   </div>
 </template>
 

@@ -6,7 +6,7 @@
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
-            @click="showCreateModal = true"
+            @click="$dialog.createActor({ type: 'Player' })"
           >
             Create
           </button>
@@ -20,7 +20,7 @@
           <button
             class="btn btn-secondary border-dark"
             @click="
-              $store.dispatch('export', {
+              exportData({
                 type: 'player',
                 fileName: 'players',
               })
@@ -37,9 +37,9 @@
           class="d-none"
           ref="import"
           @change="
-            $store.dispatch('import', {
-              files: $event.target.files,
+            importData({
               filters: ['player', 'bonus', 'penalty', 'defend'],
+              files: $event.target.files,
             })
           "
         />
@@ -62,7 +62,7 @@
         </thead>
         <tbody>
           <template v-for="player in players" :key="player.name">
-            <tr :id="player.name">
+            <tr :id="player.elementId">
               <!-- Name -->
               <td class="text-center align-middle text-capitalize">
                 <template v-if="player.editing">
@@ -146,7 +146,7 @@
                 ></Modifier>
               </td>
               <!-- Actions -->
-              <td class="align-middle">
+              <td class="align-middle" :id="player.id">
                 <div
                   class="btn-group btn-group-sm w-100 mb-2 actions"
                   role="group"
@@ -154,21 +154,27 @@
                   <button
                     class="btn btn-success border-dark"
                     title="Add a Bonus to this Player"
-                    @click="modifyPlayer('Bonus', player)"
+                    @click="
+                      $dialog.modifyActor({ type: 'Bonus', target: player })
+                    "
                   >
                     <img src="images/boost.png" />
                   </button>
                   <button
                     class="btn btn-warning border-dark"
                     title="Add a Penalty to this Player"
-                    @click="modifyPlayer('Penalty', player)"
+                    @click="
+                      $dialog.modifyActor({ type: 'Penalty', target: player })
+                    "
                   >
                     <img src="images/hinder.png" />
                   </button>
                   <button
                     class="btn btn-success border-dark"
                     title="Add a Defend to this Player"
-                    @click="modifyPlayer('Defend', player)"
+                    @click="
+                      $dialog.modifyActor({ type: 'Defend', target: player })
+                    "
                   >
                     <img src="images/defend.png" />
                   </button>
@@ -201,7 +207,7 @@
                   <button
                     class="btn btn-secondary border-dark text-dark"
                     @click="
-                      $store.dispatch('export', {
+                      exportData({
                         type: 'player',
                         fileName: player.name,
                         id: player.id,
@@ -218,68 +224,6 @@
         </tbody>
       </table>
     </div>
-    <Modal :isOpen="showCreateModal">
-      <template v-slot:header
-        ><h5 class="modal-title">Add a Player</h5></template
-      >
-      <template v-slot:body>
-        <div class="input-group input-group-sm">
-          <span class="input-group-text border-dark">Name</span>
-          <input
-            type="text"
-            v-model.trim="newPlayer.name"
-            class="form-control border-dark"
-            @keypress.enter="createPlayer"
-            ref="newPlayerName"
-          />
-        </div>
-        <div class="input-group input-group-sm mt-2">
-          <span class="input-group-text border-dark">Max HP</span>
-          <input
-            type="number"
-            v-model.number="newPlayer.maxHp"
-            class="form-control border-dark"
-            @keypress.enter="createPlayer"
-            min="17"
-            max="40"
-          />
-          <span class="input-group-text border-dark">Current HP</span>
-          <input
-            type="number"
-            v-model.number="newPlayer.hp"
-            class="form-control border-dark"
-            @keypress.enter="createPlayer"
-            min="0"
-            :max="newPlayer.maxHp"
-            ref="newPlayerHP"
-          />
-        </div>
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-success border-dark"
-          type="button"
-          @click="createPlayer"
-          :disabled="newPlayer.name === ''"
-        >
-          Create
-        </button>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          @click="showCreateModal = false"
-        >
-          Close
-        </button>
-      </template>
-    </Modal>
-    <ModifierModal
-      v-if="modifierTarget"
-      :target="modifierTarget"
-      :type="modifierType"
-      :show="showModifierModal"
-      @close="showModifierModal = false"
-    />
   </div>
 </template>
 
@@ -289,44 +233,30 @@ import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
 import { sortActors } from "../scripts/actor";
-import Modal from "components/modals/modal.vue";
-import ModifierModal from "components/modals/modifyModal.vue";
-import { unvue } from "../scripts/utilities.js";
 
 export default defineComponent({
   name: "PlayerList",
   components: {
     Modifier,
-    Modal,
-    ModifierModal,
   },
   data() {
     return {
-      showCreateModal: false,
-      showModifierModal: false,
       newPlayer: {
         name: "",
         hp: 30,
         maxHp: 30,
       },
-      modifierType: "Bonus",
-      modifierTarget: null,
     };
   },
   computed: {
     ...mapState(["players"]),
   },
   methods: {
-    ...mapActions(["addPlayer"]),
-    createPlayer() {
-      this.addPlayer(unvue(this.newPlayer));
-      this.showCreateModal = false;
-    },
-    modifyPlayer(type, player) {
-      this.modifierTarget = player;
-      this.modifierType = type;
-      this.showModifierModal = true;
-    },
+    ...mapActions({
+      exportData: "export",
+      importData: "import",
+      addPlayer: "addPlayer",
+    }),
     editPlayer(player, index) {
       player.beginEdit();
       // this.$nextTick(() => {

@@ -9,7 +9,7 @@
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
-            @click="addVillain"
+            @click="$dialog.createActor({ type: 'Villain' })"
           >
             Create
           </button>
@@ -122,28 +122,39 @@
               <div class="btn-group btn-group-sm w-50">
                 <button
                   class="btn btn-success border-dark"
-                  @click="modifyVillain(villain, 'Bonus')"
+                  @click="
+                    $dialog.modifyActor({ type: 'Bonus', target: villain })
+                  "
                   title="Add a Bonus to this Villain"
                 >
                   <img src="images/boost.png" />
                 </button>
                 <button
                   class="btn btn-warning border-dark"
-                  @click="modifyVillain(villain, 'Penalty')"
+                  @click="
+                    $dialog.modifyActor({ type: 'Penalty', target: player })
+                  "
                   title="Add a Penalty to this Villain"
                 >
                   <img src="images/hinder.png" />
                 </button>
                 <button
                   class="btn btn-secondary border-dark"
-                  @click="modifyVillain(villain, 'Defend')"
+                  @click="
+                    $dialog.modifyActor({ type: 'Defend', target: player })
+                  "
                   title="Add a Defend to this Villain"
                 >
                   <img src="images/defend.png" />
                 </button>
                 <button
                   class="btn btn-primary border-dark"
-                  @click="addMinion(villain.id)"
+                  @click="
+                    $dialog.createActor({
+                      type: 'Minion',
+                      ownerId: villain.id,
+                    })
+                  "
                   title="Add a Minion to this Villain"
                 >
                   <span class="fa-stack">
@@ -184,19 +195,6 @@
         </div>
       </div>
     </div>
-    <CreateActorModal
-      :show="showCreateModal"
-      :type="createData.type"
-      :ownerId="createData.ownerId"
-      @close="showCreateModal = false"
-    />
-    <ModifierModal
-      v-if="modifierData.target"
-      :target="modifierData.target"
-      :type="modifierData.type"
-      :show="showModifierModal"
-      @close="showModifierModal = false"
-    />
   </div>
 </template>
 
@@ -205,15 +203,11 @@ import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
 import Modifier from "./modifier.vue";
-import ModifierModal from "components/modals/modifyModal.vue";
-import CreateActorModal from "components/modals/createActorModal.vue";
 
 export default defineComponent({
   name: "Villains",
   components: {
     Modifier,
-    ModifierModal,
-    CreateActorModal,
   },
   data() {
     return {
@@ -225,29 +219,12 @@ export default defineComponent({
         type: "Villain",
         ownerId: null,
       },
-      showCreateModal: false,
-      showModifierModal: false,
     };
   },
   computed: {
     ...mapState(["villains"]),
   },
   methods: {
-    addVillain() {
-      this.createData.type = "Villain";
-      this.createData.ownerId = null;
-      this.showCreateModal = true;
-    },
-    addMinion(villainId) {
-      this.createData.type = "Minion";
-      this.createData.ownerId = villainId;
-      this.showCreateModal = true;
-    },
-    modifyVillain(villain, type) {
-      this.modifierData.target = villain;
-      this.modifierData.type = type;
-      this.showModifierModal = true;
-    },
     editVillain(villain, index) {
       villain.beginEdit();
       this.$refs.editName[index].focus();

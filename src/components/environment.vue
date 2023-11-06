@@ -40,7 +40,7 @@ import Locations from "./locations.vue";
 import SceneTracker from "./sceneTracker.vue";
 import RoundTracker from "./roundTracker.vue";
 import EnvironmentNotes from "./environment-notes.vue";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 export default defineComponent({
   name: "Environment",
@@ -52,21 +52,14 @@ export default defineComponent({
     EnvironmentNotes,
   },
   methods: {
+    ...mapActions(["resetEnvironment"]),
     resetEnvironment() {
-      this.$dialog
-        .confirm(
-          {
-            title: "Are You Sure?",
-            body: "Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed. (Players will not be affected)",
-          },
-          {
-            okText: "Yes",
-            cancelText: "No",
-          }
-        )
-        .then((r) => {
-          this.$store.dispatch("resetEnvironment");
-        });
+      this.$dialog.confirm({
+        body: "Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed. (Players will not be affected)",
+        onConfirmDialog: () => {
+          this.resetEnvironment;
+        },
+      });
     },
   },
   computed: {

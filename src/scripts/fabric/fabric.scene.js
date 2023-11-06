@@ -40,6 +40,9 @@ function addLocation(canvas, locationData) {
     name: locationData.name,
     top: locationData.top,
     left: locationData.left,
+    scaleX: locationData.scaleX ?? 1,
+    scaleY: locationData.scaleY ?? 1,
+    angle: locationData.angle ?? 0,
   });
   const { top, left } = getNextLocation(canvas, 0, 300, group);
   if (locationData.top) {
@@ -97,6 +100,9 @@ function addChallenge(canvas, challengeData) {
     borderColor: css.primary,
     cornerColor: css.primary,
     actorType: "challenge",
+    scaleX: challengeData.scaleX ?? 1,
+    scaleY: challengeData.scaleY ?? 1,
+    angle: challengeData.angle ?? 0,
   });
 
   const removed = removeIfExists(canvas, challengeData.id);
@@ -109,22 +115,14 @@ function getNextLocation(canvas, top, left, obj) {
   if (top > canvas.height - 100) {
     return getNextLocation(canvas, 0, left + obj.width + 10, obj);
   } else {
-    let match = null;
-    const list = canvas.getObjects();
-    for (let i = 0; i < list.length; i++) {
-      const el = list[i];
-      if (el.actorType === "location") {
-        if (
-          el.left >= left &&
-          el.left < obj.width + left &&
-          el.top >= top &&
-          el.top < obj.height + top
-        ) {
-          match = el;
-          break;
-        }
-      }
-    }
+    const match = canvas.getObjects().find((el) => {
+      return (
+        el.left >= left &&
+        el.left < obj.width + left &&
+        el.top >= top &&
+        el.top < obj.height + top
+      );
+    });
     if (match) {
       return getNextLocation(canvas, top + match.height, left, obj);
     } else {
