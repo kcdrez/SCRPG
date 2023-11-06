@@ -266,61 +266,6 @@
         <div v-else class="text-center">There are no actors in the scene.</div>
       </div>
     </div>
-    <!-- <Modal :isOpen="showCreateModal">
-      <template v-slot:header
-        ><h5 class="modal-title">Add a Player</h5></template
-      >
-      <template v-slot:body>
-        <div class="input-group input-group-sm">
-          <span class="input-group-text border-dark">Name</span>
-          <input
-            type="text"
-            v-model.trim="newPlayer.name"
-            class="form-control border-dark"
-            @keypress.enter="addPlayer"
-            ref="newPlayerName"
-          />
-        </div>
-        <div class="input-group input-group-sm mt-2">
-          <span class="input-group-text border-dark">Max HP</span>
-          <input
-            type="number"
-            v-model.number="newPlayer.maxHp"
-            class="form-control border-dark"
-            @keypress.enter="addPlayer"
-            min="17"
-            max="40"
-          />
-          <span class="input-group-text border-dark">Current HP</span>
-          <input
-            type="number"
-            v-model.number="newPlayer.hp"
-            class="form-control border-dark"
-            @keypress.enter="addPlayer"
-            min="0"
-            :max="newPlayer.maxHp"
-            ref="newPlayerHP"
-          />
-        </div>
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-success border-dark"
-          type="button"
-          @click="addPlayer"
-          :disabled="newPlayer.name === ''"
-        >
-          Create
-        </button>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          @click="showCreateModal = false"
-        >
-          Close
-        </button>
-      </template>
-    </Modal> -->
     <CreateActorModal
       :show="showCreateModal"
       :type="modalType"

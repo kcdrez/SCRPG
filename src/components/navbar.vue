@@ -14,20 +14,12 @@
     <div class="collapse navbar-collapse" id="navbar-toggler">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <div
-            class="nav-link c-pointer"
-            data-bs-toggle="modal"
-            data-bs-target="#overcomeChartModal"
-          >
+          <div class="nav-link c-pointer" @click="toggleOvercomeModal(true)">
             Overcome Chart
           </div>
         </li>
         <li class="nav-item">
-          <div
-            class="nav-link c-pointer"
-            data-bs-toggle="modal"
-            data-bs-target="#boostsChartModal"
-          >
+          <div class="nav-link c-pointer" @click="toggleBoostModal(true)">
             Boost/Hinder Chart
           </div>
         </li>
@@ -35,27 +27,35 @@
           <a
             class="nav-link dropdown-toggle"
             role="button"
-            data-toggle="dropdown"
+            data-bs-toggle="dropdown"
           >
             Data
           </a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="#" @click="$refs.import.click()"
-              >Import</a
-            >
-            <input
-              type="file"
-              accept=".xlsx"
-              class="d-none"
-              ref="import"
-              @change="
-                $store.dispatch('import', { files: $event.target.files })
-              "
-            />
-            <a class="dropdown-item" href="#" @click="$store.dispatch('export')"
-              >Export</a
-            >
-          </div>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="#" @click="$refs.import.click()">
+                Import
+              </a>
+              <input
+                type="file"
+                accept=".xlsx"
+                class="d-none"
+                ref="import"
+                @change="
+                  $store.dispatch('import', { files: $event.target.files })
+                "
+              />
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="#"
+                @click="$store.dispatch('export')"
+              >
+                Export
+              </a>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>
@@ -67,6 +67,7 @@
 
 <script>
 import { defineComponent } from "vue";
+import { mapActions } from "vuex";
 
 import config from "../../package.json";
 
@@ -76,6 +77,9 @@ export default defineComponent({
     return {
       version: config.version,
     };
+  },
+  methods: {
+    ...mapActions(["toggleBoostModal", "toggleOvercomeModal"]),
   },
 });
 </script>

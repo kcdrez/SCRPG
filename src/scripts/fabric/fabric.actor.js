@@ -102,11 +102,12 @@ async function addBaddie(canvas, baddie) {
     borderColor: css.primary,
     cornerColor: css.primary,
     actorType,
+    dieSize: baddie.size,
   });
 
-  const removed = removeBaddieIfExists(canvas, baddie.id);
-  const data = baddie.top && baddie.left ? baddie : removed;
-  addGroup(canvas, group, data);
+  // const removed = removeBaddieIfExists(canvas, baddie.id);
+  // const data = baddie.top && baddie.left ? baddie : removed;
+  addGroup(canvas, group, baddie);
 }
 
 function addPlayer(canvas, playerData) {

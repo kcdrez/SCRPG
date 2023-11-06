@@ -20,6 +20,10 @@ const store = createStore({
       id: null,
       type: null,
     },
+    modals: {
+      showBoostModal: false,
+      showOvercomeModal: false,
+    },
   },
   mutations: {
     INIT(state, { players, minions, lieutenants, villains, scene }) {
@@ -41,7 +45,8 @@ const store = createStore({
       state.initialized = true;
     },
     CREATE_BADDIE(state, baddie) {
-      state[baddie.type].push(baddie);
+      const arr = [...state[baddie.type], baddie];
+      state[baddie.type] = arr;
     },
     DELETE_BADDIE(state, { type, index }) {
       state[type].splice(index, 1);
@@ -72,6 +77,7 @@ const store = createStore({
       state.players = [];
     },
     SELECT_CANVAS_EL(state, data) {
+      console.log("select canvas element", data);
       state.selection.id = data?.id || null;
       state.selection.type = data?.actorType || null;
     },
@@ -110,7 +116,6 @@ const store = createStore({
           });
         }
         window.localStorage.setItem(type, JSON.stringify(dataToSave));
-        console.log("saving", dataToSave);
       }
     },
     resetEnvironment(ctx) {
@@ -325,6 +330,12 @@ const store = createStore({
     },
     selectObject(ctx, data) {
       ctx.commit("SELECT_CANVAS_EL", data);
+    },
+    toggleBoostModal(ctx, isOpen) {
+      ctx.state.modals.showBoostModal = isOpen;
+    },
+    toggleOvercomeModal(ctx, isOpen) {
+      ctx.state.modals.showOvercomeModal = isOpen;
     },
   },
   getters: {

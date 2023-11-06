@@ -46,47 +46,57 @@
         </div>
       </div>
     </div>
-    <div id="boostsChartModal" class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Boost/Hinder Chart</h3>
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <img
-              src="images/boosts.jpeg"
-              class="img-fluid"
-              data-dismiss="modal"
-            />
-          </div>
-          <div class="modal-footer">
-            <button
-              class="btn btn-secondary border-dark"
-              type="button"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Modal :isOpen="modals.showBoostModal" @close="toggleBoostModal(false)">
+      <template v-slot:header>
+        <h3 class="modal-title">Boost/Hinder Chart</h3>
+      </template>
+      <template v-slot:body>
+        <img src="images/boosts.jpeg" class="img-fluid" />
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          @click="toggleBoostModal(false)"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
+    <Modal
+      :isOpen="modals.showOvercomeModal"
+      @close="toggleOvercomeModal(false)"
+    >
+      <template v-slot:header>
+        <h3 class="modal-title">Overcome Chart</h3>
+      </template>
+      <template v-slot:body>
+        <img src="images/overcome.jpeg" class="img-fluid" />
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-secondary border-dark"
+          type="button"
+          @click="toggleOvercomeModal(false)"
+        >
+          Close
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { defineComponent } from "vue";
+import { mapState, mapActions } from "vuex";
 import _ from "lodash";
 
-import Baddies from "../components/baddie.vue";
-import Environment from "../components/environment.vue";
-import Villains from "../components/villain.vue";
+import Baddies from "components/baddie.vue";
+import Environment from "components/environment.vue";
+import Villains from "components/villain.vue";
 import Players from "components/player.vue";
-import DrawingBoard from "../components/drawingBoard.vue";
-import Modal from "components/modal/modal.vue"; //todo implement modal component
+import DrawingBoard from "components/drawingBoard.vue";
+import Modal from "components/modals/modal.vue"; //todo implement modal component
 
 export default defineComponent({
   name: "GMTools",
@@ -96,14 +106,13 @@ export default defineComponent({
       showScrollWidget: false,
     };
   },
+  computed: {
+    ...mapState(["modals"]),
+  },
   methods: {
+    ...mapActions(["toggleBoostModal", "toggleOvercomeModal"]),
     scrollToTop() {
-      $("html").animate(
-        {
-          scrollTop: 0,
-        },
-        300
-      );
+      $("html").animate({ scrollTop: 0 }, 300);
     },
     scrolling: _.debounce(function () {
       //lodash doesnt like arrow functions for some reason
