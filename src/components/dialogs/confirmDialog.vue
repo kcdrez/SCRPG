@@ -7,14 +7,14 @@
     <template v-slot:footer>
       <button
         type="button"
-        class="btn btn-primary border-dark"
+        class="btn btn-success border-dark"
         @click="confirm()"
       >
         {{ okText }}
       </button>
       <button
         type="button"
-        class="btn btn-secondary border-dark"
+        class="btn btn-danger border-dark"
         @click="cancel()"
       >
         {{ cancelText }}

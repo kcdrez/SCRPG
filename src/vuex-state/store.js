@@ -114,7 +114,6 @@ const store = createStore({
             }
           });
         }
-        console.log(dataToSave);
         window.localStorage.setItem(type, JSON.stringify(dataToSave));
       }
     },
