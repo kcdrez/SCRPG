@@ -34,8 +34,11 @@ class Baddie extends Actor {
   get displayName() {
     let text = `${this.name}`;
     text += this.index ? `-${this.index}` : "";
-    text += this.owner ? ` (${this.owner})` : "";
+    text += this.owner ? ` (${this.owner.name})` : "";
     return text;
+  }
+  get allowRemove() {
+    return true;
   }
 
   demote() {
@@ -99,17 +102,6 @@ class Baddie extends Actor {
         ...this.defends.map((x) => x.export(this.id)),
       ],
     };
-  }
-  copy(excludeInstances, rawInstances) {
-    console.log("todo copy baddie.js");
-    // return Object.assign(
-    //   {
-    //     bonuses: this.bonuses.map((x) => x.export(this.id)),
-    //     penalties: this.penalties.map((x) => x.export(this.id)),
-    //     defends: this.defends.map((x) => x.export(this.id)),
-    //   },
-    //   this.export(null, excludeInstances, rawInstances).baddie
-    // );
   }
   saveEdit() {
     this._owner = this.tempOwner;

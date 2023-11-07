@@ -10,7 +10,15 @@
             class="btn btn-sm btn-success border-dark"
             @click="$dialog.createActor({ type: labelSingle })"
           >
-            Create
+            Add
+          </button>
+          <button
+            class="btn btn-warning border-dark"
+            title="Remove all players from the scene"
+            @click="clearList()"
+            :disabled="list.length === 0"
+          >
+            Clear
           </button>
           <button
             class="btn btn-primary border-dark"
@@ -64,7 +72,7 @@
           </tr>
         </thead>
         <tbody>
-          <template v-for="baddie in list" :key="baddie.id">
+          <template v-for="(baddie, index) in list" :key="baddie.id">
             <tr :id="baddie.elementId">
               <!-- Name (Owner) -->
               <td class="text-center align-middle text-capitalize">
@@ -310,11 +318,19 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(["upsertBaddie", "removeBaddie"]),
+    ...mapActions(["upsertBaddie", "removeBaddie", "resetBaddies"]),
     editBaddie(baddie, index) {
       baddie.beginEdit();
-      this.$nextTick(() => {
-        this.$refs.nameEdit[index].focus();
+      // this.$nextTick(() => {
+      //   this.$refs.nameEdit[index].focus();
+      // });
+    },
+    clearList() {
+      this.$dialog.confirm({
+        body: `Are you sure you want to clear all ${this.label} from the scene?`,
+        onConfirmDialog: () => {
+          this.resetBaddies({ type: this.label.toLowerCase() });
+        },
       });
     },
   },

@@ -43,7 +43,6 @@ class GenericObject {
     this.save();
   }
   scrollInView() {
-    console.log(this.elementId);
     $("html, body").animate({
       scrollTop: $(`#${this.elementId}`).offset().top - 90,
     });

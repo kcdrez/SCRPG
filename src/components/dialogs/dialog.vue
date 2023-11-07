@@ -56,6 +56,9 @@ export default defineComponent({
       this.$refs.modal.addEventListener("hidden.bs.modal", (event) => {
         this.$emit("close");
       });
+      this.$refs.modal.addEventListener("shown.bs.modal", (event) => {
+        this.$emit("shown");
+      });
       this.toggleDialog();
     });
   },

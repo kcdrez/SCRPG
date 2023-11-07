@@ -1,5 +1,3 @@
-import { v4 as uuid } from "uuid";
-
 import store from "store/store";
 import { Actor, Modifier } from "./actor";
 import dialog from "./dialog";
@@ -15,6 +13,7 @@ class Player extends Actor {
       : [];
     this.defends = data.defends ? data.defends.map((x) => new Modifier(x)) : [];
     this.type = "player";
+    this.usedReaction = false;
   }
 
   get hp() {
@@ -69,11 +68,11 @@ class Player extends Actor {
     else return "";
   }
 
-  initHp({ maxHp, hp, _hp, tempHP }) {
+  initHp({ maxHp, _maxHp, hp, _hp, tempHP }) {
     let green;
     let yellow;
 
-    switch (maxHp) {
+    switch (maxHp ?? _maxHp) {
       case 40:
       case 39:
         green = 30;
@@ -160,7 +159,7 @@ class Player extends Actor {
         break;
     }
     this.status = { green, yellow };
-    this._maxHp = maxHp || 40;
+    this._maxHp = maxHp || _maxHp || 40;
     this._hp = hp || _hp;
     this.tempHP = tempHP || this._hp;
   }
@@ -234,6 +233,9 @@ class Player extends Actor {
         type: this.type,
         top: this.top,
         left: this.left,
+        scaleY: this.scaleY,
+        scaleX: this.scaleX,
+        angle: this.angle,
       },
       minions,
     };

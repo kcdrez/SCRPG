@@ -18,41 +18,6 @@
       <i class="fas fa-arrow-up"></i>
       TOP
     </div>
-    <Dialog :isOpen="dialogs.showBoostDialog" @close="toggleBoostDialog(false)">
-      <template v-slot:header>
-        <h3 class="modal-title">Boost/Hinder Chart</h3>
-      </template>
-      <template v-slot:body>
-        <img src="images/boosts.jpeg" class="img-fluid" />
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          @click="toggleBoostDialog(false)"
-        >
-          Close
-        </button>
-      </template>
-    </Dialog>
-    <Dialog
-      :isOpen="dialogs.showOvercomeDialog"
-      @close="toggleOvercomeDialog(false)"
-    >
-      <template v-slot:header>Overcome Chart</template>
-      <template v-slot:body>
-        <img src="images/overcome.jpeg" class="img-fluid" />
-      </template>
-      <template v-slot:footer>
-        <button
-          class="btn btn-secondary border-dark"
-          type="button"
-          @click="toggleOvercomeDialog(false)"
-        >
-          Close
-        </button>
-      </template>
-    </Dialog>
   </div>
 </template>
 
@@ -66,7 +31,6 @@ import Environment from "components/scene/environment.vue";
 import Villains from "components/actors/villain.vue";
 import Players from "components/actors/player.vue";
 import DrawingBoard from "components/drawingBoard/drawingBoard.vue";
-import Dialog from "components/dialogs/dialog.vue";
 
 export default defineComponent({
   name: "GMTools",
@@ -76,18 +40,13 @@ export default defineComponent({
     Villains,
     Players,
     DrawingBoard,
-    Dialog,
   },
   data() {
     return {
       showScrollWidget: false,
     };
   },
-  computed: {
-    ...mapState(["dialogs"]),
-  },
   methods: {
-    ...mapActions(["toggleBoostDialog", "toggleOvercomeDialog"]),
     scrollToTop() {
       $("html").animate({ scrollTop: 0 }, 300);
     },

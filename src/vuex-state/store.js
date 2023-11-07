@@ -20,10 +20,6 @@ const store = createStore({
       id: null,
       type: null,
     },
-    dialogs: {
-      showBoostDialog: false,
-      showOvercomeDialog: false,
-    },
   },
   mutations: {
     INIT(state, { players, minions, lieutenants, villains, scene }) {
@@ -51,6 +47,10 @@ const store = createStore({
     DELETE_BADDIE(state, { type, index }) {
       state[type].splice(index, 1);
     },
+    RESET_BADDIES(state, { type }) {
+      state[type] = [];
+      console.log(type);
+    },
     RESET_ENVIRONMENT(state) {
       state.minions = [];
       state.lieutenants = [];
@@ -72,9 +72,6 @@ const store = createStore({
       if (index > -1) {
         state.players.splice(index, 1);
       }
-    },
-    RESET_PLAYERS(state) {
-      state.players = [];
     },
     SELECT_CANVAS_EL(state, data) {
       state.selection.id = data?.id || null;
@@ -151,6 +148,10 @@ const store = createStore({
         ctx.dispatch("saveData", type);
       }
     },
+    resetBaddies(ctx, { type }) {
+      ctx.commit("RESET_BADDIES", { type });
+      ctx.dispatch("saveData", type);
+    },
     addPlayer(ctx, playerData) {
       if (!playerData.id) {
         playerData.id = uuid();
@@ -166,20 +167,8 @@ const store = createStore({
       ctx.dispatch("saveData", "players");
     },
     resetPlayers(ctx) {
-      ctx.commit("RESET_PLAYERS");
+      ctx.commit("RESET_BADDIES", { type: "players" });
       ctx.dispatch("saveData", "players");
-    },
-    reconcile(ctx, type) {
-      //todo
-      // const baddiesList = ctx.state[type];
-      // for (let i = 0; i < baddiesList.length - 1; i++) {
-      //   if (sameBaddies(baddiesList[i], baddiesList[i + 1])) {
-      //     baddiesList[i].instances.push(...baddiesList[i + 1].instances);
-      //     baddiesList[i + 1].instances = [];
-      //   }
-      // }
-      // ctx.state[type] = baddiesList.filter((x) => x.count > 0);
-      // ctx.dispatch("saveData", type);
     },
     export(ctx, options) {
       const { type, fileName, id } = options || {};
@@ -227,7 +216,6 @@ const store = createStore({
       }
       if (type === "minions" || !type) {
         ctx.state.minions.forEach((minion) => {
-          console.log(minion);
           if (!rows.find((row) => row.id === minion.id)) {
             const { baddie, modifiers } = minion.export();
             rows.push(baddie, ...modifiers);
@@ -337,12 +325,6 @@ const store = createStore({
     },
     selectObject(ctx, data) {
       ctx.commit("SELECT_CANVAS_EL", data);
-    },
-    toggleBoostDialog(ctx, isOpen) {
-      ctx.state.dialogs.showBoostDialog = isOpen;
-    },
-    toggleOvercomeDialog(ctx, isOpen) {
-      ctx.state.dialogs.showOvercomeDialog = isOpen;
     },
   },
   getters: {

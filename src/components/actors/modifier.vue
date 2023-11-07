@@ -41,7 +41,7 @@
           />
         </div>
         <div class="d-inline" v-if="modifier.type !== 'Defend'">
-          <label :for="`mod-persistent-${modifier.id}`" class="c-pointer"
+          <label :for="`mod-persistent-${modifier.id}`" class="c-pointer me-1"
             >Persistent?</label
           >
           <input
@@ -53,7 +53,7 @@
           />
         </div>
         <div class="d-inline mx-3" v-if="modifier.type !== 'Defend'">
-          <label :for="`mod-exclusive-${modifier.id}`" class="c-pointer"
+          <label :for="`mod-exclusive-${modifier.id}`" class="c-pointer me-1"
             >Exclusive?</label
           >
           <input

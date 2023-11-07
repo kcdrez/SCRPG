@@ -2,16 +2,21 @@
   <div class="villain-list">
     <div class="row baddie-list-header">
       <div class="col">
-        <h2 class="section-header">
-          Villans
-          <!-- <a href="#villain-Data" data-toggle="collapse">Villains</a> -->
-        </h2>
+        <h2 class="section-header">Villans</h2>
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-success border-dark"
             @click="$dialog.createActor({ type: 'Villain' })"
           >
-            Create
+            Add
+          </button>
+          <button
+            class="btn btn-warning border-dark"
+            title="Remove all players from the scene"
+            @click="clearVillains()"
+            :disabled="villains.length === 0"
+          >
+            Clear
           </button>
           <button
             class="btn btn-primary border-dark"
@@ -200,7 +205,7 @@
 
 <script>
 import { defineComponent } from "vue";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
 
@@ -225,9 +230,18 @@ export default defineComponent({
     ...mapState(["villains"]),
   },
   methods: {
+    ...mapActions(["resetBaddies"]),
     editVillain(villain, index) {
       villain.beginEdit();
       this.$refs.editName[index].focus();
+    },
+    clearVillains() {
+      this.$dialog.confirm({
+        body: `Are you sure you want to clear all ${this.label} from the scene?`,
+        onConfirmDialog: () => {
+          this.resetBaddies({ type: "villains" });
+        },
+      });
     },
   },
 });

@@ -1,5 +1,5 @@
 <template>
-  <Dialog :isOpen="show" @close="$emit('close')">
+  <Dialog :isOpen="show" @close="$emit('cancel')" @shown="selectDefault()">
     <template v-slot:header>Create a {{ type }}</template>
     <template v-slot:body>
       <div class="input-group input-group-sm mb-3">
@@ -107,7 +107,7 @@
           @keydown.enter="createActor()"
         />
       </div>
-      <div class="input-group input-group-sm mb-3" v-if="isMinionOrLieutenant">
+      <div class="input-group input-group-sm mb-3" v-if="type === 'Minion'">
         <div class="input-group-text border-dark">Owner</div>
         <select
           class="form-control border-dark"
@@ -285,6 +285,9 @@ export default defineComponent({
         });
         this.newChallenge.entry = "";
       }
+    },
+    selectDefault() {
+      this.$refs.createName.focus();
     },
   },
   computed: {

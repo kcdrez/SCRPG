@@ -154,7 +154,7 @@
             </div>
             <div>{{ challenge.description }}</div>
           </div>
-          <div>
+          <div class="mb-2">
             <table
               class="table table-sm table-striped table-bordered table-dark text-center mb-0"
             >

@@ -14,12 +14,12 @@
     <div class="collapse navbar-collapse" id="navbar-toggler">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <div class="nav-link c-pointer" @click="toggleOvercomeDialog(true)">
+          <div class="nav-link c-pointer" @click="$dialog.overcomeChart()">
             Overcome Chart
           </div>
         </li>
         <li class="nav-item">
-          <div class="nav-link c-pointer" @click="toggleBoostDialog(true)">
+          <div class="nav-link c-pointer" @click="$dialog.boostChart()">
             Boost/Hinder Chart
           </div>
         </li>

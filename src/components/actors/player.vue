@@ -8,12 +8,20 @@
             class="btn btn-sm btn-success border-dark"
             @click="$dialog.createActor({ type: 'Player' })"
           >
-            Create
+            Add
+          </button>
+          <button
+            class="btn btn-warning border-dark"
+            title="Remove all players from the scene"
+            @click="clearPlayers()"
+            :disabled="players.length === 0"
+          >
+            Clear
           </button>
           <button
             class="btn btn-primary border-dark"
             @click="$refs.import.click()"
-            :title="`Import Player data from an xlsx file`"
+            title="Import Player data from an xlsx file"
           >
             Import
           </button>
@@ -61,7 +69,7 @@
           </tr>
         </thead>
         <tbody>
-          <template v-for="player in players" :key="player.name">
+          <template v-for="(player, index) in players" :key="player.name">
             <tr :id="player.elementId">
               <!-- Name -->
               <td class="text-center align-middle text-capitalize">
@@ -183,7 +191,7 @@
                   <button
                     class="btn btn-secondary border-dark text-dark"
                     title="Edit this Player"
-                    @click="editPlayer(player)"
+                    @click="editPlayer(player, index)"
                     v-if="player.allowEdit && !player.editing"
                   >
                     <i class="fas fa-edit"></i>
@@ -256,12 +264,21 @@ export default defineComponent({
       exportData: "export",
       importData: "import",
       addPlayer: "addPlayer",
+      resetPlayers: "resetPlayers",
     }),
+    clearPlayers() {
+      this.$dialog.confirm({
+        body: "Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.",
+        onConfirmDialog: () => {
+          this.resetPlayers();
+        },
+      });
+    },
     editPlayer(player, index) {
       player.beginEdit();
-      // this.$nextTick(() => {
-      //   this.$refs.nameEdit[index].focus();
-      // });
+      this.$nextTick(() => {
+        this.$refs.nameEdit[index].focus();
+      });
     },
   },
 });

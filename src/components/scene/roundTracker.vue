@@ -10,53 +10,6 @@
         >
           Reset Round Tracker
         </button>
-        <div class="input-group input-group-sm justify-content-center">
-          <div class="input-group-text border-dark">Players:</div>
-          <button
-            class="btn btn-success border-dark"
-            title="Add a new player to the scene"
-            @click="$dialog.createActor({ type: 'Player' })"
-          >
-            Add
-          </button>
-          <button
-            class="btn btn-warning border-dark"
-            title="Remove all players from the scene"
-            @click="clearPlayers()"
-          >
-            Clear
-          </button>
-          <button
-            class="btn btn-primary border-dark"
-            @click="$refs.import.click()"
-          >
-            Import
-          </button>
-          <button
-            class="btn btn-secondary border-dark"
-            title="Export the player data to an xlsx file"
-            @click="
-              exportData({
-                type: 'players',
-                fileName: 'players',
-              })
-            "
-          >
-            Export
-          </button>
-        </div>
-        <input
-          type="file"
-          accept=".xlsx"
-          class="d-none"
-          ref="import"
-          @change="
-            importData({
-              files: $event.target.files,
-              filters: ['player', 'minions', 'bonus', 'penalty', 'defend'],
-            })
-          "
-        />
       </div>
       <div class="card-body">
         <table
@@ -290,16 +243,7 @@ export default defineComponent({
       exportData: "export",
       importData: "import",
       resetRound: "resetRound",
-      resetPlayers: "resetPlayers",
     }),
-    clearPlayers() {
-      this.$dialog.confirm({
-        body: "Are you sure you want to clear all players from the scene? Note: This will not remove any minions, lieutenants, or villains.",
-        onConfirmDialog: () => {
-          this.resetPlayers();
-        },
-      });
-    },
     editActor(actor, index) {
       actor.beginEdit();
       this.$nextTick(() => {
