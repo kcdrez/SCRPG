@@ -99,7 +99,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/mixins";
+@import "styles/mixins";
 
 img {
   cursor: pointer;

@@ -232,7 +232,7 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
-import { sortActors } from "../scripts/actor";
+import { sortActors } from "scripts/actor";
 
 export default defineComponent({
   name: "PlayerList",
@@ -268,7 +268,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables.module.scss";
+@import "styles/variables.module.scss";
 
 .player-list {
   img {

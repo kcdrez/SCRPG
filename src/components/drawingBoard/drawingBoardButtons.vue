@@ -234,10 +234,11 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 img {
   width: 20px;
 }
+
 button {
   min-width: 50px;
   font-size: 1.1rem;

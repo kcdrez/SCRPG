@@ -1,8 +1,5 @@
-import { v4 as uuid } from "uuid";
-
-import store from "../vuex-state/store";
+import store from "store/store";
 import { Actor, Modifier } from "./actor";
-import { unvue } from "./utilities";
 import dialog from "./dialog";
 
 class Baddie extends Actor {
@@ -81,37 +78,27 @@ class Baddie extends Actor {
     this.acted = status === undefined ? !this.acted : status;
     this.save();
   }
-  export(id, excludeInstances, rawInstances) {
-    console.log("todo export in baddie.js");
-    // let instances = [];
-    // if (!id || this.id === id) {
-    //   const modifiers = [
-    //     ...this.bonuses.map((x) => x.export(this.id)),
-    //     ...this.penalties.map((x) => x.export(this.id)),
-    //     ...this.defends.map((x) => x.export(this.id)),
-    //   ];
-
-    //   if (!excludeInstances) {
-    //     instances = rawInstances
-    //       ? JSON.parse(JSON.stringify(this.instances))
-    //       : JSON.stringify(this.instances);
-    //   }
-
-    //   const baddie = {
-    //     name: this.name,
-    //     type: this.type,
-    //     parent: this._owner,
-    //     id: this.id,
-    //     size: this.size,
-    //     acted: this.acted,
-    //     instances,
-    //   };
-
-    //   return {
-    //     baddie,
-    //     modifiers,
-    //   };
-    // } else return {};
+  export() {
+    return {
+      baddie: {
+        name: this.name,
+        type: this.type,
+        parent: this._owner,
+        id: this.id,
+        size: this.size,
+        acted: this.acted,
+        top: this.top,
+        left: this.left,
+        scaleX: this.scaleX,
+        scaleY: this.scaleY,
+        angle: this.angle,
+      },
+      modifiers: [
+        ...this.bonuses.map((x) => x.export(this.id)),
+        ...this.penalties.map((x) => x.export(this.id)),
+        ...this.defends.map((x) => x.export(this.id)),
+      ],
+    };
   }
   copy(excludeInstances, rawInstances) {
     console.log("todo copy baddie.js");

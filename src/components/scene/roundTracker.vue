@@ -267,7 +267,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 
 export default defineComponent({
@@ -316,7 +316,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/variables.module.scss";
+@import "styles/variables.module.scss";
 
 img {
   max-width: 20px;

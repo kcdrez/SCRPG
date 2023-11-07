@@ -15,18 +15,16 @@ module.exports = {
     alias: {
       vue: "vue/dist/vue.esm-bundler.js",
       components: path.resolve(__dirname, "../src/components"),
-      // pages: path.resolve(__dirname, "../src/pages"),
-      // types: path.resolve(__dirname, "../src/types"),
-      // resources: path.resolve(__dirname, "../src/resources"),
-      // "vuex-store": path.resolve(__dirname, "../src/vuex-store"),
-      // utils: path.resolve(__dirname, "../src/utils"),
-      // styles: path.resolve(__dirname, "../src/styles"),
+      pages: path.resolve(__dirname, "../src/pages"),
+      store: path.resolve(__dirname, "../src/vuex-state"),
+      scripts: path.resolve(__dirname, "../src/scripts"),
+      styles: path.resolve(__dirname, "../src/styles"),
     },
   },
   devServer: {
     hot: true,
-    watchOptions: {
-      poll: true,
+    static: {
+      watch: true,
     },
   },
   module: {
@@ -85,7 +83,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    // new webpack.HotModuleReplacementPlugin(),
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
       filename: "index.html",

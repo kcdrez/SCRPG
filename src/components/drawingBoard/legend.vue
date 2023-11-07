@@ -8,8 +8,9 @@
 <script>
 import { fabric } from "fabric";
 import { defineComponent } from "vue";
-import { makeStar } from "../scripts/fabric/fabric.common";
-import css from "../styles/variables.module.scss";
+
+import { makeStar } from "scripts/fabric/fabric.common";
+import css from "styles/variables.module.scss";
 
 export default defineComponent({
   name: "Legend",
@@ -126,13 +127,12 @@ export default defineComponent({
       challengeText
     );
   },
-  watch: {},
 });
 </script>
 
 <style lang="scss">
-@import "../styles/mixins";
-@import "../styles/variables.module.scss";
+@import "styles/mixins";
+@import "styles/variables.module.scss";
 
 #canvas {
   border: 1px black solid;

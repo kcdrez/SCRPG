@@ -61,11 +61,11 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 import _ from "lodash";
 
-import Baddies from "components/baddie.vue";
-import Environment from "components/environment.vue";
-import Villains from "components/villain.vue";
-import Players from "components/player.vue";
-import DrawingBoard from "components/drawingBoard.vue";
+import Baddies from "components/actors/baddie.vue";
+import Environment from "components/scene/environment.vue";
+import Villains from "components/actors/villain.vue";
+import Players from "components/actors/player.vue";
+import DrawingBoard from "components/drawingBoard/drawingBoard.vue";
 import Dialog from "components/dialogs/dialog.vue";
 
 export default defineComponent({
@@ -107,8 +107,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import "../styles/mixins";
-@import "../styles/variables.module.scss";
+@import "styles/mixins";
+@import "styles/variables.module.scss";
 
 .admin-page {
   max-width: 90%;

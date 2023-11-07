@@ -4,7 +4,7 @@ import {
   wrapCanvasText,
   fontSize,
 } from "./fabric.common";
-import css from "../../styles/variables.module.scss";
+import css from "styles/variables.module.scss";
 
 function addLocation(canvas, locationData) {
   const size = 300;

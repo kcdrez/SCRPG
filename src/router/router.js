@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 
 import GMToolsPage from "../pages/gmTools.vue";
 
-import store from "../vuex-state/store";
+import store from "store/store";
 
 const routes = [
   {

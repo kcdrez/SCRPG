@@ -55,7 +55,7 @@ const store = createStore({
       state.minions = [];
       state.lieutenants = [];
       state.villains = [];
-      state.scene.clear();
+      state.scene.clear(true);
     },
     RESET_ROUND(state) {
       state.minions.forEach((x) => x.resetRound());
@@ -227,6 +227,7 @@ const store = createStore({
       }
       if (type === "minions" || !type) {
         ctx.state.minions.forEach((minion) => {
+          console.log(minion);
           if (!rows.find((row) => row.id === minion.id)) {
             const { baddie, modifiers } = minion.export();
             rows.push(baddie, ...modifiers);

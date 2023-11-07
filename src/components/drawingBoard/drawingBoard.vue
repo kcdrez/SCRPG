@@ -10,15 +10,12 @@
 import { defineComponent } from "vue";
 import _ from "lodash";
 import { mapState, mapGetters, mapActions } from "vuex";
-import {
-  addBaddie,
-  addPlayer,
-  addVillain,
-} from "../scripts/fabric/fabric.actor";
-import { addLocation, addChallenge } from "../scripts/fabric/fabric.scene";
-import { initCanvas } from "../scripts/fabric/fabric.common";
+
+import { addBaddie, addPlayer, addVillain } from "scripts/fabric/fabric.actor";
+import { addLocation, addChallenge } from "scripts/fabric/fabric.scene";
+import { initCanvas } from "scripts/fabric/fabric.common";
 import Legend from "./legend.vue";
-import DrawingBoardButtons from "components/drawingBoardButtons.vue";
+import DrawingBoardButtons from "components/drawingBoard/drawingBoardButtons.vue";
 
 export default defineComponent({
   name: "DrawingBoard",
@@ -174,8 +171,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../styles/mixins";
-@import "../styles/variables.module.scss";
+@import "styles/mixins";
+@import "styles/variables.module.scss";
 
 #canvas {
   border: 1px black solid;

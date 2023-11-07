@@ -1,6 +1,8 @@
 import { fabric } from "fabric";
-import css from "../../styles/variables.module.scss";
-import store from "../../vuex-state/store";
+
+import css from "styles/variables.module.scss";
+import store from "store/store";
+
 const fontSize = 18;
 
 function initCanvas(id) {

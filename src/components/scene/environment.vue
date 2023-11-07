@@ -9,7 +9,7 @@
         <div class="btn-group btn-group-sm my-auto">
           <button
             class="btn btn-sm btn-danger border-dark"
-            @click="resetEnvironment"
+            @click="reset()"
             title="Reset the Environment, removing the Scene Tracker, all Minions, Lieutenants, Villains, and Challenges"
           >
             Reset
@@ -34,13 +34,14 @@
 </template>
 
 <script>
+import { mapState, mapActions } from "vuex";
 import { defineComponent } from "vue";
+
 import ChallengesTracker from "./challenges.vue";
 import Locations from "./locations.vue";
 import SceneTracker from "./sceneTracker.vue";
 import RoundTracker from "./roundTracker.vue";
 import EnvironmentNotes from "./environment-notes.vue";
-import { mapState, mapActions } from "vuex";
 
 export default defineComponent({
   name: "Environment",
@@ -53,11 +54,11 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(["resetEnvironment"]),
-    resetEnvironment() {
+    reset() {
       this.$dialog.confirm({
         body: "Are you sure you want to reset the Scene? All Minions, Lieutenants, Villans, Challenges, Locations, and the Scene Tracker will be removed. (Players will not be affected)",
         onConfirmDialog: () => {
-          this.resetEnvironment;
+          this.resetEnvironment();
         },
       });
     },

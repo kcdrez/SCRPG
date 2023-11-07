@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import _ from "lodash";
-import css from "../../styles/variables.module.scss";
+
+import css from "styles/variables.module.scss";
 import {
   makeStar,
   addGroup,

@@ -274,7 +274,7 @@ import { defineComponent } from "vue";
 import { mapState, mapActions } from "vuex";
 
 import Modifier from "./modifier.vue";
-import { sortActors } from "../scripts/actor";
+import { sortActors } from "scripts/actor";
 
 export default defineComponent({
   name: "BaddieList",

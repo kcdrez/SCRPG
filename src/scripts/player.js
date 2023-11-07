@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-import store from "../vuex-state/store";
+import store from "store/store";
 import { Actor, Modifier } from "./actor";
 import dialog from "./dialog";
 
