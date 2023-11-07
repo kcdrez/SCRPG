@@ -1,8 +1,6 @@
-import Vue from 'vue';
-import store from '../vuex-state/store';
-import { v4 as uuid } from 'uuid';
-import Actor from './actor';
-import { unvue } from './utilities';
+import store from "store/store";
+import { Actor, Modifier } from "./actor";
+import dialog from "./dialog";
 
 class Baddie extends Actor {
   constructor(data) {
@@ -11,201 +9,126 @@ class Baddie extends Actor {
     this.tempOwner = this._owner;
     this.size = data.size || 12;
     this.tempSize = this.size;
-    this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
-    this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
-    this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
-    this.instances = (() => {
-      if (typeof data.instances === 'string') {
-        const parsed = JSON.parse(data.instances);
-        return Array.isArray(parsed) ? parsed : [];
-      } else if (Array.isArray(data.instances)) {
-        return data.instances;
-      } else {
-        return [];
-      }
-    })();
+    this.bonuses = data.bonuses ? data.bonuses.map((x) => new Modifier(x)) : [];
+    this.penalties = data.penalties
+      ? data.penalties.map((x) => new Modifier(x))
+      : [];
+    this.defends = data.defends ? data.defends.map((x) => new Modifier(x)) : [];
 
-    if (this.instances.length === 0) {
-      if (data.count > 0) {
-        this.addInstances(data.count);
-      } else if (this.count <= 0) {
-        this.addInstances(1);
+    const maxIndex = store.state[data.type].reduce((maxIndex, baddie) => {
+      if (baddie.index >= maxIndex && data.name === baddie.name) {
+        return baddie.index + 1;
       }
-    }
-    this.tempCount = this.count; //this has to be after adding instances
+      return maxIndex;
+    }, 1);
+
+    this.index = maxIndex;
   }
 
   get owner() {
     return store.getters.byID(this._owner);
   }
-  get count() { return this.instances.length; }
-  set count(val) {
-    const diff = val - this.count;
-    if (diff > 0) {
-      this.addInstances(diff);
-    } else {
-      this.removeInstance(null, Math.abs(diff));
-    }
-    this.tempCount = val;
-    this.save();
-  }
   get allowEdit() {
     return !this.editing;
   }
-  get viewDetails() {
+  get displayName() {
+    let text = `${this.name}`;
+    text += this.index ? `-${this.index}` : "";
+    text += this.owner ? ` (${this.owner.name})` : "";
+    return text;
+  }
+  get allowRemove() {
     return true;
   }
 
-  demote(id) {
-    this.changeSize(this.size - 2, id);
-  }
-  promote(id) {
-    this.changeSize(this.size + 2, id);
-  }
-  changeSize(newSize, id) {
-    const copy = this.copy(true);
-    copy.id = uuid();
-    copy.size = newSize;
-    if (copy.size >= 4 && copy.size <= 12) {
-      if (id) {
-        const match = this.instances.find(x => x.id === id);
-        copy.instances.push(match);
-        this.removeInstance(id);
-      } else {
-        const x = this.instances[this.instances.length - 1];
-        copy.instances.push(unvue(x));
-        this.count--;
-      }
-      store.dispatch('upsertBaddie', copy);
+  demote() {
+    if (this.size > 4) {
+      this.changeSize(this.size - 2);
     }
+  }
+  promote() {
+    if (this.size < 12) {
+      this.changeSize(this.size + 2);
+    }
+  }
+  changeSize(newSize) {
+    this.size = newSize;
+    this.save();
   }
   addModifier(modifierData) {
     if (!modifierData.name) return;
 
     switch (modifierData.type.toLowerCase()) {
-      case 'bonus':
+      case "bonus":
         this.bonuses.push(new Modifier(modifierData));
         this.sortModifiers(this.bonuses);
         break;
-      case 'penalty':
+      case "penalty":
         this.penalties.push(new Modifier(modifierData));
         this.sortModifiers(this.penalties);
         break;
-      case 'defend':
+      case "defend":
         this.defends.push(new Modifier(modifierData));
         this.sortModifiers(this.defends);
         break;
     }
   }
   removeModifier(type, index) {
-    const remove = () => {
-      const copy = this.copy(false, true);
-      copy[type].splice(index, 1);
-      copy.id = uuid();
-      copy.instances.splice(1);
-      this.count--; //todo use id to remove it
-      if (copy.instances.length > 0) store.dispatch('upsertBaddie', copy);
-      this.save();
-    }
-
-    if (this[type][index].exclusive || this[type][index].persistent) {
-      Vue.dialog.confirm({
-        title: 'Are you sure?',
-        body: `This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`
-      },
-      {
-        okText: 'Yes',
-        cancelText: 'No'
-      })
-      .then(() => {
-        remove();
-      });
-    } else { 
-      remove();
-    }
+    this[type].splice(index, 1);
+    this.save();
   }
   takenAction(status) {
     this.acted = status === undefined ? !this.acted : status;
     this.save();
   }
-  save() {
-    if (this.count <= 0) {
-      store.dispatch('removeBaddie', { type: this.type, id: this.id });
-    } else {
-      store.dispatch('reconcile', this.type);
-    }
-  }
-  export(id, excludeInstances, rawInstances) {
-    let instances = [];
-    if (!id || this.id === id) {
-      const modifiers = [
-        ...this.bonuses.map(x => x.export(this.id)),
-        ...this.penalties.map(x => x.export(this.id)),
-        ...this.defends.map(x => x.export(this.id)),
-      ];
-
-      if (!excludeInstances) {
-        instances = rawInstances ? JSON.parse(JSON.stringify(this.instances)): JSON.stringify(this.instances);
-      }
-
-      const baddie = {
+  export() {
+    return {
+      baddie: {
         name: this.name,
         type: this.type,
         parent: this._owner,
         id: this.id,
         size: this.size,
         acted: this.acted,
-        instances
-      };
-
-      return {
-        baddie,
-        modifiers
-      }
-    } else return {};
-  }
-  copy(excludeInstances, rawInstances) {
-    return Object.assign({
-      bonuses: this.bonuses.map(x => x.export(this.id)),
-      penalties: this.penalties.map(x => x.export(this.id)),
-      defends: this.defends.map(x => x.export(this.id)),
-    }, this.export(null, excludeInstances, rawInstances).baddie);
+        top: this.top,
+        left: this.left,
+        scaleX: this.scaleX,
+        scaleY: this.scaleY,
+        angle: this.angle,
+      },
+      modifiers: [
+        ...this.bonuses.map((x) => x.export(this.id)),
+        ...this.penalties.map((x) => x.export(this.id)),
+        ...this.defends.map((x) => x.export(this.id)),
+      ],
+    };
   }
   saveEdit() {
     this._owner = this.tempOwner;
     this.size = this.tempSize;
-    this.count = this.tempCount;
-    this.bonuses.forEach(b => b.saveEdit());
-    this.penalties.forEach(p => p.saveEdit());
-    this.defends.forEach(d => d.saveEdit());
+    this.bonuses.forEach((b) => b.saveEdit());
+    this.penalties.forEach((p) => p.saveEdit());
+    this.defends.forEach((d) => d.saveEdit());
     super.saveEdit();
   }
-  addInstances(amount) {
-    for (let i = 1; i <= amount; i++) {
-      this.instances.push({ id: uuid(), top: null, left: null });
-    }
-  }
-  removeInstance(id, amount) {
-    if (id) {
-      const index = this.instances.findIndex(x => x.id === id);
-      if (index > -1) {
-        this.instances.splice(index, 1);
-      }
-    } else if (amount) {
-      for (let i = 1; i <= amount; i++) {
-        this.instances.pop();
-      }
-    }
-    this.save();
+  remove() {
+    dialog.confirm({
+      body: `Are you sure you want to remove this ${this.type} (${this.displayName})?`,
+      onConfirmDialog: () => {
+        store.dispatch("removeBaddie", { id: this.id, type: this.type });
+      },
+    });
   }
 }
 
-class Villain extends Actor{
+class Villain extends Actor {
   constructor(data) {
     super(data);
-    this.bonuses = data.bonuses ? data.bonuses.map(x => new Modifier(x)) : [];
-    this.penalties = data.penalties ? data.penalties.map(x => new Modifier(x)) : [];
-    this.defends = data.defends ? data.defends.map(x => new Modifier(x)) : [];
+    this.bonuses = data.bonuses ? data.bonuses.map((x) => new Modifier(x)) : [];
+    this.penalties = data.penalties
+      ? data.penalties.map((x) => new Modifier(x))
+      : [];
+    this.defends = data.defends ? data.defends.map((x) => new Modifier(x)) : [];
   }
 
   get allowAddMinion() {
@@ -214,23 +137,20 @@ class Villain extends Actor{
   get allowEdit() {
     return true;
   }
-  get viewDetails() {
-    return true;
-  }
 
   addModifier(modifierData) {
     if (!modifierData.name) return;
 
     switch (modifierData.type.toLowerCase()) {
-      case 'bonus':
+      case "bonus":
         this.bonuses.push(new Modifier(modifierData));
         this.sortModifiers(this.bonuses);
         break;
-      case 'penalty':
+      case "penalty":
         this.penalties.push(new Modifier(modifierData));
         this.sortModifiers(this.penalties);
         break;
-      case 'defend':
+      case "defend":
         this.defends.push(new Modifier(modifierData));
         this.sortModifiers(this.defends);
         break;
@@ -240,141 +160,89 @@ class Villain extends Actor{
     const remove = () => {
       this[type].splice(index, 1);
       this.save();
-    }
+    };
+
     if (this[type][index].exclusive || this[type][index].persistent) {
-      Vue.dialog.confirm(`This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`)
-      .then(() => {
-        remove();
+      dialog.confirm({
+        body: `This ${type} is persistent and/or exclusive. Are you sure you want to remove it?`,
+        onConfirmDialog: () => {
+          remove();
+        },
       });
-    } else { 
+    } else {
       remove();
     }
   }
   takenAction() {
-    const minions = store.getters.childMinions(this.id); 
+    const minions = store.getters.childMinions(this.id);
     const newStatus = !this.acted;
-    const minionNotMatched = minions.some(x => x.acted !== newStatus);
-    const message = newStatus ? 
-      `Some of this villain's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`:
-      `Some of this villain's minions have already acted. Do you also want to mark their minions as having not acted?`;
+    const minionNotMatched = minions.some((x) => x.acted !== newStatus);
+    const message = newStatus
+      ? `Some of this villain's minions have not acted. Generally, all minions act at the start of the turn. Do you also want to mark all of their minions as having acted too?`
+      : `Some of this villain's minions have already acted. Do you also want to mark their minions as having not acted?`;
     if (minionNotMatched && minions.length > 0) {
-      Vue.dialog.confirm({
-        title: 'Warning',
-        body: message
-      },
-      {
-        okText: 'Yes',
-        cancelText: 'No'
-      })
-      .then(() => {
-        minions.forEach(minion => {
-          minion.takenAction(newStatus);
-        })
+      dialog.confirm({
+        title: "Warning",
+        body: message,
+        onConfirmDialog: () => {
+          minions.forEach((minion) => {
+            minion.takenAction(newStatus);
+          });
+        },
       });
     }
     this.acted = newStatus;
     this.save();
   }
   export() {
-    const minions = store.getters.childMinions(this.id).reduce((acc, minion) => {
-      const {baddie, modifiers} = minion.export();
-      acc.push(baddie);
-      acc.push(...modifiers);
-      return acc;
-    }, []);
+    const minions = store.getters
+      .childMinions(this.id)
+      .reduce((acc, minion) => {
+        const { baddie, modifiers } = minion.export();
+        acc.push(baddie);
+        acc.push(...modifiers);
+        return acc;
+      }, []);
 
     return {
       baddie: {
         id: this.id,
         name: this.name,
         type: this.type,
-        acted: this.acted
+        acted: this.acted,
       },
       modifiers: [
-        ...this.bonuses.map(x => x.export(this.id)),
-        ...this.defends.map(x => x.export(this.id)),
-        ...this.penalties.map(x => x.export(this.id))
+        ...this.bonuses.map((x) => x.export(this.id)),
+        ...this.defends.map((x) => x.export(this.id)),
+        ...this.penalties.map((x) => x.export(this.id)),
       ],
-      minions
-    }
+      minions,
+    };
   }
   saveEdit() {
-    this.bonuses.forEach(b => b.saveEdit());
-    this.penalties.forEach(p => p.saveEdit());
-    this.defends.forEach(d => d.saveEdit());
+    this.bonuses.forEach((b) => b.saveEdit());
+    this.penalties.forEach((p) => p.saveEdit());
+    this.defends.forEach((d) => d.saveEdit());
     super.saveEdit();
   }
   remove() {
-    store.dispatch('removeBaddie', { id: this.id, type: this.type });
-  }
-}
-
-class Modifier {
-  constructor(data) {
-    this.id = data.id || uuid();
-    this.name = data.name;
-    this.tempName = this.name;
-    this.amount = data.amount;
-    this.tempAmount = this.amount;
-    this.exclusive = data.exclusive || false;
-    this.tempExclusive = this.exclusive;
-    this.persistent = data.persistent || false;
-    this.tempPersistent = this.persistent;
-    this.type = data.type;
-  }
-
-  get min() {
-    switch (this.type.toLowerCase()) {
-      case 'bonus':
-        return 1;
-      case 'hinder':
-        return -4;
-      case 'defend':
-        return 100;
-      default:
-        console.warning('Unknown modifier type', this.type);
-        return 100;
-    }
-  }
-  get max() {
-    switch (this.type.toLowerCase()) {
-      case 'bonus':
-        return 4;
-      case 'hinder':
-        return -1;
-      case 'defend':
-        return 1;
-      default:
-        console.warning('Unknown modifier type', this.type);
-        return 1;
-    }
-  }
-
-  export(parent) {
-    return {
-      id: this.id,
-      type: this.type,
-      name: this.name,
-      amount: this.amount,
-      exclusive: this.exclusive,
-      persistent: this.persistent,
-      parent
-    }
-  }
-  saveEdit() {
-    this.name = this.tempName;
-    this.amount = this.tempAmount;
-    this.persistent = this.tempPersistent;
-    this.exclusive = this.tempExclusive;
+    dialog.confirm({
+      body: `Are you sure you want to remove this ${this.type} (${this.name})?`,
+      onConfirmDialog: () => {
+        store.dispatch("removeBaddie", { id: this.id, type: this.type });
+      },
+    });
   }
 }
 
 function sameBaddies(baddie1, baddie2) {
-  return baddie1.name === baddie2.name &&
+  return (
+    baddie1.name === baddie2.name &&
     JSON.stringify(baddie1.bonuses) === JSON.stringify(baddie2.bonuses) &&
     JSON.stringify(baddie1.penalties) === JSON.stringify(baddie2.penalties) &&
     JSON.stringify(baddie1.defends) === JSON.stringify(baddie2.defends) &&
-    baddie1.size === baddie2.size;
+    baddie1.size === baddie2.size
+  );
 }
 
-export {Baddie, Villain, sameBaddies};
+export { Baddie, Villain, sameBaddies };

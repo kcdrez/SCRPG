@@ -1,41 +1,30 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import { createRouter, createWebHashHistory } from "vue-router";
 
-Vue.use(VueRouter);
+import GMToolsPage from "../pages/gmTools.vue";
 
-import GMToolsPage from '../pages/gmTools.vue';
-
-import store from '../vuex-state/store';
+import store from "store/store";
 
 const routes = [
   {
-    path: '/',
-    name: 'home',
-    component: GMToolsPage
+    path: "/",
+    name: "home",
+    component: GMToolsPage,
   },
   {
-    path: '/gmtools',
-    name: 'gmTools',
-    component: GMToolsPage
-  }
-]
+    path: "/gmtools",
+    name: "gmTools",
+    component: GMToolsPage,
+  },
+];
 
-const router = new VueRouter({
-  // mode: 'history',
-  routes
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes,
 });
 
 router.beforeEach((to, from, next) => {
-  isInitialized(next);
+  store.dispatch("initialize");
+  next();
 });
 
-function isInitialized(next) {
-  if (store.state.initialized) next();
-  else {
-    store.watch(
-      (state) => state.initialized,
-      (newVal) => { if (newVal) next() }
-    )
-  }
-}
 export default router;
